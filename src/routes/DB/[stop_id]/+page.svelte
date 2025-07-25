@@ -51,7 +51,7 @@
   {#each departures as dep}
     {@const trip = data.trips[dep.trip_id]}
     {@const route = routes[trip._trip.route_id || ""]}
-    {@const express = dep.express_string.toLowerCase() != "all stops"};
+    {@const express = dep.express_string.toLowerCase() != "all stops"}
     <div
       class="departure {dep.last_stop_id == params.stop_id.toLowerCase()
         ? 'term'
