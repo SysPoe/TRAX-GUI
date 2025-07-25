@@ -41,7 +41,7 @@
 
 <div class="header">
   <h1>TRAX <i>DepartureBoard</i></h1>
-  <h2>Departures from {station?.stop_name || "Unknown Station"}</h2>
+  <h2>Departures from {station?.stop_name || "Unknown Station"} in the next 4 hours</h2>
   <a href="/DB/">Back</a>
 </div>
 
