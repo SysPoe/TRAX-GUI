@@ -48,7 +48,7 @@
   .title h1 {
     font-size: 2.5rem;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: -0.1rem;
     margin-bottom: 0.5rem;
   }
   .title p {

@@ -4,7 +4,7 @@ let loaded = false;
 
 export async function loadTRAX() {
     if (!loaded) {
-        await TRAX.loadGTFS();
+        await TRAX.loadGTFS(true);
         loaded = true;
     }
 }

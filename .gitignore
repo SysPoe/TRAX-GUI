@@ -1,0 +1,6 @@
+TRAX
+node_modules
+.svelte-kit
+package-lock.json
+db.sqlite
+db.sqlite-journal
