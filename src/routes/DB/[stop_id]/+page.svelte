@@ -41,7 +41,9 @@
 
 <div class="header">
   <h1>TRAX <i>DepartureBoard</i></h1>
-  <h2>Departures from {station?.stop_name || "Unknown Station"} in the next 4 hours</h2>
+  <h2>
+    Departures from {station?.stop_name || "Unknown Station"} in the next 4 hours
+  </h2>
   <a href="/DB/">Back</a>
 </div>
 
@@ -59,9 +61,9 @@
           ? 'passing'
           : ''}"
     >
-      <span class="last-stop">
+      <!-- <span class="last-stop">
         {dep.last_stop_id.slice(-6, -3).toUpperCase()}
-      </span>
+      </span> -->
       <span class="platform" style="background-color: #{route.route_color}">
         {dep.actual_platform_code || "?"}
       </span>
@@ -87,18 +89,18 @@
       <span
         class="service-type {dep.last_stop_id == params.stop_id.toLowerCase()
           ? 'term'
-          : express
-            ? 'express'
-            : dep.passing
-              ? 'passing'
+          : dep.passing
+            ? 'passing'
+            : express
+              ? 'express'
               : 'all-stops'}"
       >
         {dep.last_stop_id == params.stop_id.toLowerCase()
           ? "T"
-          : express
-            ? "E"
-            : dep.passing
-              ? "P"
+          : dep.passing
+            ? "P"
+            : express
+              ? "E"
               : "A"}
       </span>
       <span class="departs_in">
@@ -122,7 +124,7 @@
   }
 
   :root {
-    font-size: min(2.1vw, 1em);
+    font-size: min(2.5vw, 1em);
   }
   .departures {
     font-family: "Arial Narrow", Arial, sans-serif;
@@ -177,7 +179,7 @@
   .smalltext {
     margin-top: -1.8rem;
     font-size: 1.2rem;
-    width: 18rem;
+    width: 20rem;
     display: inline-block;
     vertical-align: middle;
     font-weight: 500;
@@ -186,7 +188,7 @@
   }
   .headsign {
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     text-transform: uppercase;
   }
 
@@ -208,7 +210,7 @@
     outline: 0.15rem solid black;
   }
   .service-type.passing {
-    background-color: rgb(39, 96, 33);
+    background-color: rgb(73, 73, 73);
     color: white;
   }
   .service-type.express {
@@ -240,7 +242,7 @@
     color: red;
   }
   .late {
-    color: orange;
+    color: darkgoldenrod;
   }
   .on-time {
     color: green;

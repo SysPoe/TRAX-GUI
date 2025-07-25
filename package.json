@@ -21,6 +21,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
-		"translink-rail-api": "github:SysPoe/TRAX"
+		"gtfs": "^4.17.5",
+		"translink-rail-api": "github:Syspoe/TRAX"
 	}
 }
