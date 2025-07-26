@@ -1,33 +1,25 @@
 <script lang="ts">
-  import type { AugmentedStopTime } from "translink-rail-api";
+  import type { SerializableAugmentedStopTime } from "translink-rail-api";
   import type { PageProps } from "./$types";
   import type * as gtfs from "gtfs";
+  import type { UpcomingQRTravelDeparture } from "$lib";
 
   const { data, params }: PageProps = $props();
 
   let {
     departures,
   }: {
-    departures: Array<
-      Omit<
-        AugmentedStopTime,
-        | "actual_stop"
-        | "actual_parent_station"
-        | "scheduled_stop"
-        | "scheduled_parent_station"
-        | "toSerializable"
-      > & {
-        actual_stop: string | null;
-        actual_parent_station: string | null;
-        scheduled_stop: string | null;
-        scheduled_parent_station: string | null;
-        express_string: string;
-        actual_departure_time: string;
-        scheduled_departure_time: string;
-        last_stop_id: string;
-        departs_in: string;
-      }
-    >;
+    departures: (
+      | (SerializableAugmentedStopTime & {
+          dep_type: "gtfs";
+          express_string: string;
+          last_stop_id: string;
+          scheduled_departure_time: string;
+          departs_in: string;
+          departsInSecs: number;
+        })
+      | UpcomingQRTravelDeparture
+    )[];
   } = data;
 
   let {
@@ -51,63 +43,97 @@
 
 <div class="departures">
   {#each departures as dep}
-    {@const trip = data.trips[dep.trip_id]}
-    {@const route = routes[trip._trip.route_id || ""]}
-    {@const express = dep.express_string.toLowerCase() != "all stops"}
-    <div
-      class="departure {dep.last_stop_id == params.stop_id.toLowerCase()
-        ? 'term'
-        : dep.passing
-          ? 'passing'
-          : ''}"
-    >
-      <!-- <span class="last-stop">
-        {dep.last_stop_id.slice(-6, -3).toUpperCase()}
-      </span> -->
-      <span class="platform" style="background-color: #{route.route_color}">
-        {dep.actual_platform_code || "?"}
-      </span>
-      <span class="smalltext">
-        <span class="time">{dep.scheduled_departure_time}</span>
-        <span
-          class="delay {dep.realtime
-            ? dep.realtime_info?.delay_class || 'scheduled'
-            : 'scheduled'}"
-        >
-          ({dep.realtime
-            ? dep.realtime_info?.delay_string || "scheduled"
-            : "scheduled"})
-        </span>
-        <span class="run">{trip.run}</span> to <br />
-        <span class="headsign">
-          {trip._trip.trip_headsign
-            ?.replace(/station$/, "")
-            .trim()
-            .toUpperCase()}
-        </span>
-      </span>
-      <span
-        class="service-type {dep.last_stop_id == params.stop_id.toLowerCase()
+    {#if dep.dep_type === "gtfs"}
+      {@const trip = data.trips[dep.trip_id]}
+      {@const route = routes[trip._trip.route_id || ""]}
+      {@const express = dep.express_string.toLowerCase() != "all stops"}
+      <div
+        class="departure {dep.last_stop_id == params.stop_id.toLowerCase()
           ? 'term'
           : dep.passing
             ? 'passing'
-            : express
-              ? 'express'
-              : 'all-stops'}"
+            : ''}"
       >
-        {dep.last_stop_id == params.stop_id.toLowerCase()
-          ? "T"
-          : dep.passing
-            ? "P"
-            : express
-              ? "E"
-              : "A"}
-      </span>
-      <span class="departs_in">
-        {dep.departs_in.replace("0h ", "")}
-      </span>
-    </div>
-    <hr />
+        <!-- <span class="last-stop">
+        {dep.last_stop_id.slice(-6, -3).toUpperCase()}
+      </span> -->
+        <span class="platform" style="background-color: #{route.route_color}">
+          {dep.actual_platform_code || "?"}
+        </span>
+        <span class="smalltext">
+          <span class="time">{dep.scheduled_departure_time}</span>
+          <span
+            class="delay {dep.realtime
+              ? dep.realtime_info?.delay_class || 'scheduled'
+              : 'scheduled'}"
+          >
+            ({dep.realtime
+              ? dep.realtime_info?.delay_string || "scheduled"
+              : "scheduled"})
+          </span>
+          <span class="run">{trip.run}</span> to <br />
+          <span class="headsign">
+            {trip._trip.trip_headsign
+              ?.replace(/station$/, "")
+              .trim()
+              .toUpperCase()}
+          </span>
+        </span>
+        <span
+          class="service-type {dep.last_stop_id == params.stop_id.toLowerCase()
+            ? 'term'
+            : dep.passing
+              ? 'passing'
+              : express
+                ? 'express'
+                : 'all-stops'}"
+        >
+          {dep.last_stop_id == params.stop_id.toLowerCase()
+            ? "T"
+            : dep.passing
+              ? "P"
+              : express
+                ? "E"
+                : "A"}
+        </span>
+        <span class="departs_in">
+          {dep.departs_in.replace("0h ", "")}
+        </span>
+      </div>
+      <hr />
+    {:else if dep.dep_type === "qrt"}
+      <div
+        class="departure qr-travel"
+      >
+        <!-- <span class="last-stop">
+        {dep.last_stop_id.slice(-6, -3).toUpperCase()}
+      </span> -->
+        <span class="platform qr-travel">
+          ?
+        </span>
+        <span class="smalltext">
+          <span class="time">{(dep.stop?.actualDeparture === "0001-01-01T00:00:00" ? dep.stop?.actualArrival : dep.stop?.actualDeparture)?.slice(11,16)}</span>
+          <span
+            class="delay {dep.delayClass}"
+          >
+            ({dep.delayString})
+          </span>
+          <span class="run">{dep.run}</span> to <br />
+          <span class="headsign">
+            {dep.service.stops.at(-1)?.placeName.replace(/^Brisbane -/, "").trim() || "Unknown"}
+          </span>
+        </span>
+        <span
+          class="service-type qr-travel"
+        >
+          Q
+        </span>
+        <span class="departs_in">
+          {dep.departureString}
+        </span>
+      </div>
+      <hr />
+    {/if}
   {/each}
 </div>
 
@@ -143,6 +169,9 @@
   .departure.term {
     background-color: rgb(236, 215, 255);
   }
+  .departure.qr-travel {
+    background-color: #fec796;
+  }
 
   .last-stop {
     font-family: "Arial";
@@ -174,6 +203,9 @@
     text-align: center;
     -webkit-text-stroke-width: 0.2rem;
     -webkit-text-stroke-color: black;
+  }
+  .platform.qr-travel,.service-type.qr-travel {
+    background-color: rgb(255, 132, 0);
   }
 
   .smalltext {
