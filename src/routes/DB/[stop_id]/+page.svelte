@@ -31,6 +31,8 @@
   const station = data.stations.find((v) => v.stop_id === data.stop_id);
 </script>
 
+<title>TRAX Departure Board - {station?.stop_name || "Unknown Station"}</title>
+
 <div class="header">
   <h1>TRAX <i>DepartureBoard</i></h1>
   <h2>

@@ -25,6 +25,8 @@
   }
 </script>
 
+<title>TRAX Departure Board</title>
+
 <div class="title">
     <h1>TRAX <i>DepartureBoard</i></h1>
     <p>Select a station to view departures...</p>

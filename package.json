@@ -22,6 +22,6 @@
 	},
 	"dependencies": {
 		"gtfs": "^4.17.5",
-		"translink-rail-api": "github:Syspoe/TRAX"
+		"translink-rail-api": "github:SysPoe/TRAX"
 	}
 }
