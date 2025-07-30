@@ -105,7 +105,7 @@
       <hr />
     {:else if dep.dep_type === "qrt"}
       <div
-        class="departure qr-travel"
+        class="departure {dep.passing ? "passing" : "qr-travel"}"
       >
         <!-- <span class="last-stop">
         {dep.last_stop_id.slice(-6, -3).toUpperCase()}
@@ -126,9 +126,9 @@
           </span>
         </span>
         <span
-          class="service-type qr-travel"
+          class="service-type {dep.passing ? "passing" : "qr-travel"}"
         >
-          Q
+          {dep.passing ? "P" : "Q"}
         </span>
         <span class="departs_in">
           {dep.departureString}
@@ -211,7 +211,7 @@
   }
 
   .smalltext {
-    margin-top: -1.8rem;
+    margin-top: -1.7rem;
     font-size: 1.2rem;
     width: 20rem;
     display: inline-block;
@@ -222,7 +222,7 @@
   }
   .headsign {
     font-weight: 700;
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     text-transform: uppercase;
   }
 
