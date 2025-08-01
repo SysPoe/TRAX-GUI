@@ -49,10 +49,6 @@ export function getUpcomingQRTravelDepartures(
         )
     )
     .map((v) => {
-      console.log(v);
-      return v;
-    })
-    .map((v) => {
       const stop = (v.stopsWithPassing ?? []).find(
         (s) =>
           s.placeName.toLowerCase().trim().startsWith(targetPlace) ||
@@ -123,6 +119,5 @@ export function getUpcomingQRTravelDepartures(
     .sort(
       (a, b) => a.departsInSecs - b.departsInSecs
     ) as UpcomingQRTravelDeparture[];
-  console.log(trains);
   return trains;
 }
