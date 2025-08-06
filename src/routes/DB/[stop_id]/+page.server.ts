@@ -6,13 +6,18 @@ import TRAX, {
 import * as gtfs from "gtfs";
 import {
   getUpcomingQRTravelDepartures,
+  isTRAXLoaded,
   loadTRAX,
   type UpcomingQRTravelDeparture,
 } from "$lib";
 import type { PageServerLoad } from "./$types";
+import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params }) => {
-  await loadTRAX();
+  if (!isTRAXLoaded) {
+    loadTRAX();
+    throw error(503, 'Loading TRAX data... Please retry in a few minutes.');
+  }
 
   const { stop_id } = params;
 
@@ -49,6 +54,8 @@ export const load: PageServerLoad = async ({ params }) => {
   }
 
   let stop = TRAX.getAugmentedStops(stop_id)[0];
+  if(stop === undefined || stop === null) 
+    throw error(404, `Stop with ID "${stop_id}" not found.`);
   let departures: (SerializableAugmentedStopTime & {
     dep_type: "gtfs";
     express_string: string;

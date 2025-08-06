@@ -4,3 +4,4 @@ node_modules
 package-lock.json
 db.sqlite
 db.sqlite-journal
+gtfs-last-loaded.txt

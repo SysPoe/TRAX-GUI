@@ -6,6 +6,8 @@
 
   const { data, params }: PageProps = $props();
 
+  console.log(data);
+
   let {
     departures,
   }: {
@@ -114,7 +116,7 @@
           ?
         </span>
         <span class="smalltext">
-          <span class="time">{(dep.stop?.actualDeparture === "0001-01-01T00:00:00" ? dep.stop?.actualArrival : dep.stop?.actualDeparture)?.slice(11,16)}</span>
+          <span class="time">{(dep.stop?.estimatedPassingTime || (dep.stop?.actualDeparture === "0001-01-01T00:00:00" ? dep.stop?.actualArrival : dep.stop?.actualDeparture))?.slice(11,16)}</span>
           <span
             class="delay {dep.delayClass}"
           >
@@ -284,7 +286,7 @@
   .early {
     color: blue;
   }
-  .scheduled {
+  .scheduled,.estimated {
     color: gray;
   }
 </style>

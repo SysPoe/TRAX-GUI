@@ -1,18 +1,53 @@
-import TRAX, { type TravelTrip, type TravelStopTime } from "translink-rail-api";
+import TRAX, { type TravelTrip, type SRTStop } from "translink-rail-api";
+import fs from "fs";
 
-let loaded = false;
+export let isTRAXLoaded = false;
+let isTRAXLoading = false;
 
 export async function loadTRAX() {
-  if (!loaded) {
-    await TRAX.loadGTFS(true);
-    loaded = true;
+  if (!isTRAXLoaded && !isTRAXLoading) {
+    isTRAXLoading = true;
+
+    TRAX.clearIntervals();
+
+    let lastLoaded = fs.existsSync("gtfs-last-loaded.txt")
+      ? fs.readFileSync("gtfs-last-loaded.txt", "utf-8")
+      : new Date(0).toISOString();
+    const lastLoadedDate = new Date(lastLoaded);
+    if (Date.now() - lastLoadedDate.getTime() > 1000 * 60 * 60 * 24) {
+      // If last loaded was more than 24 hours ago, reload GTFS data
+      await TRAX.loadGTFS(true, true);
+      fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
+
+      // Calculate millis to 3am
+      const millis = new Date();
+      millis.setHours(3, 0, 0, 0);
+      if (millis.getTime() < Date.now()) {
+        millis.setDate(millis.getDate() + 1);
+      }
+      const millisTo3am = millis.getTime() - Date.now();
+      setTimeout(() => {
+        TRAX.clearIntervals();
+        loadTRAX();
+        
+        setInterval(() => {
+          TRAX.clearIntervals();
+          loadTRAX();
+        }, 1000 * 60 * 60 * 24);
+      }, millisTo3am); // Reload TRAX at 3am every day
+    } else {
+      // Otherwise, load from cache
+      await TRAX.loadGTFS(true, false);
+    }
+
+    isTRAXLoaded = true;
   }
 }
 
 export type UpcomingQRTravelDeparture = {
   dep_type: "qrt";
   service: TravelTrip;
-  stop: TravelStopTime | undefined;
+  stop: SRTStop | undefined;
   passing: boolean;
   departsInSecs: number;
   departureString: string;
@@ -59,8 +94,10 @@ export function getUpcomingQRTravelDepartures(
       let departsInSecs =
         Math.round(
           new Date(
-            ((stop?.actualDeparture === "0001-01-01T00:00:00" || !stop?.actualDeparture)
-              ? (stop?.actualArrival === "0001-01-01T00:00:00" || !stop?.actualArrival)
+            (stop?.actualDeparture === "0001-01-01T00:00:00" ||
+            !stop?.actualDeparture
+              ? stop?.actualArrival === "0001-01-01T00:00:00" ||
+                !stop?.actualArrival
                 ? stop?.estimatedPassingTime
                 : stop?.actualArrival
               : stop?.actualDeparture) || "0001-01-01T00:00:00"
