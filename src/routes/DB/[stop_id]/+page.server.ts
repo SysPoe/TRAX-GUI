@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({ params }) => {
   const { stop_id } = params;
 
   let today = Number.parseInt(
-    new Date().toISOString().split("T")[0].replaceAll("-", "")
+    new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", "")
   );
 
   let now = new Date();
@@ -54,7 +54,7 @@ export const load: PageServerLoad = async ({ params }) => {
   }
 
   let stop = TRAX.getAugmentedStops(stop_id)[0];
-  if(stop === undefined || stop === null) 
+  if (stop === undefined || stop === null)
     throw error(404, `Stop with ID "${stop_id}" not found.`);
   let departures: (SerializableAugmentedStopTime & {
     dep_type: "gtfs";
@@ -129,15 +129,15 @@ export const load: PageServerLoad = async ({ params }) => {
 
   let mixed: (
     | (SerializableAugmentedStopTime & {
-        dep_type: "gtfs";
-        express_string: string;
-        last_stop_id: string;
-        scheduled_departure_time: string;
-        departs_in: string;
-        departsInSecs: number;
-      })
+      dep_type: "gtfs";
+      express_string: string;
+      last_stop_id: string;
+      scheduled_departure_time: string;
+      departs_in: string;
+      departsInSecs: number;
+    })
     | UpcomingQRTravelDeparture
-  )[] = [...departures, ...qrtDepartures].sort((a,b) => {
+  )[] = [...departures, ...qrtDepartures].sort((a, b) => {
     return (a.departsInSecs || 0) - (b.departsInSecs || 0);
   });
 

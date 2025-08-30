@@ -3,10 +3,9 @@
   import type { PageProps } from "./$types";
   import type * as gtfs from "gtfs";
   import type { UpcomingQRTravelDeparture } from "$lib";
+    import { goto } from "$app/navigation";
 
   const { data, params }: PageProps = $props();
-
-  console.log(data);
 
   let {
     departures,
@@ -52,12 +51,15 @@
       {@const trip = data.trips[dep.trip_id]}
       {@const route = routes[trip._trip.route_id || ""]}
       {@const express = dep.express_string.toLowerCase() != "all stops"}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
-        class="departure {dep.last_stop_id == params.stop_id.toLowerCase()
+        class="departure gtfs {dep.last_stop_id == params.stop_id.toLowerCase()
           ? 'term'
           : dep.passing
             ? 'passing'
             : ''}"
+        onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}`)}
       >
         <!-- <span class="last-stop">
         {dep.last_stop_id.slice(-6, -3).toUpperCase()}
@@ -279,6 +281,16 @@
     display: inline-block;
     vertical-align: top;
     margin-top: 0.7rem;
+  }
+
+  .gtfs {
+    cursor: pointer;
+    transition: all 200ms;
+  }
+
+  .gtfs:hover {
+    background-color: #eef;
+    box-shadow: 0 0 1rem #99f;
   }
 
   .very-late {

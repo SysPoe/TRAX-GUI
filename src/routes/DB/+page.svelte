@@ -25,7 +25,7 @@
   }
 </script>
 
-<nav><a href="..">Home</a></nav>
+<nav><a href="/">Home</a></nav>
 
 <title>TRAX Departure Board</title>
 

@@ -1,0 +1,258 @@
+<script lang="ts">
+    import { goto } from "$app/navigation";
+    import type { PageProps } from "./$types";
+
+    const { data }: PageProps = $props();
+
+    // Borrowed from TRAX
+    function formatTimestamp(ts?: number | null): string {
+        if (!ts) return "--:--";
+        const d = new Date(ts * 1000);
+        return d.toISOString().slice(11, 16);
+    }
+
+    function makePageUrl(page: number) {
+        // Use originalParams from the server to reconstruct the query string
+        const params = new URLSearchParams();
+        if (data.originalParams) {
+            for (const [key, values] of Object.entries(data.originalParams)) {
+                (values as string[]).forEach((v) => {
+                    if (v !== "") params.append(key, v);
+                });
+            }
+        }
+        params.set("page", page.toString());
+        return `?${params.toString()}`;
+    }
+
+    function getPaginationPages(current: number, total: number) {
+        const pages = [];
+        if (total <= 1) return [1];
+        pages.push(1);
+        if (current > 4) pages.push("...");
+        for (
+            let i = Math.max(2, current - 2);
+            i <= Math.min(total - 1, current + 2);
+            i++
+        ) {
+            pages.push(i);
+        }
+        if (current < total - 3) pages.push("...");
+        if (total > 1) pages.push(total);
+        return pages;
+    }
+</script>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/TV">Back</a>
+</nav>
+
+<div class="title">
+    <h1>TRAX <i>TripViewer</i></h1>
+    <p>
+        {#if data?.trips.length === 0}
+            No trips found. Try adjusting your search criteria and searching
+            again.
+        {:else}
+            Search Results (Showing {data.page * data.perPage + 1} to {Math.min(
+                (data.page + 1) * data.perPage,
+                data.results,
+            )} of {data.results} results)
+        {/if}
+    </p>
+</div>
+
+{#if data.totalPages > 1}
+    <div class="pagination">
+        {#if data.page > 1}
+            <a href={makePageUrl(data.page - 1)}>&laquo; Prev</a>
+        {/if}
+        {#each getPaginationPages(data.page, data.totalPages) as page}
+            {#if page === "..."}
+                <span class="ellipsis">...</span>
+            {:else if page === data.page}
+                <span class="current">{page}</span>
+            {:else}
+                <a href={makePageUrl(page as number)}>{page}</a>
+            {/if}
+        {/each}
+        {#if data.page < data.totalPages}
+            <a href={makePageUrl(data.page + 1)}>Next &raquo;</a>
+        {/if}
+    </div>
+{/if}
+
+<div class="results">
+    <hr />
+    {#each data?.trips as trip}
+        {@const departure_time = formatTimestamp(
+            trip.stopTimes[0].scheduled_departure_timestamp,
+        )}
+        {@const startStation =
+            data.stations[trip.stopTimes[0].scheduled_stop ?? 0]}
+        {@const endStation =
+            data.stations[
+                trip.stopTimes[trip.stopTimes.length - 1].scheduled_stop ?? 0
+            ]}
+        {@const startParent = startStation?.parent_station
+            ? data.stations[startStation.parent_station]
+            : null}
+        {@const endParent = endStation?.parent_station
+            ? data.stations[endStation.parent_station]
+            : null}
+
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
+            class="result"
+            onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}`)}
+        >
+            <span class="headline">
+                {departure_time}
+                {trip._trip.route_id.slice(0, 4)}
+                <span class="de-emphasize">{trip.run}</span>
+            </span><br />
+            <span class="extra-details">
+                from: <span class="location"
+                    >{startParent?.stop_name?.replace(" station", "").trim() ??
+                        startStation?.stop_name
+                            ?.replace(" station", "")
+                            .trim()}</span
+                >
+                to:
+                <span class="location"
+                    >{endParent?.stop_name?.replace(" station", "").trim() ??
+                        endStation?.stop_name
+                            ?.replace(" station", "")
+                            .trim()}</span
+                >
+                <br />
+                {data.expressStrings[trip._trip.trip_id]} <br />
+
+                {#if trip.serviceDates.length == 1}
+                    Service date:
+                {:else}
+                    Service dates:
+                {/if}
+                {#each trip.serviceDates as date, i (date)}
+                    {date}{i < trip.serviceDates.length - 1 ? ", " : ""}
+                {/each}
+            </span>
+        </div>
+        <hr />
+    {/each}
+</div>
+
+{#if data.totalPages > 1}
+    <div class="pagination">
+        {#if data.page > 1}
+            <a href={makePageUrl(data.page - 1)}>&laquo; Prev</a>
+        {/if}
+        {#each getPaginationPages(data.page, data.totalPages) as page}
+            {#if page === "..."}
+                <span class="ellipsis">...</span>
+            {:else if page === data.page}
+                <span class="current">{page}</span>
+            {:else}
+                <a href={makePageUrl(page as number)}>{page}</a>
+            {/if}
+        {/each}
+        {#if data.page < data.totalPages}
+            <a href={makePageUrl(data.page + 1)}>Next &raquo;</a>
+        {/if}
+    </div>
+{/if}
+
+<style>
+    * {
+        font-family: "Arial";
+    }
+
+    .results {
+        margin: 0 auto;
+        max-width: 600px;
+        padding: 0 1rem;
+    }
+
+    .result {
+        cursor: pointer;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        padding: 0.5rem;
+        transition: all 200ms;
+    }
+
+    .result:hover {
+        background-color: #eef;
+        box-shadow: 0 0 1rem #99f;
+    }
+
+    .headline {
+        font-size: 1.2rem;
+    }
+
+    .de-emphasize {
+        color: #777;
+    }
+
+    .extra-details,
+    .extra-details * {
+        color: #555;
+        font-size: 0.9rem;
+        font-family: "Courier New", Courier, monospace;
+    }
+
+    .location {
+        color: darkslategray;
+        font-weight: bold;
+    }
+
+    .title {
+        text-align: center;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        color: #2c3e50;
+    }
+    .title h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.1rem;
+        margin-bottom: 0.5rem;
+    }
+    .title p {
+        font-size: 1.2rem;
+        color: #555;
+        margin-bottom: 1rem;
+    }
+    .pagination {
+        text-align: center;
+        margin: 1rem 0;
+    }
+    .pagination a,
+    .pagination .current,
+    .pagination .ellipsis {
+        display: inline-block;
+        margin: 0 0.2rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        text-decoration: none;
+        color: #2980b9;
+        font-weight: 500;
+        background: none;
+    }
+    .pagination a:hover {
+        background: #e0e0e0;
+        color: #222;
+    }
+    .pagination .current {
+        background: #2980b9;
+        color: #fff;
+        font-weight: 700;
+    }
+    .pagination .ellipsis {
+        color: #888;
+        background: none;
+        cursor: default;
+    }
+</style>

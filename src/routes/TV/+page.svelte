@@ -1,14 +1,134 @@
+<script lang="ts">
+  import { onMount } from "svelte";
+  import type { PageProps } from "./$types";
+  import type { SerializableAugmentedStop } from "translink-rail-api";
 
-<nav><a href="..">Home</a></nav>
+  const { data }: PageProps = $props();
+  let { stations }: { stations: SerializableAugmentedStop[] } = data;
+
+  function addIntermediate() {
+    const container = document.getElementById("intermediates");
+    const template = document.getElementById("template-intermediate-station");
+    if (container && template) {
+      let id = container.children.length;
+      const newIntermediate = template.cloneNode(true) as HTMLElement;
+      newIntermediate.style.display = "block";
+      newIntermediate.id += `-${id}`;
+      newIntermediate
+        .querySelector("select")
+        ?.setAttribute("id", `intermediate-station-${id}`);
+      newIntermediate
+        .querySelector("select")
+        ?.setAttribute("name", `intermediate-station-${id}`);
+      const button = newIntermediate.querySelector("button");
+      if (button) {
+        button.addEventListener("click", removeIntermediate);
+      }
+      container.appendChild(newIntermediate);
+    }
+  }
+
+  function removeIntermediate(event: Event) {
+    const button = event.currentTarget as HTMLElement;
+    const parent = button.parentElement;
+    if (parent && parent.parentElement) {
+      parent.parentElement.removeChild(parent);
+    }
+  }
+
+  function addDate() {
+    const container = document.getElementById("dates");
+    const template = document.getElementById("template-date");
+    if (container && template) {
+      let id = container.children.length;
+      const newDate = template.cloneNode(true) as HTMLElement;
+      newDate.id += `-${id}`;
+      newDate.querySelector("select")?.setAttribute("id", `service-date-${id}`);
+      newDate
+        .querySelector("select")
+        ?.setAttribute("name", `service-date-${id}`);
+      newDate.style.display = "block";
+      const button = newDate.querySelector("button");
+      if (button) {
+        button.addEventListener("click", removeDate);
+      }
+      container.appendChild(newDate);
+    }
+  }
+
+  function removeDate(event: Event) {
+    const button = event.currentTarget as HTMLElement;
+    const parent = button.parentElement;
+    if (parent && parent.parentElement) {
+      parent.parentElement.removeChild(parent);
+    }
+  }
+</script>
+
+<nav><a href="/">Home</a></nav>
 
 <div class="title">
-    <h1>TRAX <i>TripViewer</i></h1>
-    <p>Search for a trip to view details...</p>
+  <h1>TRAX <i>TripViewer</i></h1>
+  <p>Search for a trip to view details...</p>
 </div>
 
-<hr>
-<b>Filter by Train Number</b><br>
-<select name="train-number-type" id="train-number-type">
+<form action="/TV/search" method="get">
+  <input type="submit" value="Search" />
+  <hr />
+  <b>Filter by Stations</b><br />
+  <select name="start-station" id="start-station">
+    <option value="">Any Starting Station</option>
+    <!-- TODO add search functionality for stations -->
+    {#each stations as station}
+      <option value={station.stop_id}>{station.stop_name}</option>
+    {/each}
+  </select><br />
+  <select name="end-station" id="end-station">
+    <option value="">Any Ending Station</option>
+    <!-- TODO add search functionality for stations -->
+    {#each stations as station}
+      <option value={station.stop_id}>{station.stop_name}</option>
+    {/each}
+  </select><br />
+  <i
+    >Included Stations (not necessarily in order and can be start/end, service
+    must stop at all selected stops):</i
+  ><br />
+  <!-- TODO add ability to add/remove intermediate stations -->
+  <div class="intermediates" id="intermediates">
+    <div style="display: none;" id="template-intermediate-station">
+      <select name="intermediate-station" id="intermediate-station">
+        <option value="">Any Intermediate Station</option>
+        <!-- TODO add search functionality for stations -->
+        {#each stations as station}
+          <option value={station.stop_id}>{station.stop_name}</option>
+        {/each}
+      </select>
+      <button> - </button>
+    </div>
+  </div>
+  <button type="button" onclick={addIntermediate}> + </button>
+
+  <hr />
+  <b>Filter by Date</b><br />
+  <i>Service must run on all selected dates</i><br />
+  <div class="dates" id="dates">
+    <div style="display: none;" id="template-date">
+      <select name="service-date" id="service-date">
+        <option value="">Any Date</option>
+        <!-- TODO add search functionality for dates -->
+        {#each data.dates as date}
+          <option value={date}>{date}</option>
+        {/each}
+      </select>
+      <button> - </button>
+    </div>
+  </div>
+  <button type="button" onclick={addDate}> + </button>
+
+  <hr />
+  <b>Filter by Train Number</b><br />
+  <select name="train-number-type" id="train-number-type">
     <option value="">Any Type</option>
     <option value="1">1 - 6 car SMU in revenue service</option>
     <option value="D">D - NGR in revenue service</option>
@@ -16,9 +136,9 @@
     <option value="T">T - 6 car IMU in revenue service</option>
     <option value="U">U - 3 car IMU in revenue service</option>
     <option value="X">X - Train equipped w/ L2 ETCS in revenue service </option>
-</select><br>
+  </select><br />
 
-<select name="train-number-destination" id="train-number-destination">
+  <select name="train-number-destination" id="train-number-destination">
     <option value="">Any Destination Range</option>
     <option value="0">0 - Roma Street - Bowen Hills</option>
     <option value="1">1 - Dakabin - Caboolture</option>
@@ -32,7 +152,7 @@
     <option value="B">B - Clayfield - Doomben / Pinkenba</option>
     <option value="D">D - Milton - Redbank</option>
     <option value="E">E - Windsor - Ferny Grove</option>
-    <option value="G">G - Ormeau - Varsity Lakes / Yeerongpilly</option>
+    <option value="G">G - Ormeau - Varsity Lakes </option>
     <option value="H">H - Manly / Cannon Hill</option>
     <option value="K">K - Richlands - Springfield Central</option>
     <option value="L">L - Elimbah - Nambour</option>
@@ -46,9 +166,28 @@
     <option value="X">X - Exhibition Direct</option>
     <option value="Y">Y - Virginia - Kippa-Ring</option>
     <option value="Z">Z - Exhibition </option>
-</select>
+  </select><br />
+  <hr />
+  <input type="submit" value="Search" />
+</form>
 
 <style>
+  * {
+    font-family: "Arial";
+  }
+
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1.2em;
+  }
+
+  form hr {
+    margin: 1rem 0;
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+
   .title {
     text-align: center;
     margin-top: 2rem;
