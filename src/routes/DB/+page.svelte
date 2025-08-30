@@ -25,6 +25,8 @@
   }
 </script>
 
+<nav><a href="..">Home</a></nav>
+
 <title>TRAX Departure Board</title>
 
 <div class="title">

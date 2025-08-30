@@ -35,12 +35,13 @@
 
 <title>TRAX Departure Board - {station?.stop_name || "Unknown Station"}</title>
 
+<nav><a href="..">Home</a> <a href="../DB">Back</a></nav>
+
 <div class="header">
   <h1>TRAX <i>DepartureBoard</i></h1>
   <h2>
     Departures from {station?.stop_name || "Unknown Station"} in the next 4 hours
   </h2>
-  <a href="/DB/">Back</a>
 </div>
 
 <hr />
@@ -142,6 +143,9 @@
 </div>
 
 <style>
+  * {
+    font-family: "Arial";
+  }
   .header {
     text-align: center;
     color: #2c3e50;
@@ -193,7 +197,7 @@
     align-items: center;
     color: white;
     display: inline-block;
-    font-family: "Arial";
+    font-family: "Arial", serif;
     font-size: 3rem;
     font-synthesis: weight;
     font-synthesis-weight: 900;
@@ -223,7 +227,10 @@
     font-synthesis-weight: 500;
   }
   .headsign {
+    font-family: "Arial Bold";
+    font-synthesis: weight;
     font-weight: 700;
+    line-height: 0.9;
     font-size: 1.7rem;
     text-transform: uppercase;
   }

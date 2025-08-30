@@ -14,32 +14,40 @@ export async function loadTRAX() {
       ? fs.readFileSync("gtfs-last-loaded.txt", "utf-8")
       : new Date(0).toISOString();
     const lastLoadedDate = new Date(lastLoaded);
-    if (Date.now() - lastLoadedDate.getTime() > 1000 * 60 * 60 * 24) {
+    if (
+      Date.now() - lastLoadedDate.getTime() > 1000 * 60 * 60 * 24 ||
+      lastLoadedDate.getDay() !== new Date().getDay()
+    ) {
       // If last loaded was more than 24 hours ago, reload GTFS data
+
+      console.log("Reloading static TRAX GTFS data...");
+      if (fs.existsSync("db.sqlite")) fs.rmSync("db.sqlite");
+      if (fs.existsSync("db.sqlite-journal")) fs.rmSync("db.sqlite-journal");
       await TRAX.loadGTFS(true, true);
       fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
-
-      // Calculate millis to 3am
-      const millis = new Date();
-      millis.setHours(3, 0, 0, 0);
-      if (millis.getTime() < Date.now()) {
-        millis.setDate(millis.getDate() + 1);
-      }
-      const millisTo3am = millis.getTime() - Date.now();
-      setTimeout(() => {
-        TRAX.clearIntervals();
-        loadTRAX();
-        
-        setInterval(() => {
-          TRAX.clearIntervals();
-          loadTRAX();
-        }, 1000 * 60 * 60 * 24);
-      }, millisTo3am); // Reload TRAX at 3am every day
     } else {
       // Otherwise, load from cache
       await TRAX.loadGTFS(true, false);
     }
 
+    // Calculate millis to 3am
+    const millis = new Date();
+    millis.setHours(3, 0, 0, 0);
+    if (millis.getTime() < Date.now()) {
+      millis.setDate(millis.getDate() + 1);
+    }
+    const millisTo3am = millis.getTime() - Date.now();
+    setTimeout(() => {
+      TRAX.clearIntervals();
+      loadTRAX();
+
+      setInterval(() => {
+        TRAX.clearIntervals();
+        loadTRAX();
+      }, 1000 * 60 * 60 * 24);
+    }, millisTo3am); // Reload TRAX at 3am every day
+
+    isTRAXLoading = false;
     isTRAXLoaded = true;
   }
 }
