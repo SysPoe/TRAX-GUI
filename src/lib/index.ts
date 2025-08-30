@@ -36,9 +36,9 @@ export async function loadTRAX() {
 
         gtfs.updateGtfsRealtime(TRAX.config);
         TRAX.refreshRealtimeCache();
-        
+
         isTRAXLoaded = true;
-        isTRAXLoaded = false;
+        isTRAXLoading = false;
       }, 60_000);
     }
 
