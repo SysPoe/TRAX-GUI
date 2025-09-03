@@ -1,5 +1,4 @@
 import TRAX, { type TravelTrip, type SRTStop } from "translink-rail-api";
-import * as gtfs from "gtfs";
 import fs from "fs";
 
 export let isTRAXLoaded = false;
@@ -28,18 +27,7 @@ export async function loadTRAX() {
       fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
     } else {
       // Otherwise, load from cache
-      await TRAX.loadGTFS(false, false);
-
-      setInterval(() => {
-        isTRAXLoaded = false;
-        isTRAXLoading = true;
-
-        gtfs.updateGtfsRealtime(TRAX.config);
-        TRAX.refreshRealtimeCache();
-
-        isTRAXLoaded = true;
-        isTRAXLoading = false;
-      }, 60_000);
+      await TRAX.loadGTFS(true, false);
     }
 
     // Calculate millis to 3am
