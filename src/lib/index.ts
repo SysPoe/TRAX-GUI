@@ -21,8 +21,8 @@ export async function loadTRAX() {
       // If last loaded was more than 24 hours ago, reload GTFS data
 
       console.log("Reloading static TRAX GTFS data...");
-      if (fs.existsSync("db.sqlite")) fs.rmSync("db.sqlite");
-      if (fs.existsSync("db.sqlite-journal")) fs.rmSync("db.sqlite-journal");
+      if (fs.existsSync(".TRAXCACHE.sqlite")) fs.rmSync(".TRAXCACHE.sqlite");
+      if (fs.existsSync(".TRAXCACHE.sqlite-journal")) fs.rmSync(".TRAXCACHE.sqlite-journal");
       await TRAX.loadGTFS(true, true);
       fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
     } else {

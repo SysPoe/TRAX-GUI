@@ -42,250 +42,130 @@
     <a href="/TV">Back</a>
 </nav>
 
-<div class="title">
+<div class="header">
     <h1>TRAX <i>TripViewer</i></h1>
     <h2>
-        Trip Details - {formatTimestamp(
+        {trip.run} - {trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+    </h2>
+    <p>Departing: {formatTimestamp(
             trip.stopTimes[0].scheduled_departure_timestamp ||
                 trip.stopTimes[0].scheduled_arrival_timestamp,
-        )}
-        {trip.run}
-        {trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} service
-    </h2>
-    <p>Trip ID: {trip._trip.trip_id}</p>
+        )} | Trip ID: {trip._trip.trip_id}</p>
 </div>
 
-<div class="content">
-    <div class="section">
+<hr />
+
+<div class="container">
+    <div class="content">
+    <div class="info-section">
         <h3>Trip Information</h3>
-        <div class="info-row">
-            <span class="info-label">Express:</span>
+        <div class="info-item">
+            <span class="info-label">Express Status:</span>
             <span class="info-value">{data.expressString}</span>
         </div>
-        <div class="info-row">
-            <span class="info-label">Run:</span>
+        <div class="info-item">
+            <span class="info-label">Run Number:</span>
             <span class="info-value">{trip.run}</span>
         </div>
-        <div class="run-series">
-            <span class="info-label">Run Series:</span>
-            <ul>
-                {#each Object.keys(trip.runSeries) as date}
-                    <li>
-                        {date}: {trip.runSeries[Number.parseInt(date)] ||
-                            "Unknown"}
-                    </li>
-                {/each}
-            </ul>
-        </div>
-        <div class="info-row">
+        <div class="info-item">
             <span class="info-label">Service Dates:</span>
-            {#each trip.scheduledStartServiceDates as sd, i (sd)}
-                {i > 0 ? ", " : ""}{sd}
-            {/each}
+            <span class="info-value">{trip.scheduledStartServiceDates.join(", ")}</span>
         </div>
-        <div class="info-row">
-            <span class="info-label">Service ID:</span>
-            <span class="info-value"
-                >{@html trip._trip.service_id || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Trip Headsign:</span>
-            <span class="info-value"
-                >{@html trip._trip.trip_headsign || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Trip Short Name:</span>
-            <span class="info-value"
-                >{@html trip._trip.trip_short_name || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Direction ID:</span>
-            <span class="info-value"
-                >{@html trip._trip.direction_id || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Block ID:</span>
-            <span class="info-value"
-                >{@html trip._trip.block_id || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Shape ID:</span>
-            <span class="info-value"
-                >{@html trip._trip.shape_id || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Wheelchair Accessible:</span>
-            <span class="info-value"
-                >{@html trip._trip.wheelchair_accessible || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Bikes Allowed:</span>
-            <span class="info-value"
-                >{@html trip._trip.bikes_allowed || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Cars Allowed:</span>
-            <span class="info-value"
-                >{@html trip._trip.cars_allowed || "<b>null</b>"}</span
-            >
+        <div class="info-item">
+            <span class="info-label">Headsign:</span>
+            <span class="info-value">{@html trip._trip.trip_headsign || "<b>null</b>"}</span>
         </div>
     </div>
 
-    <div class="section">
+    <div class="info-section">
         <h3>Route Information ({route.route_id})</h3>
-        <div class="info-row">
-            <span class="info-label">Agency ID:</span>
-            <span class="info-value"
-                >{@html route.agency_id || "<b>null</b>"}</span
-            >
+        <div class="info-item">
+            <span class="info-label">Route Name:</span>
+            <span class="info-value">{@html route.route_long_name || route.route_short_name || "<b>null</b>"}</span>
         </div>
-        <div class="info-row">
-            <span class="info-label">Route Short Name:</span>
-            <span class="info-value"
-                >{@html route.route_short_name || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Route Long Name:</span>
-            <span class="info-value"
-                >{@html route.route_long_name || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Route Description:</span>
-            <span class="info-value"
-                >{@html route.route_desc || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Route Type:</span>
-            <span class="info-value"
-                >{@html route.route_type || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Route URL:</span>
-            <span class="info-value"
-                >{@html `<a href="${route.route_url}" target="_blank">${route.route_url}</a>` ||
-                    "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
+        <div class="info-item">
             <span class="info-label">Route Color:</span>
-            <span class="info-value"
-                >{@html route.route_color || "<b>null</b>"}
+            <span class="info-value">
+                {@html route.route_color || "<b>null</b>"}
                 {#if route.route_color}
                     <div
-                        class="square"
+                        class="color-square"
                         style="background-color: #{route.route_color};"
                     ></div>
                 {/if}
             </span>
         </div>
-        <div class="info-row">
-            <span class="info-label">Route Text Color:</span>
-            <span class="info-value"
-                >{@html route.route_text_color || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Route Sort Order:</span>
-            <span class="info-value"
-                >{@html route.route_sort_order || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Continuous Pickup:</span>
-            <span class="info-value"
-                >{@html route.continuous_pickup || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Continuous Drop Off:</span>
-            <span class="info-value"
-                >{@html route.continuous_drop_off || "<b>null</b>"}</span
-            >
-        </div>
-        <div class="info-row">
-            <span class="info-label">Network ID:</span>
-            <span class="info-value"
-                >{@html route.network_id || "<b>null</b>"}</span
-            >
-        </div>
     </div>
 
-    <div class="section" id="stoptimes">
+    <div class="info-section">
         <h3>Stoptimes</h3>
         <div class="stoptimes">
-            <p>Example format:</p>
-            <span class="stop-time">
-                <span class="time">Sch.</span>
-                <span class="lateness scheduled">lateness</span>
-                <span class="date-offset">(+1 day)</span>
-                <span class="station">Station</span>
-                <span class="platform">platform</span>
-            </span>
-            <hr>
             {#each trip.stopTimes as st}
                 <a
-                    class="stop-time {st.passing ? 'passing' : ''}"
+                    class="stop-time {st.passing ? 'passing' : ''} {st.realtime && st.realtime_info?.schedule_relationship === 3 ? 'cancelled' : ''}"
                     href={`/DB/${st.scheduled_parent_station || st.scheduled_stop}`}
                     onclick={() =>
                         goto(
                             `/DB/${st.scheduled_parent_station || st.scheduled_stop}`,
                         )}
                 >
-                    <span class="time {st.realtime ? 'realtime' : ''}">
-                        {formatTimestamp(
-                            st.scheduled_departure_timestamp ||
-                                st.scheduled_arrival_timestamp,
-                        )}
+                    <span class="platform" style="background-color: #{route.route_color || '000000'}">
+                        {st.scheduled_platform_code || "?"}
                     </span>
-
-                    <span class="lateness {st.passing ? "estimated" : st.realtime_info?.delay_class || "scheduled"}">
-                        {st.passing ? "estimated" : st.realtime ? st.realtime_info?.delay_string : "scheduled"}
-                    </span>
-                    {#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
-                        <span class="date-offset"
-                            >(+{st.scheduled_departure_timestamp
-                                ? st.scheduled_departure_date_offset
-                                : st.scheduled_arrival_date_offset} day{(st.scheduled_departure_timestamp
-                                ? st.scheduled_departure_date_offset
-                                : st.scheduled_arrival_date_offset) !== 1
-                                ? "s"
-                                : ""})</span
-                        >
-                    {/if}
-                    <span class="station">
-                        {(
-                            stations[st.scheduled_parent_station || ""]
-                                ?.stop_name ||
-                            stations[st.scheduled_stop || ""]?.stop_name ||
-                            "Unknown"
-                        )
-                            .replace(/station/i, "")
-                            .trim()}
-                    </span>
-                    {#if st.scheduled_platform_code}
-                        <span class="platform">
-                            plat. {st.scheduled_platform_code || "?"}
+                    <span class="smalltext">
+                        <span class="time">
+                            {formatTimestamp(
+                                st.scheduled_departure_timestamp ||
+                                    st.scheduled_arrival_timestamp,
+                            )}
                         </span>
-                    {/if}
+                        <span
+                            class="delay {st.passing
+                                ? 'estimated'
+                                : st.realtime_info?.delay_class || 'scheduled'}"
+                        >
+                            ({st.passing
+                                ? "est."
+                                : st.realtime
+                                  ? st.realtime_info?.delay_string
+                                  : "scheduled"})
+                        </span>
+                        {#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
+                            <span class="date-offset"
+                                >(+{st.scheduled_departure_timestamp
+                                    ? st.scheduled_departure_date_offset
+                                    : st.scheduled_arrival_date_offset}{(st.scheduled_departure_timestamp
+                                    ? st.scheduled_departure_date_offset
+                                    : st.scheduled_arrival_date_offset) !== 1
+                                    ? "d"
+                                    : "d"})</span
+                            >
+                        {/if}
+                        <br />
+                        <span class="station">
+                            {(
+                                stations[st.scheduled_parent_station || ""]
+                                    ?.stop_name ||
+                                stations[st.scheduled_stop || ""]?.stop_name ||
+                                "Unknown"
+                            )
+                                .replace(/station/i, "")
+                                .trim()
+                                .toUpperCase()}
+                        </span>
+                    </span>
                     {#if st.passing}
-                        <span class="passing-indicator">passing*</span>
+                        <span class="service-type passing">P</span>
+                    {:else if st.realtime && st.realtime_info?.schedule_relationship === 3}
+                        <span class="service-type cancelled">C</span>
                     {/if}
                 </a>
+                <hr />
             {/each}
         </div>
     </div>
+</div>
+
 </div>
 
 <footer>
@@ -296,11 +176,20 @@
 
 <style>
     * {
-        font-family: "Arial";
+        font-family: "Arial", sans-serif;
     }
 
     :root {
-        font-size: min(3vw, 1em);
+        font-size: 1em;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: #fafafa;
     }
 
     nav {
@@ -319,181 +208,285 @@
         text-decoration: underline;
     }
 
-    .title {
+    .header {
         text-align: center;
-        margin-top: 2rem;
-        margin-bottom: 2rem;
         color: #2c3e50;
+        margin: 1.2rem 0;
+        padding: 0 1rem;
     }
-    .title h1 {
-        font-size: 2.5rem;
+    .header h1 {
+        font-size: 2rem;
         font-weight: 700;
-        letter-spacing: -0.1rem;
+        letter-spacing: -0.03rem;
+        margin-bottom: 0.2rem;
     }
-    .title * {
-        margin-bottom: 0.4rem;
-    }
-    .title p {
-        font-size: 1.2rem;
+
+    .header h2 {
+        font-size: 1.3rem;
+        font-weight: 500;
         color: #555;
-        margin-bottom: 1rem;
+        margin: 0.3rem 0;
     }
-    .square {
-        width: 0.7rem;
-        height: 0.7rem;
-        border: 0.1rem solid black;
-        display: inline-block;
+
+    .header p {
+        font-size: 0.95rem;
+        color: #777;
+        margin: 0.3rem 0;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex: 1;
+        padding: 0.8rem;
     }
 
     .content {
-        max-width: 800px;
+        width: 100%;
+        max-width: 650px;
         margin: 0 auto;
-        padding: 0 1rem;
     }
 
-    .section {
-        background: #f8f9fa;
-        border: 1px solid #e1e4e8;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+    .info-section {
+        margin-bottom: 1.5rem;
+        padding: 1.2rem;
+        border-radius: 6px;
+        background-color: #ffffff;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
     }
 
-    .section h3 {
-        color: #2c3e50;
+    .info-section h3 {
         margin-top: 0;
-        margin-bottom: 1rem;
-        font-size: 1.4rem;
+        color: #2c3e50;
+        font-size: 1.3rem;
         font-weight: 600;
     }
 
-    .info-row {
-        margin-bottom: 0.5rem;
-        line-height: 1.4;
+    .info-item {
+        display: flex;
+        margin-bottom: 0.6rem;
+        padding: 0.4rem 0;
     }
 
     .info-label {
-        font-weight: 600;
-        color: #2980b9;
-        display: inline-block;
+        font-weight: 500;
         min-width: 140px;
+        color: #555;
+        font-size: 0.95rem;
     }
 
     .info-value {
-        color: #555;
+        flex: 1;
+        color: #333;
+        font-size: 0.95rem;
     }
 
-    .run-series {
-        margin-top: 1rem;
+    .run-series-item {
+        display: flex;
+        margin: 0.2rem 0;
     }
 
-    .run-series ul {
-        margin: 0.5rem 0;
-        padding-left: 1.5rem;
-        list-style-type: " \2013 ";
+    .run-series-item .date {
+        min-width: 90px;
+        font-weight: 500;
     }
 
-    .run-series li {
-        margin-bottom: 0.25rem;
-        color: #555;
+    .route-link {
+        color: #2980b9;
+        text-decoration: none;
+    }
+
+    .route-link:hover {
+        text-decoration: underline;
+    }
+
+    .color-square {
+        width: 1rem;
+        height: 1rem;
+        border: 1px solid #ccc;
+        display: inline-block;
+        margin-left: 0.5rem;
+        vertical-align: middle;
     }
 
     .stoptimes {
-        margin-top: 1rem;
+        font-family: "Arial Narrow", Arial, sans-serif;
+        padding: 0.1rem;
+        width: fit-content;
+        margin: 0 auto;
     }
 
     .stop-time {
         display: block;
-        text-decoration: none;
+        width: fit-content;
         color: inherit;
-
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem;
-        background: white;
-        border: 1px solid #e1e4e8;
-        border-radius: 6px;
-        transition: all 0.2s;
-    }
-
-    .stop-time:hover {
-        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.1);
-        border-color: #2980b9;
+        text-decoration: none;
     }
 
     .stop-time.passing {
-        background: #d6d6d6;
-        border-color: rgb(197, 197, 197);
+        background-color: #f5f5f5;
     }
 
-    .stop-time.passing:hover {
-        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.1);
-        border-color: #2980b9;
+    .stop-time.cancelled {
+        background-color: #fceaea;
     }
 
-    .time {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #2c3e50;
-        min-width: 60px;
+    .stop-time {
+        cursor: pointer;
+        transition: all 150ms;
+        border-radius: 3px;
+        margin-bottom: 0.2rem;
     }
 
-    .date-offset {
-        color: #16324e;
-        font-size: 0.9rem;
-        margin-left: 0.5rem;
+    .stop-time:hover {
+        background-color: #f0f7ff;
+    }
+
+    .stop-time.cancelled:hover {
+        background-color: #fceaea;
+        box-shadow: 0 0 1rem #d6b3b3;
+    }
+
+    .stop-time:hover {
+        background-color: #f0f7ff;
+        box-shadow: 0 0 1rem #c5d5f0;
+    }
+
+    .platform {
+        align-items: center;
+        color: white;
+        display: inline-block;
+        font-family: "Arial", serif;
+        font-size: 2rem;
+        font-weight: 900;
+        height: 2rem;
+        width: 2.8rem;
+        justify-content: center;
+        line-height: 0.95;
+        margin: 0.3rem;
+        outline: 0.15rem solid black;
+        text-align: center;
+        -webkit-text-stroke-width: 0.1rem;
+        -webkit-text-stroke-color: black;
+    }
+
+    .smalltext {
+        margin-top: -1rem;
+        font-size: 0.95rem;
+        width: 16rem;
+        display: inline-block;
+        vertical-align: middle;
         font-weight: 500;
     }
 
     .station {
-        flex: 1;
-        font-weight: 500;
-        color: #2980b9;
-        margin: 0 1rem;
+        font-weight: 600;
+        line-height: 0.9;
+        font-size: 1.3rem;
+        text-transform: uppercase;
     }
 
-    .platform {
-        color: #27ae60;
-        font-size: 0.9rem;
-        font-weight: 500;
+    .service-type {
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 0.8rem;
+        width: 1.1rem;
+        height: 1.1rem;
+        padding-bottom: 0.1rem;
+        text-align: center;
+        outline: 0.1rem solid black;
     }
 
-    .passing-indicator {
-        color: #000000;
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin-left: 0.5rem;
+    .service-type.passing {
+        background-color: rgb(120, 120, 120);
+        color: white;
+    }
+
+    .service-type.cancelled {
+        background-color: #c62828;
+        color: white;
+    }
+
+    .very-late {
+        color: #c62828;
+    }
+    .late {
+        color: #ff8f00;
+    }
+    .on-time {
+        color: #2e7d32;
+    }
+    .early {
+        color: #1565c0;
+    }
+    .scheduled,
+    .estimated {
+        color: #757575;
+    }
+    .delay.cancelled {
+        color: #fff;
+        background-color: #c62828;
+        padding: 0 0.25em;
+        border-radius: 0.25em;
+        font-weight: bold;
+    }
+
+    .date-offset {
+        font-size: 0.8rem;
+        color: #757575;
+        margin-left: 0.4rem;
     }
 
     footer {
         text-align: center;
-        margin-top: 3rem;
+        margin-top: 1.5rem;
         padding: 1rem;
-        color: #777;
-        font-size: 0.9rem;
-        border-top: 1px solid #e1e4e8;
+        color: #757575;
+        font-size: 0.85rem;
     }
 
-    .lateness {
-        min-width: 4rem;
+    hr {
+        border: none;
+        height: 1px;
+        background-color: #eee;
+        margin: 0.4rem 0;
     }
 
-    .very-late {
-        color: red;
-    }
-    .late {
-        color: darkgoldenrod;
-    }
-    .on-time {
-        color: green;
-    }
-    .early {
-        color: blue;
-    }
-    .scheduled,
-    .estimated {
-        color: gray;
+    @media (max-width: 768px) {
+        :root {
+            font-size: 1em;
+        }
+        
+        .info-item {
+            flex-direction: column;
+        }
+        
+        .info-label {
+            min-width: auto;
+            margin-bottom: 0.2rem;
+        }
+        
+        .platform {
+            font-size: 1.8rem;
+            height: 1.8rem;
+            width: 2.7rem;
+        }
+        
+        .smalltext {
+            width: 14rem;
+            font-size: 0.9rem;
+        }
+        
+        .station {
+            font-size: 1.2rem;
+        }
+        
+        .container {
+            padding: 0.5rem;
+        }
     }
 </style>
