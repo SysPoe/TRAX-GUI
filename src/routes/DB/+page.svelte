@@ -1,25 +1,30 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type { PageProps } from './$types';
+  import { onMount } from "svelte";
+  import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
-  
+
   onMount(() => {
-    const filterInput = document.getElementById('filter') as HTMLInputElement;
+    const filterInput = document.getElementById("filter") as HTMLInputElement;
     filterInput.value = "";
   });
 
   function filterStations(event: KeyboardEvent) {
     const filter = (event.target as HTMLInputElement).value.toLowerCase();
-    const stations = document.querySelectorAll('.station') as NodeListOf<HTMLElement>;
-    
-    stations.forEach(station => {
-      const name = station.getAttribute('data-name')?.toLowerCase() || '';
-      const id = station.getAttribute('data-id')?.toLowerCase() || '';
-      if (name.includes(filter.toLowerCase()) || id.includes(filter.toLowerCase())) {
-        station.style.display = 'block';
+    const stations = document.querySelectorAll(
+      ".station",
+    ) as NodeListOf<HTMLElement>;
+
+    stations.forEach((station) => {
+      const name = station.getAttribute("data-name")?.toLowerCase() || "";
+      const id = station.getAttribute("data-id")?.toLowerCase() || "";
+      if (
+        name.includes(filter.toLowerCase()) ||
+        id.includes(filter.toLowerCase())
+      ) {
+        station.style.display = "block";
       } else {
-        station.style.display = 'none';
+        station.style.display = "none";
       }
     });
   }
@@ -30,19 +35,46 @@
 <title>TRAX Departure Board</title>
 
 <div class="title">
-    <h1>TRAX <i>DepartureBoard</i></h1>
-    <p>Select a station to view departures...</p>
-    <input type="text" name="filter" id="filter" placeholder="Filter stations..." onkeypress={filterStations}>
+  <h1>TRAX <i>DepartureBoard</i></h1>
+  <p>Select a station to view departures...</p>
+  <input
+    type="text"
+    name="filter"
+    id="filter"
+    placeholder="Filter stations..."
+    onkeypress={filterStations}
+  />
 </div>
 
 <div class="stations">
-    {#each data.stations as station}
-    <div data-id={station.stop_id} data-name={station.stop_name} class="station">
-        <a href="/DB/{station.stop_id}">{station.stop_name}</a>
+  {#each data.stations as station}
+    <div
+      data-id={station.stop_id}
+      data-name={station.stop_name}
+      class="station"
+    >
+      <a href="/DB/{station.stop_id}">{station.stop_name}</a>
     </div>
-    {/each}
+  {/each}
 </div>
+
 <style>
+  nav {
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  nav a {
+    margin: 0 1rem;
+    color: #2980b9;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+  
   .title {
     text-align: center;
     margin-top: 2rem;
@@ -67,7 +99,7 @@
     border-radius: 6px;
     width: 300px;
     max-width: 90vw;
-    box-shadow: 0 2px 8px rgba(44,62,80,0.05);
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.05);
     margin-top: 0.5rem;
     transition: border-color 0.2s;
   }
@@ -89,11 +121,13 @@
     padding: 1rem 1.5rem;
     min-width: 180px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(44,62,80,0.07);
-    transition: box-shadow 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+    transition:
+      box-shadow 0.2s,
+      border-color 0.2s;
   }
   .station:hover {
-    box-shadow: 0 4px 16px rgba(41,128,185,0.12);
+    box-shadow: 0 4px 16px rgba(41, 128, 185, 0.12);
     border-color: #2980b9;
   }
   .station a {

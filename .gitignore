@@ -1,7 +1,7 @@
 node_modules
 .svelte-kit
 package-lock.json
-db.sqlite
-db.sqlite-journal
+.TRAXCACHE.sqlite
+.TRAXCACHE.sqlite-journal
 gtfs-last-loaded.txt
 .gitignore

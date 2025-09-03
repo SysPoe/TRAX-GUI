@@ -65,6 +65,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>TRAX TripViewer - Search</title>
+</svelte:head>
+
 <nav><a href="/">Home</a></nav>
 
 <div class="title">
@@ -111,12 +115,11 @@
 
   <hr />
   <b>Filter by Date</b><br />
-  <i>Service must run on all selected dates</i><br />
+  <i>Service must run on (have stops scheduled for) all selected dates</i><br />
   <div class="dates" id="dates">
     <div style="display: none;" id="template-date">
       <select name="service-date" id="service-date">
         <option value="">Any Date</option>
-        <!-- TODO add search functionality for dates -->
         {#each data.dates as date}
           <option value={date}>{date}</option>
         {/each}
@@ -174,6 +177,22 @@
 <style>
   * {
     font-family: "Arial";
+  }
+
+  nav {
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  nav a {
+    margin: 0 1rem;
+    color: #2980b9;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
   }
 
   form {

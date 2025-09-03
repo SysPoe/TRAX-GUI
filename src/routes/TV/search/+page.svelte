@@ -6,7 +6,7 @@
 
     // Borrowed from TRAX
     function formatTimestamp(ts?: number | null): string {
-        if (!ts) return "--:--";
+        if (ts === null || ts === undefined) return "--:--";
         const d = new Date(ts * 1000);
         return d.toISOString().slice(11, 16);
     }
@@ -42,6 +42,10 @@
         return pages;
     }
 </script>
+
+<svelte:head>
+    <title>TRAX TripViewer - Search Results</title>
+</svelte:head>
 
 <nav>
     <a href="/">Home</a>
@@ -102,11 +106,10 @@
             ? data.stations[endStation.parent_station]
             : null}
 
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div
+        <a
             class="result"
             onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}`)}
+            href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
         >
             <span class="headline">
                 {departure_time}
@@ -130,16 +133,18 @@
                 <br />
                 {data.expressStrings[trip._trip.trip_id]} <br />
 
-                {#if trip.serviceDates.length == 1}
+                {#if trip.scheduledStartServiceDates.length == 1}
                     Service date:
                 {:else}
                     Service dates:
                 {/if}
-                {#each trip.serviceDates as date, i (date)}
-                    {date}{i < trip.serviceDates.length - 1 ? ", " : ""}
+                {#each trip.scheduledStartServiceDates as date, i (date)}
+                    {date}{i < trip.scheduledStartServiceDates.length - 1
+                        ? ", "
+                        : ""}
                 {/each}
             </span>
-        </div>
+        </a>
         <hr />
     {/each}
 </div>
@@ -169,18 +174,38 @@
         font-family: "Arial";
     }
 
+    nav {
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    nav a {
+        margin: 0 1rem;
+        color: #2980b9;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    nav a:hover {
+        text-decoration: underline;
+    }
+
     .results {
         margin: 0 auto;
         max-width: 600px;
         padding: 0 1rem;
     }
 
-    .result {
+    a.result {
         cursor: pointer;
         margin-left: 1rem;
         margin-right: 1rem;
         padding: 0.5rem;
         transition: all 200ms;
+
+        color: inherit;
+        text-decoration: none;
+        display: block;
     }
 
     .result:hover {

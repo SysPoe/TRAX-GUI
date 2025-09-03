@@ -52,7 +52,7 @@ export const load: PageServerLoad = async ({ url }) => {
             st.scheduled_stop?.stop_id === stop
         ));
     for (const date of serviceDates)
-        trips = trips.filter(trip => trip.serviceDates.includes(Number.parseInt(date)));
+        trips = trips.filter(trip => trip.scheduledTripDates.includes(Number.parseInt(date)));
     if (trainNumberType.trim() !== "")
         trips = trips.filter(trip => trip.run[0].toLowerCase() === trainNumberType.toLowerCase());
     if (trainNumberDestination.trim() !== "")
@@ -61,10 +61,10 @@ export const load: PageServerLoad = async ({ url }) => {
     let concatenated = false;
     let results = trips.length;
 
-    // sort by .serviceDates.sort()[0], then .stopTimes[0].scheduled_departure_timestamp, then .run
+    // sort by .scheduledTripDates.sort()[0], then .stopTimes[0].scheduled_departure_timestamp, then .run
     trips = trips.sort((a, b) => {
-        const aServiceDate = a.serviceDates.sort()[0];
-        const bServiceDate = b.serviceDates.sort()[0];
+        const aServiceDate = a.scheduledTripDates.sort()[0];
+        const bServiceDate = b.scheduledTripDates.sort()[0];
         if (aServiceDate !== bServiceDate) {
             return aServiceDate - bServiceDate;
         }

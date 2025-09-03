@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { SerializableAugmentedStopTime } from "translink-rail-api";
+  import { type SerializableAugmentedStopTime } from "translink-rail-api";
   import type { PageProps } from "./$types";
   import type * as gtfs from "gtfs";
   import type { UpcomingQRTravelDeparture } from "$lib";
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
 
   const { data, params }: PageProps = $props();
 
@@ -53,13 +53,17 @@
       {@const express = dep.express_string.toLowerCase() != "all stops"}
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        class="departure gtfs {dep.last_stop_id == params.stop_id.toLowerCase()
-          ? 'term'
-          : dep.passing
-            ? 'passing'
-            : ''}"
-        onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}`)}
+      <a
+        class="departure gtfs {dep.realtime &&
+        dep.realtime_info?.schedule_relationship === 3
+          ? 'cancelled'
+          : dep.last_stop_id == params.stop_id.toLowerCase()
+            ? 'term'
+            : dep.passing
+              ? 'passing'
+              : ''}"
+        href={`/TV/trip/gtfs/${trip._trip.trip_id}#stoptimes`}
+        onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}#stoptimes`)}
       >
         <!-- <span class="last-stop">
         {dep.last_stop_id.slice(-6, -3).toUpperCase()}
@@ -70,13 +74,18 @@
         <span class="smalltext">
           <span class="time">{dep.scheduled_departure_time}</span>
           <span
-            class="delay {dep.realtime
-              ? dep.realtime_info?.delay_class || 'scheduled'
-              : 'scheduled'}"
+            class="delay {dep.realtime &&
+            dep.realtime_info?.schedule_relationship === 3
+              ? 'cancelled'
+              : dep.realtime
+                ? dep.realtime_info?.delay_class || 'scheduled'
+                : 'scheduled'}"
           >
-            ({dep.realtime
-              ? dep.realtime_info?.delay_string || "scheduled"
-              : "scheduled"})
+            ({dep.realtime && dep.realtime_info?.schedule_relationship === 3
+              ? "cancelled"
+              : dep.realtime
+                ? dep.realtime_info?.delay_string || "scheduled"
+                : "scheduled"})
           </span>
           <span class="run">{trip.run}</span> to <br />
           <span class="headsign">
@@ -87,52 +96,59 @@
           </span>
         </span>
         <span
-          class="service-type {dep.last_stop_id == params.stop_id.toLowerCase()
-            ? 'term'
-            : dep.passing
-              ? 'passing'
-              : express
-                ? 'express'
-                : 'all-stops'}"
+          class="service-type {dep.realtime &&
+          dep.realtime_info?.schedule_relationship === 3
+            ? 'cancelled'
+            : dep.last_stop_id == params.stop_id.toLowerCase()
+              ? 'term'
+              : dep.passing
+                ? 'passing'
+                : express
+                  ? 'express'
+                  : 'all-stops'}"
         >
-          {dep.last_stop_id == params.stop_id.toLowerCase()
-            ? "T"
-            : dep.passing
-              ? "P"
-              : express
-                ? "E"
-                : "A"}
+          {dep.realtime && dep.realtime_info?.schedule_relationship === 3
+            ? "C"
+            : dep.last_stop_id == params.stop_id.toLowerCase()
+              ? "T"
+              : dep.passing
+                ? "P"
+                : express
+                  ? "E"
+                  : "A"}
         </span>
         <span class="departs_in">
           {dep.departs_in.replace("0h ", "")}
         </span>
-      </div>
+      </a>
       <hr />
     {:else if dep.dep_type === "qrt"}
-      <div
-        class="departure {dep.passing ? "passing" : "qr-travel"}"
-      >
+      <div class="departure {dep.passing ? 'passing' : 'qr-travel'}">
         <!-- <span class="last-stop">
         {dep.last_stop_id.slice(-6, -3).toUpperCase()}
       </span> -->
-        <span class="platform qr-travel">
-          ?
-        </span>
+        <span class="platform qr-travel"> ? </span>
         <span class="smalltext">
-          <span class="time">{(dep.stop?.estimatedPassingTime || (dep.stop?.actualDeparture === "0001-01-01T00:00:00" ? dep.stop?.actualArrival : dep.stop?.actualDeparture))?.slice(11,16)}</span>
-          <span
-            class="delay {dep.delayClass}"
+          <span class="time"
+            >{(
+              dep.stop?.estimatedPassingTime ||
+              (dep.stop?.actualDeparture === "0001-01-01T00:00:00"
+                ? dep.stop?.actualArrival
+                : dep.stop?.actualDeparture)
+            )?.slice(11, 16)}</span
           >
+          <span class="delay {dep.delayClass}">
             ({dep.delayString})
           </span>
           <span class="run">{dep.run}</span> to <br />
           <span class="headsign">
-            {dep.service.stops.at(-1)?.placeName.replace(/^Brisbane -/, "").trim() || "Unknown"}
+            {dep.service.stops
+              .at(-1)
+              ?.placeName.replace(/^Brisbane -/, "")
+              .trim() || "Unknown"}
           </span>
         </span>
-        <span
-          class="service-type {dep.passing ? "passing" : "qr-travel"}"
-        >
+        <span class="service-type {dep.passing ? 'passing' : 'qr-travel'}">
           {dep.passing ? "P" : "Q"}
         </span>
         <span class="departs_in">
@@ -148,6 +164,26 @@
   * {
     font-family: "Arial";
   }
+
+  :root {
+    font-size: min(2.5vw, 1em);
+  }
+  
+  nav {
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  nav a {
+    margin: 0 1rem;
+    color: #2980b9;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
   .header {
     text-align: center;
     color: #2c3e50;
@@ -159,9 +195,6 @@
     margin-bottom: 0.5rem;
   }
 
-  :root {
-    font-size: min(2.5vw, 1em);
-  }
   .departures {
     font-family: "Arial Narrow", Arial, sans-serif;
     padding: 0.2rem;
@@ -170,8 +203,12 @@
     margin-left: auto;
     margin-right: auto;
   }
+
   .departure {
+    display: block;
     width: fit-content;
+    color: inherit;
+    text-decoration: none;
   }
   .departure.passing {
     background-color: #ccc;
@@ -181,6 +218,13 @@
   }
   .departure.qr-travel {
     background-color: #fec796;
+  }
+  .departure.cancelled {
+    background-color: #c48989;
+  }
+  .departure.cancelled:hover {
+    background-color: #c48989;
+    box-shadow: 0 0 1rem #8c4141;
   }
 
   .last-stop {
@@ -214,7 +258,8 @@
     -webkit-text-stroke-width: 0.2rem;
     -webkit-text-stroke-color: black;
   }
-  .platform.qr-travel,.service-type.qr-travel {
+  .platform.qr-travel,
+  .service-type.qr-travel {
     background-color: rgb(255, 132, 0);
   }
 
@@ -269,6 +314,10 @@
     background-color: blue;
     color: white;
   }
+  .service-type.cancelled {
+    background-color: #b22222;
+    color: white;
+  }
 
   .departs_in {
     font-family: "Arial";
@@ -305,7 +354,15 @@
   .early {
     color: blue;
   }
-  .scheduled,.estimated {
+  .scheduled,
+  .estimated {
     color: gray;
+  }
+  .delay.cancelled {
+    color: #fff;
+    background-color: #b22222;
+    padding: 0 0.3em;
+    border-radius: 0.3em;
+    font-weight: bold;
   }
 </style>
