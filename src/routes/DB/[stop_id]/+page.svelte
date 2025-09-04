@@ -160,15 +160,19 @@
   {/each}
 </div>
 
+<svelte:head>
+  <style>
+    :root {
+      font-size: min(2.4vw, 1em);
+    }
+  </style>
+</svelte:head>
+
 <style>
   * {
     font-family: "Arial";
   }
 
-  :root {
-    font-size: min(2.5vw, 1em);
-  }
-  
   nav {
     text-align: center;
     margin: 1rem 0;

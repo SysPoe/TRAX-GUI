@@ -30,22 +30,10 @@ export async function loadTRAX() {
       await TRAX.loadGTFS(true, false);
     }
 
-    // Calculate millis to 3am
-    const millis = new Date();
-    millis.setHours(3, 0, 0, 0);
-    if (millis.getTime() < Date.now()) {
-      millis.setDate(millis.getDate() + 1);
-    }
-    const millisTo3am = millis.getTime() - Date.now();
-    setTimeout(() => {
+    setInterval(() => {
       TRAX.clearIntervals();
       loadTRAX();
-
-      setInterval(() => {
-        TRAX.clearIntervals();
-        loadTRAX();
-      }, 1000 * 60 * 60 * 24);
-    }, millisTo3am); // Reload TRAX at 3am every day
+    }, 1000 * 60 * 60 * 6); // Reload TRAX every 6h
 
     isTRAXLoading = false;
     isTRAXLoaded = true;
@@ -103,7 +91,7 @@ export function getUpcomingQRTravelDepartures(
         Math.round(
           new Date(
             (stop?.actualDeparture === "0001-01-01T00:00:00" ||
-            !stop?.actualDeparture
+              !stop?.actualDeparture
               ? stop?.actualArrival === "0001-01-01T00:00:00" ||
                 !stop?.actualArrival
                 ? stop?.estimatedPassingTime
@@ -119,10 +107,10 @@ export function getUpcomingQRTravelDepartures(
         ? delaySecs == 0
           ? "on time"
           : `${Math.floor(roundedDelay / 3600)}h ${Math.floor(
-              (Math.abs(roundedDelay) % 3600) / 60
-            )}m ${delaySecs > 0 ? "late" : "early"}`
-              .replace(/^0h/, "")
-              .trim()
+            (Math.abs(roundedDelay) % 3600) / 60
+          )}m ${delaySecs > 0 ? "late" : "early"}`
+            .replace(/^0h/, "")
+            .trim()
         : "scheduled";
       const delayClass:
         | "very-late"
@@ -130,14 +118,14 @@ export function getUpcomingQRTravelDepartures(
         | "early"
         | "on-time"
         | "scheduled" = delaySecs
-        ? roundedDelay > 0
-          ? roundedDelay > 5 * 60
-            ? "very-late"
-            : "late"
-          : roundedDelay < 0
-          ? "early"
-          : "on-time"
-        : "scheduled";
+          ? roundedDelay > 0
+            ? roundedDelay > 5 * 60
+              ? "very-late"
+              : "late"
+            : roundedDelay < 0
+              ? "early"
+              : "on-time"
+          : "scheduled";
       return {
         dep_type: "qrt" as "qrt",
         service: v,

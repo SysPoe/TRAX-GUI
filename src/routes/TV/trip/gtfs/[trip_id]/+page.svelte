@@ -125,7 +125,7 @@
                                 : st.realtime_info?.delay_class || 'scheduled'}"
                         >
                             ({st.passing
-                                ? "est."
+                                ? "estimated"
                                 : st.realtime
                                   ? st.realtime_info?.delay_string
                                   : "scheduled"})
