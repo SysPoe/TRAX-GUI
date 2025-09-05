@@ -32,7 +32,17 @@
   const station = data.stations.find((v) => v.stop_id === data.stop_id);
 </script>
 
-<title>TRAX Departure Board - {station?.stop_name || "Unknown Station"}</title>
+<svelte:head>
+  <title>
+    TRAX Departure Board - {station?.stop_name || "Unknown Station"}
+  </title>
+
+  <style>
+    :root {
+      font-size: min(2.4vw, 1em);
+    }
+  </style>
+</svelte:head>
 
 <nav><a href="..">Home</a> <a href="../DB">Back</a></nav>
 
@@ -158,14 +168,6 @@
     {/if}
   {/each}
 </div>
-
-<svelte:head>
-  <style>
-    :root {
-      font-size: min(2.4vw, 1em);
-    }
-  </style>
-</svelte:head>
 
 <style>
   * {

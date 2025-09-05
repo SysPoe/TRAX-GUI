@@ -35,6 +35,11 @@
         {trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} service
         - TRAX TripViewer
     </title>
+    <style>
+        :root {
+            font-size: min(3.6vw, 1em);
+        }
+    </style>
 </svelte:head>
 
 <nav>
@@ -246,10 +251,6 @@
 <style>
     * {
         font-family: "Arial", sans-serif;
-    }
-
-    :root {
-        font-size: 1em;
     }
 
     nav {
