@@ -3,6 +3,7 @@
   import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
+  let loading = $state(false);
 
   onMount(() => {
     const filterInput = document.getElementById("filter") as HTMLInputElement;
@@ -10,10 +11,13 @@
   });
 
   function filterStations(event: KeyboardEvent) {
-    const filter = (event.target as HTMLInputElement).value.toLowerCase();
+    const filter = (event.target as HTMLInputElement).value.toLowerCase().trim();
     const stations = document.querySelectorAll(
       ".station",
     ) as NodeListOf<HTMLElement>;
+
+    let countBlock = 0;
+    let blockEl: HTMLElement = null as any as HTMLElement;
 
     stations.forEach((station) => {
       const name = station.getAttribute("data-name")?.toLowerCase() || "";
@@ -22,11 +26,18 @@
         name.includes(filter.toLowerCase()) ||
         id.includes(filter.toLowerCase())
       ) {
+        blockEl = station;
+        countBlock++;
         station.style.display = "block";
       } else {
         station.style.display = "none";
       }
     });
+
+    if(event.key === "Enter" && countBlock === 1 && blockEl != null) {
+      loading = true;
+      blockEl.querySelector("a")?.click();
+    }
   }
 </script>
 
@@ -44,6 +55,9 @@
     placeholder="Filter stations..."
     onkeypress={filterStations}
   />
+  {#if loading}
+    <p class="loading">Loading...</p>
+  {/if}
 </div>
 
 <div class="stations">

@@ -3,7 +3,6 @@
   import type { PageProps } from "./$types";
   import type * as gtfs from "gtfs";
   import type { UpcomingQRTravelDeparture } from "$lib";
-  import { goto } from "$app/navigation";
 
   const { data, params }: PageProps = $props();
 
@@ -56,6 +55,9 @@
 <hr />
 
 <div class="departures">
+  {#if departures.length === 0}
+    <p>No departures found in the next 4 hours.</p>
+  {/if}
   {#each departures as dep}
     {#if dep.dep_type === "gtfs"}
       {@const trip = data.trips[dep.trip_id]}

@@ -67,7 +67,9 @@ export const load: PageServerLoad = async ({ params }) => {
     .getDepartures(today, startTime, endTime)
     .map((v) => {
       const actualTime = formatTimestamp(
-        v.actual_departure_timestamp || v.actual_arrival_timestamp
+        (v.actual_departure_timestamp || v.actual_arrival_timestamp)
+          ? Math.floor((v.actual_departure_timestamp || v.actual_arrival_timestamp || 0) / 60) * 60
+          : v.actual_departure_timestamp || v.actual_arrival_timestamp
       );
       // Get current time in HH:mm
       const nowTime = `${now.getHours().toString().padStart(2, "0")}:${now
