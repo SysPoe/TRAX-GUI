@@ -21,5 +21,6 @@ export const load: PageServerLoad = async ({ params }) => {
         if (stopTime.scheduled_parent_station)
             stations[stopTime.scheduled_parent_station?.stop_id as any as string] = stopTime.scheduled_parent_station?.toSerializable() as any;
     }
+
     return { trip: trip.toSerializable(), stations, route, expressString };
 };

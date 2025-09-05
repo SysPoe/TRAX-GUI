@@ -63,7 +63,6 @@
               ? 'passing'
               : ''}"
         href={`/TV/trip/gtfs/${trip._trip.trip_id}#stoptimes`}
-        onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}#stoptimes`)}
       >
         <!-- <span class="last-stop">
         {dep.last_stop_id.slice(-6, -3).toUpperCase()}

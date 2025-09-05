@@ -45,127 +45,196 @@
 <div class="header">
     <h1>TRAX <i>TripViewer</i></h1>
     <h2>
-        {trip.run} - {trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+        {trip.run} - {trip._trip.trip_headsign?.replace("station", "").trim() ||
+            "Unknown"} Service
     </h2>
-    <p>Departing: {formatTimestamp(
+    <p>
+        Departing: {formatTimestamp(
             trip.stopTimes[0].scheduled_departure_timestamp ||
                 trip.stopTimes[0].scheduled_arrival_timestamp,
-        )} | Trip ID: {trip._trip.trip_id}</p>
+        )} | Trip ID: {trip._trip.trip_id}
+    </p>
 </div>
 
 <hr />
 
 <div class="container">
     <div class="content">
-    <div class="info-section">
-        <h3>Trip Information</h3>
-        <div class="info-item">
-            <span class="info-label">Express Status:</span>
-            <span class="info-value">{data.expressString}</span>
+        <div class="info-section">
+            <h3>Trip Information</h3>
+            <div class="info-item">
+                <span class="info-label">Express Status:</span>
+                <span class="info-value">{data.expressString}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Run Number:</span>
+                <span class="info-value">{trip.run}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Service Dates:</span>
+                <span class="info-value">
+                    {trip.scheduledStartServiceDates.join(", ")}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Headsign:</span>
+                <span class="info-value">
+                    {@html trip._trip.trip_headsign || "<b>null</b>"}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Trip Short Name:</span>
+                <span class="info-value">
+                    {@html trip._trip.trip_short_name || "<b>null</b>"}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Direction ID:</span>
+                <span class="info-value">
+                    {@html trip._trip.direction_id || "<b>null</b>"}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Block ID:</span>
+                <span class="info-value">
+                    {@html trip._trip.block_id || "<b>null</b>"}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Shape ID:</span>
+                <span class="info-value">
+                    {@html trip._trip.shape_id || "<b>null</b>"}
+                </span>
+            </div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Run Number:</span>
-            <span class="info-value">{trip.run}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Service Dates:</span>
-            <span class="info-value">{trip.scheduledStartServiceDates.join(", ")}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Headsign:</span>
-            <span class="info-value">{@html trip._trip.trip_headsign || "<b>null</b>"}</span>
-        </div>
-    </div>
 
-    <div class="info-section">
-        <h3>Route Information ({route.route_id})</h3>
-        <div class="info-item">
-            <span class="info-label">Route Name:</span>
-            <span class="info-value">{@html route.route_long_name || route.route_short_name || "<b>null</b>"}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Route Color:</span>
-            <span class="info-value">
-                {@html route.route_color || "<b>null</b>"}
-                {#if route.route_color}
-                    <div
-                        class="color-square"
-                        style="background-color: #{route.route_color};"
-                    ></div>
-                {/if}
-            </span>
-        </div>
-    </div>
-
-    <div class="info-section">
-        <h3>Stoptimes</h3>
-        <div class="stoptimes">
-            {#each trip.stopTimes as st}
-                <a
-                    class="stop-time {st.passing ? 'passing' : ''} {st.realtime && st.realtime_info?.schedule_relationship === 3 ? 'cancelled' : ''}"
-                    href={`/DB/${st.scheduled_parent_station || st.scheduled_stop}`}
-                    onclick={() =>
-                        goto(
-                            `/DB/${st.scheduled_parent_station || st.scheduled_stop}`,
-                        )}
-                >
-                    <span class="platform" style="background-color: #{route.route_color || '000000'}">
-                        {st.scheduled_platform_code || "?"}
-                    </span>
-                    <span class="smalltext">
-                        <span class="time">
-                            {formatTimestamp(
-                                st.scheduled_departure_timestamp ||
-                                    st.scheduled_arrival_timestamp,
-                            )}
-                        </span>
-                        <span
-                            class="delay {st.passing
-                                ? 'estimated'
-                                : st.realtime_info?.delay_class || 'scheduled'}"
-                        >
-                            ({st.passing
-                                ? "estimated"
-                                : st.realtime
-                                  ? st.realtime_info?.delay_string
-                                  : "scheduled"})
-                        </span>
-                        {#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
-                            <span class="date-offset"
-                                >(+{st.scheduled_departure_timestamp
-                                    ? st.scheduled_departure_date_offset
-                                    : st.scheduled_arrival_date_offset}{(st.scheduled_departure_timestamp
-                                    ? st.scheduled_departure_date_offset
-                                    : st.scheduled_arrival_date_offset) !== 1
-                                    ? "d"
-                                    : "d"})</span
+        <div class="info-section">
+            <h3>Run Series</h3>
+            {#each Object.entries(trip.runSeries) as [date, series]}
+                <div class="info-item">
+                    <span class="info-label">{date}:</span>
+                    <span class="info-value">
+                        {#if series !== null && series !== undefined}
+                            <a
+                                href={`/TV/run-series/${date}/${series}`}
+                                onclick={() => {
+                                    goto(`/TV/run-series/${date}/${series}`);
+                                }}
                             >
+                                {series}
+                            </a>
+                        {:else}
+                            <b>null</b>
                         {/if}
-                        <br />
-                        <span class="station">
-                            {(
-                                stations[st.scheduled_parent_station || ""]
-                                    ?.stop_name ||
-                                stations[st.scheduled_stop || ""]?.stop_name ||
-                                "Unknown"
-                            )
-                                .replace(/station/i, "")
-                                .trim()
-                                .toUpperCase()}
-                        </span>
                     </span>
-                    {#if st.passing}
-                        <span class="service-type passing">P</span>
-                    {:else if st.realtime && st.realtime_info?.schedule_relationship === 3}
-                        <span class="service-type cancelled">C</span>
-                    {/if}
-                </a>
-                <hr />
+                </div>
             {/each}
         </div>
-    </div>
-</div>
 
+        <div class="info-section">
+            <h3>Route Information ({route.route_id})</h3>
+            <div class="info-item">
+                <span class="info-label">Route Name:</span>
+                <span class="info-value">
+                    {@html route.route_long_name ||
+                        route.route_short_name ||
+                        "<b>null</b>"}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Route Color:</span>
+                <span class="info-value">
+                    {@html route.route_color || "<b>null</b>"}
+                    {#if route.route_color}
+                        <div
+                            class="color-square"
+                            style="background-color: #{route.route_color};"
+                        ></div>
+                    {/if}
+                </span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Stoptimes</h3>
+            <div class="stoptimes">
+                {#each trip.stopTimes as st}
+                    <a
+                        class="stop-time {st.passing
+                            ? 'passing'
+                            : ''} {st.realtime &&
+                        st.realtime_info?.schedule_relationship === 3
+                            ? 'cancelled'
+                            : ''}"
+                        href={`/DB/${st.scheduled_parent_station || st.scheduled_stop}`}
+                        onclick={() =>
+                            goto(
+                                `/DB/${st.scheduled_parent_station || st.scheduled_stop}`,
+                            )}
+                    >
+                        <span
+                            class="platform"
+                            style="background-color: #{route.route_color ||
+                                '000000'}"
+                        >
+                            {st.scheduled_platform_code || "?"}
+                        </span>
+                        <span class="smalltext">
+                            <span class="time">
+                                {formatTimestamp(
+                                    st.scheduled_departure_timestamp ||
+                                        st.scheduled_arrival_timestamp,
+                                )}
+                            </span>
+                            <span
+                                class="delay {st.passing
+                                    ? 'estimated'
+                                    : st.realtime_info?.delay_class ||
+                                      'scheduled'}"
+                            >
+                                ({st.passing
+                                    ? "estimated"
+                                    : st.realtime
+                                      ? st.realtime_info?.delay_string
+                                      : "scheduled"})
+                            </span>
+                            {#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
+                                <span class="date-offset"
+                                    >(+{st.scheduled_departure_timestamp
+                                        ? st.scheduled_departure_date_offset
+                                        : st.scheduled_arrival_date_offset}{(st.scheduled_departure_timestamp
+                                        ? st.scheduled_departure_date_offset
+                                        : st.scheduled_arrival_date_offset) !==
+                                    1
+                                        ? "d"
+                                        : "d"})</span
+                                >
+                            {/if}
+                            <br />
+                            <span class="station">
+                                {(
+                                    stations[st.scheduled_parent_station || ""]
+                                        ?.stop_name ||
+                                    stations[st.scheduled_stop || ""]
+                                        ?.stop_name ||
+                                    "Unknown"
+                                )
+                                    .replace(/station/i, "")
+                                    .trim()
+                                    .toUpperCase()}
+                            </span>
+                        </span>
+                        {#if st.passing}
+                            <span class="service-type passing">P</span>
+                        {:else if st.realtime && st.realtime_info?.schedule_relationship === 3}
+                            <span class="service-type cancelled">C</span>
+                        {/if}
+                    </a>
+                    <hr />
+                {/each}
+            </div>
+        </div>
+    </div>
 </div>
 
 <footer>
@@ -181,15 +250,6 @@
 
     :root {
         font-size: 1em;
-    }
-
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        background-color: #fafafa;
     }
 
     nav {
@@ -285,11 +345,6 @@
     .run-series-item {
         display: flex;
         margin: 0.2rem 0;
-    }
-
-    .run-series-item .date {
-        min-width: 90px;
-        font-weight: 500;
     }
 
     .route-link {
@@ -454,39 +509,5 @@
         height: 1px;
         background-color: #eee;
         margin: 0.4rem 0;
-    }
-
-    @media (max-width: 768px) {
-        :root {
-            font-size: 1em;
-        }
-        
-        .info-item {
-            flex-direction: column;
-        }
-        
-        .info-label {
-            min-width: auto;
-            margin-bottom: 0.2rem;
-        }
-        
-        .platform {
-            font-size: 1.8rem;
-            height: 1.8rem;
-            width: 2.7rem;
-        }
-        
-        .smalltext {
-            width: 14rem;
-            font-size: 0.9rem;
-        }
-        
-        .station {
-            font-size: 1.2rem;
-        }
-        
-        .container {
-            padding: 0.5rem;
-        }
     }
 </style>
