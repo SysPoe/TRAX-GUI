@@ -4,7 +4,7 @@ import fs from "fs";
 export let isTRAXLoaded = false;
 let isTRAXLoading = false;
 
-export async function loadTRAX() {
+export async function loadTRAX(freshLoad = false) {
   if (!isTRAXLoaded && !isTRAXLoading) {
     isTRAXLoading = true;
 
@@ -16,23 +16,24 @@ export async function loadTRAX() {
     const lastLoadedDate = new Date(lastLoaded);
     if (
       Date.now() - lastLoadedDate.getTime() > 1000 * 60 * 60 * 24 ||
-      lastLoadedDate.getDay() !== new Date().getDay()
+      lastLoadedDate.getDay() !== new Date().getDay() ||
+      freshLoad
     ) {
       // If last loaded was more than 24 hours ago, reload GTFS data
 
       console.log("Reloading static TRAX GTFS data...");
       if (fs.existsSync(".TRAXCACHE.sqlite")) fs.rmSync(".TRAXCACHE.sqlite");
       if (fs.existsSync(".TRAXCACHE.sqlite-journal")) fs.rmSync(".TRAXCACHE.sqlite-journal");
-      await TRAX.loadGTFS(true, true);
+      await TRAX.loadGTFS(true, true, 20_000);
       fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
     } else {
       // Otherwise, load from cache
-      await TRAX.loadGTFS(true, false);
+      await TRAX.loadGTFS(true, false, 20_000);
     }
 
     setInterval(() => {
       TRAX.clearIntervals();
-      loadTRAX();
+      loadTRAX(true);
     }, 1000 * 60 * 60 * 6); // Reload TRAX every 6h
 
     isTRAXLoading = false;

@@ -29,6 +29,8 @@
   } = data;
 
   const station = data.stations.find((v) => v.stop_id === data.stop_id);
+
+  console.log(data);
 </script>
 
 <svelte:head>
