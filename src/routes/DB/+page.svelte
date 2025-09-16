@@ -11,7 +11,9 @@
   });
 
   function filterStations(event: KeyboardEvent) {
-    const filter = (event.target as HTMLInputElement).value.toLowerCase().trim();
+    const filter = (event.target as HTMLInputElement).value
+      .toLowerCase()
+      .trim();
     const stations = document.querySelectorAll(
       ".station",
     ) as NodeListOf<HTMLElement>;
@@ -34,7 +36,7 @@
       }
     });
 
-    if(event.key === "Enter" && countBlock === 1 && blockEl != null) {
+    if (event.key === "Enter" && countBlock === 1 && blockEl != null) {
       loading = true;
       blockEl.querySelector("a")?.click();
     }
@@ -67,7 +69,12 @@
       data-name={station.stop_name}
       class="station"
     >
-      <a href="/DB/{station.stop_id}">{station.stop_name}</a>
+      <a
+        href="/DB/{station.stop_id}"
+        onclick={() => {
+          loading = true;
+        }}>{station.stop_name}</a
+      >
     </div>
   {/each}
 </div>
@@ -88,7 +95,7 @@
   nav a:hover {
     text-decoration: underline;
   }
-  
+
   .title {
     text-align: center;
     margin-top: 2rem;

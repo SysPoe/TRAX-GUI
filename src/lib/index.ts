@@ -24,11 +24,11 @@ export async function loadTRAX(freshLoad = false) {
       console.log("Reloading static TRAX GTFS data...");
       if (fs.existsSync(".TRAXCACHE.sqlite")) fs.rmSync(".TRAXCACHE.sqlite");
       if (fs.existsSync(".TRAXCACHE.sqlite-journal")) fs.rmSync(".TRAXCACHE.sqlite-journal");
-      await TRAX.loadGTFS(true, true, 20_000);
+      await TRAX.loadGTFS(true, true, 120_000);
       fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
     } else {
       // Otherwise, load from cache
-      await TRAX.loadGTFS(true, false, 20_000);
+      await TRAX.loadGTFS(true, false, 120_000);
     }
 
     setInterval(() => {
