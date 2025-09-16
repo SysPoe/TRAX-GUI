@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16.933332mm"
+   height="16.933332mm"
+   viewBox="0 0 16.933332 16.933333"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   sodipodi:docname="TV-logo-inkscape.svg"
+   inkscape:export-filename="bitmap.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="6.9644859"
+     inkscape:cx="12.922705"
+     inkscape:cy="31.373457"
+     inkscape:window-width="1712"
+     inkscape:window-height="894"
+     inkscape:window-x="1536"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <rect
+       x="33.886206"
+       y="6.7683213"
+       width="19.384058"
+       height="39.179076"
+       id="rect6" />
+    <rect
+       x="4.1627449"
+       y="3.3024621"
+       width="27.837255"
+       height="57.395058"
+       id="rect4" />
+    <rect
+       x="3.4520323"
+       y="7.1071254"
+       width="15.894517"
+       height="15.594442"
+       id="rect2" />
+    <rect
+       x="6.4979432"
+       y="9.3407933"
+       width="37.363174"
+       height="22.13362"
+       id="rect1" />
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Blur"
+       id="filter3"
+       x="-0.028346468"
+       y="-0.028346481"
+       width="1.0566929"
+       height="1.056693">
+      <feGaussianBlur
+         stdDeviation="0.1 0.1"
+         result="fbSourceGraphic"
+         id="feGaussianBlur3" />
+      <feColorMatrix
+         result="fbSourceGraphicAlpha"
+         in="fbSourceGraphic"
+         values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
+         id="feColorMatrix3" />
+      <feGaussianBlur
+         id="feGaussianBlur4"
+         stdDeviation="0.1 0.1"
+         result="blur"
+         in="fbSourceGraphic" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Blur"
+       id="filter5"
+       x="-0.030477907"
+       y="-0.032379208"
+       width="1.0609558"
+       height="1.0647584">
+      <feGaussianBlur
+         stdDeviation="0.2 0.2"
+         result="blur"
+         id="feGaussianBlur5" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Blur"
+       id="filter6"
+       x="-0.028639039"
+       y="-0.031366729"
+       width="1.0572781"
+       height="1.0627335">
+      <feGaussianBlur
+         stdDeviation="0.2 0.2"
+         result="blur"
+         id="feGaussianBlur6" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Blur"
+       id="filter7"
+       x="-0.028602877"
+       y="-0.031335469"
+       width="1.0572058"
+       height="1.0626709">
+      <feGaussianBlur
+         stdDeviation="0.2 0.2"
+         result="blur"
+         id="feGaussianBlur7" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-21.920405,-83.383502)">
+    <rect
+       style="fill:#1a1a1a;stroke-width:0.172851"
+       id="rect3"
+       width="16.933329"
+       height="16.933329"
+       x="21.920404"
+       y="83.383507" />
+    <ellipse
+       style="fill:#000000;stroke-width:0.264582;filter:url(#filter3)"
+       id="circle3"
+       cx="30.387072"
+       cy="91.850166"
+       rx="8.4666634"
+       ry="8.4666595"
+       transform="matrix(0.93205894,0,0,0.93205894,1.9366802,6.2404025)" />
+    <circle
+       style="fill:#4d4d4d;stroke-width:0.237277"
+       id="path3"
+       cx="30.387072"
+       cy="91.850166"
+       r="7.5928879" />
+    <g
+       id="g3"
+       transform="matrix(0.90491017,0,0,0.873373,3.4419748,10.709738)"
+       style="fill:#000000;filter:url(#filter7)">
+      <path
+         id="text6"
+         style="font-family:'Ubuntu Condensed';-inkscape-font-specification:'Ubuntu Condensed, ';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;white-space:pre;fill:#000000;stroke-width:1.35696"
+         d="m 31.172078,85.170521 c -0.994427,0.190291 -1.164362,1.356994 -0.875418,2.147575 0.729702,3.597551 1.379733,7.234266 2.556707,10.725045 0.260401,0.701453 1.242047,0.61383 1.576484,0.02148 0.762572,-0.824333 1.387456,-1.804799 1.490594,-2.931555 0.818318,-3.246527 1.472998,-6.528392 2.059514,-9.821175 -0.848751,-0.203488 -2.085569,-0.301576 -2.489867,0.648886 -0.317591,1.612908 -0.510209,3.223966 -0.869983,4.82862 -0.202102,0.995577 -0.42778,1.986756 -0.642257,2.979753 -0.622546,-2.759757 -1.158489,-5.537995 -1.564578,-8.33582 -0.410331,-0.08918 -0.810616,-0.322184 -1.241196,-0.262816 z"
+         transform="matrix(1.1050821,0,0,1.1449862,-3.8036647,-12.262501)" />
+      <path
+         id="text4"
+         style="font-family:'Ubuntu Condensed';-inkscape-font-specification:'Ubuntu Condensed, ';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;white-space:pre;fill:#000000;stroke-width:1.59879"
+         d="m 26.48698,85.288354 c -1.7004,0.0026 -3.400805,4.98e-4 -5.101201,-0.0032 0,0.85847 0,1.71694 0,2.57541 0.91876,0 1.837521,0 2.75628,0 0,4.135489 1e-6,8.270977 0,12.406466 0.781992,0.38725 2.02938,0.52851 2.466568,-0.417767 0.297409,-1.184228 0.05953,-2.439608 0.134453,-3.65263 0,-2.778689 0,-5.557379 0,-8.336069 0.831793,0 1.663586,0 2.495378,0 0.372685,-0.759288 0.531136,-1.945432 -0.348936,-2.416948 -0.74963,-0.326408 -1.61142,-0.105624 -2.402542,-0.155262 z" />
+    </g>
+    <g
+       id="g7"
+       transform="matrix(0.90491017,0,0,0.873373,3.4419748,10.709738)">
+      <path
+         id="path6"
+         style="font-family:'Ubuntu Condensed';-inkscape-font-specification:'Ubuntu Condensed, ';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;white-space:pre;fill:#ffffff;stroke-width:1.35696"
+         d="m 31.172078,85.170521 c -0.994427,0.190291 -1.164362,1.356994 -0.875418,2.147575 0.729702,3.597551 1.379733,7.234266 2.556707,10.725045 0.260401,0.701453 1.242047,0.61383 1.576484,0.02148 0.762572,-0.824333 1.387456,-1.804799 1.490594,-2.931555 0.818318,-3.246527 1.472998,-6.528392 2.059514,-9.821175 -0.848751,-0.203488 -2.085569,-0.301576 -2.489867,0.648886 -0.317591,1.612908 -0.510209,3.223966 -0.869983,4.82862 -0.202102,0.995577 -0.42778,1.986756 -0.642257,2.979753 -0.622546,-2.759757 -1.158489,-5.537995 -1.564578,-8.33582 -0.410331,-0.08918 -0.810616,-0.322184 -1.241196,-0.262816 z"
+         transform="matrix(1.1050821,0,0,1.1449862,-3.8036647,-12.262501)" />
+      <path
+         id="path7"
+         style="font-family:'Ubuntu Condensed';-inkscape-font-specification:'Ubuntu Condensed, ';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;white-space:pre;fill:#ffffff;stroke-width:1.59879"
+         d="m 26.48698,85.288354 c -1.7004,0.0026 -3.400805,4.98e-4 -5.101201,-0.0032 0,0.85847 0,1.71694 0,2.57541 0.91876,0 1.837521,0 2.75628,0 0,4.135489 1e-6,8.270977 0,12.406466 0.781992,0.38725 2.02938,0.52851 2.466568,-0.417767 0.297409,-1.184228 0.05953,-2.439608 0.134453,-3.65263 0,-2.778689 0,-5.557379 0,-8.336069 0.831793,0 1.663586,0 2.495378,0 0.372685,-0.759288 0.531136,-1.945432 -0.348936,-2.416948 -0.74963,-0.326408 -1.61142,-0.105624 -2.402542,-0.155262 z" />
+    </g>
+  </g>
+</svg>

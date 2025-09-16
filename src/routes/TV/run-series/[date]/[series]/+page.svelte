@@ -21,6 +21,7 @@
     <title>
         {data.runSeries.date}/{data.runSeries.series} - TRAX TV RunSeries
     </title>
+    <link rel="icon" type="image/svg+xml" href="/favicon-TV.svg" />
 </svelte:head>
 
 <nav>

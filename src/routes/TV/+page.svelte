@@ -67,6 +67,7 @@
 
 <svelte:head>
   <title>TRAX TripViewer - Search</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon-TV.svg" />
 </svelte:head>
 
 <nav><a href="/">Home</a></nav>

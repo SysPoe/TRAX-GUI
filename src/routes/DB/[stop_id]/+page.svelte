@@ -43,6 +43,8 @@
       font-size: min(2.4vw, 1em);
     }
   </style>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon-DB.svg" />
 </svelte:head>
 
 <nav><a href="..">Home</a> <a href="../DB">Back</a></nav>

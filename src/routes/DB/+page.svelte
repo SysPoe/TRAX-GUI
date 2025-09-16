@@ -43,9 +43,12 @@
   }
 </script>
 
-<nav><a href="/">Home</a></nav>
+<svelte:head>
+  <title>TRAX Departure Board</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon-DB.svg" />
+</svelte:head>
 
-<title>TRAX Departure Board</title>
+<nav><a href="/">Home</a></nav>
 
 <div class="title">
   <h1>TRAX <i>DepartureBoard</i></h1>

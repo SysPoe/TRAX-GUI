@@ -40,6 +40,7 @@
             font-size: min(3.6vw, 1em);
         }
     </style>
+    <link rel="icon" type="image/svg+xml" href="/favicon-TV.svg" />
 </svelte:head>
 
 <nav>
