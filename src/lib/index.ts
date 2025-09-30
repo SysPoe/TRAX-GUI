@@ -32,7 +32,6 @@ export async function loadTRAX(freshLoad = false) {
     }
 
     setInterval(() => {
-      TRAX.clearIntervals();
       loadTRAX(true);
     }, 1000 * 60 * 60 * 6); // Reload TRAX every 6h
 

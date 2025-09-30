@@ -60,8 +60,8 @@
             No trips found. Try adjusting your search criteria and searching
             again.
         {:else}
-            Search Results (Showing {data.page * data.perPage + 1} to {Math.min(
-                (data.page + 1) * data.perPage,
+            Search Results (Showing {(data.page - 1) * data.perPage + 1} to {Math.min(
+                data.page * data.perPage,
                 data.results,
             )} of {data.results} results)
         {/if}
@@ -94,6 +94,10 @@
         {@const departure_time = formatTimestamp(
             trip.stopTimes[0].scheduled_departure_timestamp,
         )}
+        {@const arrival_time = formatTimestamp(
+            trip.stopTimes[trip.stopTimes.length - 1]
+                .scheduled_arrival_timestamp,
+        )}
         {@const startStation =
             data.stations[trip.stopTimes[0].scheduled_stop ?? 0]}
         {@const endStation =
@@ -106,6 +110,11 @@
         {@const endParent = endStation?.parent_station
             ? data.stations[endStation.parent_station]
             : null}
+        {@const date_offset =
+            trip.stopTimes[trip.stopTimes.length - 1]
+                .scheduled_arrival_date_offset -
+            trip.stopTimes[0].scheduled_departure_date_offset}
+        {@const route = data.routes[trip._trip.route_id]}
 
         <a
             class="result"
@@ -113,24 +122,33 @@
             href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
         >
             <span class="headline">
-                {departure_time}
-                {trip._trip.route_id.slice(0, 4)}
-                <span class="de-emphasize">{trip.run}</span>
+                {trip.run}
+                <span class="de-emphasize">
+                    {route?.route_short_name}
+                </span> &mdash;
+                {route?.route_long_name}
+                
             </span><br />
             <span class="extra-details">
-                from: <span class="location"
+                {departure_time}
+                <span class="location"
                     >{startParent?.stop_name?.replace(" station", "").trim() ??
                         startStation?.stop_name
                             ?.replace(" station", "")
                             .trim()}</span
                 >
-                to:
+                <span class="bigarrow">&rarr;</span>
+                <!-- TODO implemnt bigarrow-->
+                {arrival_time}
                 <span class="location"
                     >{endParent?.stop_name?.replace(" station", "").trim() ??
                         endStation?.stop_name
                             ?.replace(" station", "")
                             .trim()}</span
                 >
+                {#if date_offset > 0}
+                    (+{date_offset} {date_offset == 1 ? "day" : "days"})
+                {/if}
                 <br />
                 {data.expressStrings[trip._trip.trip_id]} <br />
 
@@ -280,5 +298,12 @@
         color: #888;
         background: none;
         cursor: default;
+    }
+    .bigarrow {
+        font-size: 2rem;
+        line-height: 0.1;
+        vertical-align: middle;
+        display: inline-block;
+        margin-top: -0.5rem;
     }
 </style>

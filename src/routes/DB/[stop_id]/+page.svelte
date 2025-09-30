@@ -3,6 +3,7 @@
   import type { PageProps } from "./$types";
   import type * as gtfs from "gtfs";
   import type { UpcomingQRTravelDeparture } from "$lib";
+    import { onMount } from "svelte";
 
   const { data, params }: PageProps = $props();
 
@@ -30,7 +31,9 @@
 
   const station = data.stations.find((v) => v.stop_id === data.stop_id);
 
-  console.log(data);
+  onMount(() => {
+    console.log(data);
+  })
 </script>
 
 <svelte:head>

@@ -5,3 +5,4 @@ package-lock.json
 .TRAXCACHE.sqlite-journal
 gtfs-last-loaded.txt
 .gitignore
+.idea

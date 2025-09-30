@@ -1,6 +1,7 @@
 import TRAX, { type SerializableAugmentedStop } from 'translink-rail-api';
 import { isTRAXLoaded, loadTRAX } from "$lib";
 import type { PageServerLoad } from "./$types";
+import type * as gtfs from 'gtfs';
 import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -110,6 +111,13 @@ export const load: PageServerLoad = async ({ url }) => {
         expressStrings[key] = TRAX.express.findExpressString(trip.expressInfo, "");
     }
 
+    let routesToFetch = [...new Set(pagedTrips.map(t => t._trip.route_id))];
+    let routes: { [route_id: string]: gtfs.Route } = {};
+    for (const route_id of routesToFetch) {
+        const route = TRAX.getRawRoutes(route_id)[0];
+        if (route) routes[route_id] = route;
+    }
+
     return {
         filters: {
             startStation,
@@ -127,6 +135,7 @@ export const load: PageServerLoad = async ({ url }) => {
         totalPages,
         stations,
         expressStrings,
-        originalParams
+        originalParams,
+        routes
     };
 };
