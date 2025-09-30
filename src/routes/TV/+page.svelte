@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { PageProps } from "./$types";
   import type { SerializableAugmentedStop } from "translink-rail-api";
+
+  let loading = $state(false);
 
   const { data }: PageProps = $props();
   let { stations }: { stations: SerializableAugmentedStop[] } = data;
@@ -75,21 +76,27 @@
 <div class="title">
   <h1>TRAX <i>TripViewer</i></h1>
   <p>Search for a trip to view details...</p>
+
+  {#if loading}
+    <p><img src="/img/loading.svg" alt="Loading..."></p>
+  {/if}
 </div>
 
 <form action="/TV/search" method="get">
-  <input type="submit" value="Search" />
+  <input type="submit" value="Search" onclick={() => { loading = true; }} />
   <hr />
   <b>Filter by Stations</b><br />
+  <label for="start-station">Starts at:</label>
   <select name="start-station" id="start-station">
-    <option value="">Any Starting Station</option>
+    <option value="">Any Station</option>
     <!-- TODO add search functionality for stations -->
     {#each stations as station}
       <option value={station.stop_id}>{station.stop_name}</option>
     {/each}
   </select><br />
+  <label for="end-station">Ends at:</label>
   <select name="end-station" id="end-station">
-    <option value="">Any Ending Station</option>
+    <option value="">Any Station</option>
     <!-- TODO add search functionality for stations -->
     {#each stations as station}
       <option value={station.stop_id}>{station.stop_name}</option>
@@ -172,7 +179,7 @@
     <option value="Z">Z - Exhibition </option>
   </select><br />
   <hr />
-  <input type="submit" value="Search" />
+  <input type="submit" value="Search" onclick={() => { loading = true; }} />
 </form>
 
 <style>

@@ -61,7 +61,7 @@
     onkeypress={filterStations}
   />
   {#if loading}
-    <p class="loading">Loading...</p>
+    <p><img src="/img/loading.svg" alt="Loading..."></p>
   {/if}
 </div>
 
@@ -137,6 +137,9 @@
     gap: 1rem;
     justify-content: center;
     margin-top: 2rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .station {
     background: #f8f9fa;
@@ -149,6 +152,7 @@
     transition:
       box-shadow 0.2s,
       border-color 0.2s;
+    width: 250px;
   }
   .station:hover {
     box-shadow: 0 4px 16px rgba(41, 128, 185, 0.12);
