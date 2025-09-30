@@ -131,21 +131,22 @@
             </span><br />
             <span class="extra-details">
                 {departure_time}
-                <span class="location"
-                    >{startParent?.stop_name?.replace(" station", "").trim() ??
+                <span class="location">
+                    {startParent?.stop_name?.replace(" station", "").trim() ??
                         startStation?.stop_name
                             ?.replace(" station", "")
-                            .trim()}</span
-                >
+                            .trim()}
+                    {startStation?.platform_code}
+                </span>
                 <span class="bigarrow">&rarr;</span>
-                <!-- TODO implemnt bigarrow-->
                 {arrival_time}
-                <span class="location"
-                    >{endParent?.stop_name?.replace(" station", "").trim() ??
+                <span class="location">
+                    {endParent?.stop_name?.replace(" station", "").trim() ??
                         endStation?.stop_name
                             ?.replace(" station", "")
-                            .trim()}</span
-                >
+                            .trim()}
+                    {startStation?.platform_code}
+                </span>
                 {#if date_offset > 0}
                     (+{date_offset} {date_offset == 1 ? "day" : "days"})
                 {/if}

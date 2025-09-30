@@ -62,27 +62,25 @@ export const load: PageServerLoad = async ({ url }) => {
     let concatenated = false;
     let results = trips.length;
 
-    // sort by .scheduledTripDates.sort()[0], then .stopTimes[0].scheduled_departure_timestamp, then .run
     trips = trips.sort((a, b) => {
         const aServiceDate = a.scheduledTripDates.sort()[0];
         const bServiceDate = b.scheduledTripDates.sort()[0];
-        if (aServiceDate !== bServiceDate) {
-            return aServiceDate - bServiceDate;
-        }
+        if (aServiceDate !== bServiceDate) return aServiceDate - bServiceDate;
+
         const aDepartureTime = a.stopTimes[0].scheduled_departure_timestamp ?? 0;
         const bDepartureTime = b.stopTimes[0].scheduled_departure_timestamp ?? 0;
         if (aDepartureTime !== bDepartureTime) return aDepartureTime - bDepartureTime;
+        
         const runComparison = a.run.localeCompare(b.run);
         if (runComparison !== 0) return runComparison;
+        
         return 0;
     });
 
     // Pagination logic
     const totalPages = Math.ceil(trips.length / perPage);
     const pagedTrips = trips.slice((page - 1) * perPage, page * perPage);
-    if (trips.length > perPage) {
-        concatenated = true;
-    }
+    if (trips.length > perPage) concatenated = true;
 
     // Capture original query params for pagination links
     const originalParams: Record<string, string[]> = {};
