@@ -32,10 +32,15 @@ export const load: PageServerLoad = async ({ params }) => {
         }
     }
 
+    let stations: { [station_id: string]: gtfs.Stop } = {};
+    let _st = TRAX.getRawStops();
+    for (const station of _st) stations[station.stop_id] = station;
+
     return { 
         runSeries,
         trips,
         routes,
-        expressStrings
+        expressStrings,
+        stations
     };
 };

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
     import type { PageProps } from "./$types";
 
     const { data }: PageProps = $props();
@@ -81,52 +82,87 @@
                 {@const route = trip?._trip.route_id
                     ? data.routes[trip._trip.route_id]
                     : null}
-                <div class="trip-card">
-                    <div class="trip-header">
-                        <span class="trip-run">{trip?.run || tripInfo.run}</span
-                        >
-                        <span class="trip-time">
-                            {formatTimestamp(
-                                trip?.stopTimes[0]
-                                    ?.scheduled_departure_timestamp ||
-                                    trip?.stopTimes[0]
-                                        ?.scheduled_arrival_timestamp,
-                            )}
+
+                {@const departure_time = formatTimestamp(
+                    trip.stopTimes[0].scheduled_departure_timestamp,
+                )}
+                {@const arrival_time = formatTimestamp(
+                    trip.stopTimes[trip.stopTimes.length - 1]
+                        .scheduled_arrival_timestamp,
+                )}
+                {@const startStation =
+                    data.stations[trip.stopTimes[0].scheduled_stop ?? 0]}
+                {@const endStation =
+                    data.stations[
+                        trip.stopTimes[trip.stopTimes.length - 1]
+                            .scheduled_stop ?? 0
+                    ]}
+                {@const startParent = startStation?.parent_station
+                    ? data.stations[startStation.parent_station]
+                    : null}
+                {@const endParent = endStation?.parent_station
+                    ? data.stations[endStation.parent_station]
+                    : null}
+                {@const date_offset =
+                    trip.stopTimes[trip.stopTimes.length - 1]
+                        .scheduled_arrival_date_offset -
+                    trip.stopTimes[0].scheduled_departure_date_offset}
+
+                <a
+                    class="result"
+                    onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}`)}
+                    href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
+                >
+                    <span class="headline">
+                        {trip.run}
+                        <span class="de-emphasize">
+                            {route?.route_short_name}
                         </span>
-                    </div>
-                    <div class="trip-details">
-                        <div class="trip-info-item">
-                            <span class="info-label">Express Status:</span>
-                            <span class="info-value"
-                                >{data.expressStrings[tripInfo.trip_id] ||
-                                    "Unknown"}</span
-                            >
-                        </div>
-                        <div class="trip-info-item">
-                            <span class="info-label">Headsign:</span>
-                            <span class="info-value">
-                                {trip?._trip.trip_headsign
-                                    ?.replace(/station$/, "")
-                                    .trim() || "Unknown"}
-                            </span>
-                        </div>
-                        <div class="trip-info-item">
-                            <span class="info-label">Route:</span>
-                            <span class="info-value">
-                                {route?.route_long_name ||
-                                    route?.route_short_name ||
-                                    trip?._trip.route_id ||
-                                    "Unknown"}
-                            </span>
-                        </div>
-                    </div>
-                    <a
-                        href={`/TV/trip/gtfs/${tripInfo.trip_id}`}
-                        class="view-trip-link"
-                    >
-                        View Trip Details
-                    </a>
-                </div>
+                        &mdash;
+                        {route?.route_long_name}
+                    </span><br />
+                    <span class="extra-details">
+                        {departure_time}
+                        <span class="location">
+                            {startParent?.stop_name
+                                ?.replace(" station", "")
+                                .trim() ??
+                                startStation?.stop_name
+                                    ?.replace(" station", "")
+                                    .trim()}
+                            {startStation?.platform_code}
+                        </span>
+                        <span class="bigarrow">&rarr;</span>
+                        {arrival_time}
+                        <span class="location"
+                            >{endParent?.stop_name
+                                ?.replace(" station", "")
+                                .trim() ??
+                                endStation?.stop_name
+                                    ?.replace(" station", "")
+                                    .trim()}
+                            {endStation?.platform_code}
+                        </span>
+                        {#if date_offset > 0}
+                            (+{date_offset} {date_offset == 1 ? "day" : "days"})
+                        {/if}
+                        <br />
+                        {data.expressStrings[trip._trip.trip_id]} <br />
+
+                        {#if trip.scheduledStartServiceDates.length == 1}
+                            Service date:
+                        {:else}
+                            Service dates:
+                        {/if}
+                        {#each trip.scheduledStartServiceDates as date, i (date)}
+                            {date}{i <
+                            trip.scheduledStartServiceDates.length - 1
+                                ? ", "
+                                : ""}
+                        {/each}
+                    </span>
+                </a>
+                <hr />
             {/each}
         </div>
     </div>
@@ -178,117 +214,54 @@
         margin: 0.3rem 0;
     }
 
-    .container {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        flex: 1;
-        padding: 0.8rem;
-    }
-
     .content {
-        width: 100%;
-        max-width: 800px;
         margin: 0 auto;
+        max-width: 600px;
+        padding: 0 1rem;
     }
 
-    .info-section {
-        margin-bottom: 1.5rem;
-        padding: 1.2rem;
-        border-radius: 6px;
-        background-color: #ffffff;
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
-    }
+    a.result {
+        cursor: pointer;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        padding: 0.5rem;
+        transition: all 200ms;
 
-    .info-section h3 {
-        margin-top: 0;
-        color: #2c3e50;
-        font-size: 1.3rem;
-        font-weight: 600;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 0.5rem;
-    }
-
-    .info-item {
-        display: flex;
-        margin-bottom: 0.6rem;
-        padding: 0.4rem 0;
-    }
-
-    .info-label {
-        font-weight: 500;
-        min-width: 140px;
-        color: #555;
-        font-size: 0.95rem;
-    }
-
-    .info-value {
-        flex: 1;
-        color: #333;
-        font-size: 0.95rem;
-    }
-
-    .trip-card {
-        border: 1px solid #e1e4e8;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        background-color: #fafafa;
-    }
-
-    .trip-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.8rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid #eee;
-    }
-
-    .trip-run {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #2c3e50;
-    }
-
-    .trip-time {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #555;
-    }
-
-    .trip-details {
-        margin-bottom: 1rem;
-    }
-
-    .trip-info-item {
-        display: flex;
-        margin-bottom: 0.4rem;
-        font-size: 0.9rem;
-    }
-
-    .trip-info-item .info-label {
-        min-width: 100px;
-        font-weight: 500;
-        color: #666;
-    }
-
-    .trip-info-item .info-value {
-        color: #444;
-    }
-
-    .view-trip-link {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background-color: #2980b9;
-        color: white;
+        color: inherit;
         text-decoration: none;
-        border-radius: 4px;
-        font-weight: 500;
-        transition: background-color 0.2s;
+        display: block;
     }
 
-    .view-trip-link:hover {
-        background-color: #1c5a8a;
+    .result:hover {
+        background-color: #eef;
+        box-shadow: 0 0 1rem #99f;
+    }
+
+    .headline {
+        font-size: 1.2rem;
+    }
+
+    .de-emphasize {
+        color: #777;
+    }
+
+    .extra-details,
+    .extra-details * {
+        color: #555;
+        font-size: 0.9rem;
+        font-family: "Courier New", Courier, monospace;
+    }
+
+    .location {
+        color: darkslategray;
+        font-weight: bold;
+    }
+
+    .bigarrow {
+        font-size: 2rem;
+        line-height: 0.1;
+        vertical-align: middle;
+        display: inline-block;
+        margin-top: -0.5rem;
     }
 </style>
