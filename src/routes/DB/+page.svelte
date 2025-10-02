@@ -1,45 +1,26 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { PageProps } from "./$types";
   import { goto } from "$app/navigation";
 
   const { data }: PageProps = $props();
   let loading = $state(false);
+  let filterText = $state("");
 
-  onMount(() => {
-    const filterInput = document.getElementById("filter") as HTMLInputElement;
-    filterInput.value = "";
-  });
+  let filteredStations = $derived(
+    data.stations.filter((station) => {
+      const filter = filterText.toLowerCase().trim();
+      if (!filter) return true;
 
-  function filterStations(event: KeyboardEvent) {
-    const filter = (event.target as HTMLInputElement).value
-      .toLowerCase()
-      .trim();
-    const stations = document.querySelectorAll(
-      ".station",
-    ) as NodeListOf<HTMLElement>;
+      const name = station.stop_name?.toLowerCase() || "";
+      const id = station.stop_id?.toLowerCase() || "";
+      return name.includes(filter) || id.includes(filter);
+    }),
+  );
 
-    let countBlock = 0;
-    let blockEl: HTMLElement = null as any as HTMLElement;
-
-    stations.forEach((station) => {
-      const name = station.getAttribute("data-name")?.toLowerCase() || "";
-      const id = station.getAttribute("data-id")?.toLowerCase() || "";
-      if (
-        name.includes(filter.toLowerCase()) ||
-        id.includes(filter.toLowerCase())
-      ) {
-        blockEl = station;
-        countBlock++;
-        station.style.display = "block";
-      } else {
-        station.style.display = "none";
-      }
-    });
-
-    if (event.key === "Enter" && countBlock === 1 && blockEl != null) {
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === "Enter" && filteredStations.length === 1) {
       loading = true;
-      blockEl.querySelector("a")?.click();
+      goto(`/DB/${filteredStations[0].stop_id}`);
     }
   }
 </script>
@@ -64,14 +45,15 @@
       name="filter"
       id="filter"
       placeholder="Filter stations..."
-      onkeypress={filterStations}
+      bind:value={filterText}
+      onkeydown={handleKeydown}
     />
   {/if}
 </div>
 
 {#if !loading}
   <div class="stations">
-    {#each data.stations as station}
+    {#each filteredStations as station (station.stop_id)}
       <div
         data-id={station.stop_id}
         data-name={station.stop_name}

@@ -3,6 +3,7 @@ import fs from "fs";
 
 export let isTRAXLoaded = false;
 let isTRAXLoading = false;
+let intervalSet = false;
 
 export async function loadTRAX(freshLoad = false) {
   if (!isTRAXLoaded && !isTRAXLoading) {
@@ -31,12 +32,13 @@ export async function loadTRAX(freshLoad = false) {
       await TRAX.loadGTFS(true, false, 120_000);
     }
 
-    setInterval(() => {
+    if(!intervalSet) setInterval(() => {
       loadTRAX(true);
     }, 1000 * 60 * 60 * 6); // Reload TRAX every 6h
 
     isTRAXLoading = false;
     isTRAXLoaded = true;
+    intervalSet = true;
   }
 }
 
