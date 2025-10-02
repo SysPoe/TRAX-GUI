@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
   import type { SerializableAugmentedStop } from "translink-rail-api";
+  import "$lib/styles/common.css";
 
   let loading = $state(false);
 
@@ -80,7 +81,7 @@
 
 <div class="title">
   <h1>TRAX <i>TripViewer</i></h1>
-  <p>Search for a GTFS trip to view details...</p>
+  <p>Search for a GTFS trip to view details or view <a href="/TV/trip/QRT">QRT services</a>.</p>
 
   {#if loading}
     <p><img src="/img/loading.svg" alt="Loading..." /></p>
@@ -223,22 +224,6 @@
     font-family: "Arial";
   }
 
-  nav {
-    text-align: center;
-    margin: 1rem 0;
-  }
-
-  nav a {
-    margin: 0 1rem;
-    color: #2980b9;
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  nav a:hover {
-    text-decoration: underline;
-  }
-
   form {
     max-width: 600px;
     margin: 0 auto;
@@ -249,24 +234,6 @@
     margin: 1rem 0;
     margin-left: -1rem;
     margin-right: -1rem;
-  }
-
-  .title {
-    text-align: center;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    color: #2c3e50;
-  }
-  .title h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    letter-spacing: -0.1rem;
-    margin-bottom: 0.5rem;
-  }
-  .title p {
-    font-size: 1.2rem;
-    color: #555;
-    margin-bottom: 1rem;
   }
   
   summary {

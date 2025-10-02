@@ -1,0 +1,43 @@
+/* Common styles for navigation bars and page titles/headers */
+nav {
+    text-align: center;
+    margin: 1rem 0;
+}
+
+nav a {
+    margin: 0 1rem;
+    color: #2980b9;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+.title, .header {
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.title h1, .header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.title p, .header p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+.header h2 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #555;
+    margin: 0.3rem 0;
+}

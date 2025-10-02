@@ -6,6 +6,7 @@
     } from "translink-rail-api";
     import type * as gtfs from "gtfs";
     import type { PageProps } from "./$types";
+    import "$lib/styles/common.css";
 
     const { data }: PageProps = $props();
     let { trip }: { trip: SerializableAugmentedTrip } = data;
@@ -254,47 +255,7 @@
         font-family: "Arial", sans-serif;
     }
 
-    nav {
-        text-align: center;
-        margin: 1rem 0;
-    }
 
-    nav a {
-        margin: 0 1rem;
-        color: #2980b9;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    nav a:hover {
-        text-decoration: underline;
-    }
-
-    .header {
-        text-align: center;
-        color: #2c3e50;
-        margin: 1.2rem 0;
-        padding: 0 1rem;
-    }
-    .header h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: -0.03rem;
-        margin-bottom: 0.2rem;
-    }
-
-    .header h2 {
-        font-size: 1.3rem;
-        font-weight: 500;
-        color: #555;
-        margin: 0.3rem 0;
-    }
-
-    .header p {
-        font-size: 0.95rem;
-        color: #777;
-        margin: 0.3rem 0;
-    }
 
     .container {
         display: flex;

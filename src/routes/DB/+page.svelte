@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
   import { goto } from "$app/navigation";
+  import "$lib/styles/common.css";
 
   const { data }: PageProps = $props();
   let loading = $state(false);
@@ -74,39 +75,7 @@
 {/if}
 
 <style>
-  nav {
-    text-align: center;
-    margin: 1rem 0;
-  }
 
-  nav a {
-    margin: 0 1rem;
-    color: #2980b9;
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  nav a:hover {
-    text-decoration: underline;
-  }
-
-  .title {
-    text-align: center;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    color: #2c3e50;
-  }
-  .title h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    letter-spacing: -0.1rem;
-    margin-bottom: 0.5rem;
-  }
-  .title p {
-    font-size: 1.2rem;
-    color: #555;
-    margin-bottom: 1rem;
-  }
   .title input[type="text"] {
     padding: 0.5rem 1rem;
     font-size: 1rem;

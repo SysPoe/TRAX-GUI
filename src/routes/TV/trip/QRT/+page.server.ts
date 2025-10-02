@@ -9,6 +9,6 @@ export const load: PageServerLoad = async ({ params }) => {
         throw error(503, "Loading TRAX data... Please retry in a few minutes.");
     }
 
-    let services: TravelTrip[] = TRAX.getQRTTrains();
+    let services: TravelTrip[] = TRAX.getQRTTrains().sort((a, b) => new Date(a.stops[0].actualDeparture).getTime() - new Date(b.stops[0].actualDeparture).getTime());
     return { services };
 };

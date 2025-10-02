@@ -4,6 +4,7 @@
   import type * as gtfs from "gtfs";
   import type { UpcomingQRTravelDeparture } from "$lib";
     import { onMount } from "svelte";
+    import "$lib/styles/common.css";
 
   const { data, params }: PageProps = $props();
 
@@ -184,31 +185,7 @@
     font-family: "Arial";
   }
 
-  nav {
-    text-align: center;
-    margin: 1rem 0;
-  }
 
-  nav a {
-    margin: 0 1rem;
-    color: #2980b9;
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  nav a:hover {
-    text-decoration: underline;
-  }
-  .header {
-    text-align: center;
-    color: #2c3e50;
-  }
-  .header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    letter-spacing: -0.1rem;
-    margin-bottom: 0.5rem;
-  }
 
   .departures {
     font-family: "Arial Narrow", Arial, sans-serif;

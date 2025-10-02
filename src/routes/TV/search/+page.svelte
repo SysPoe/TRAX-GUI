@@ -1,6 +1,8 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import type { PageProps } from "./$types";
+    import "$lib/styles/trip-results.css";
+    import "$lib/styles/common.css";
 
     const { data }: PageProps = $props();
 
@@ -197,81 +199,10 @@
         font-family: "Arial";
     }
 
-    nav {
-        text-align: center;
-        margin: 1rem 0;
-    }
-
-    nav a {
-        margin: 0 1rem;
-        color: #2980b9;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    nav a:hover {
-        text-decoration: underline;
-    }
-
     .results {
         margin: 0 auto;
         max-width: 600px;
         padding: 0 1rem;
-    }
-
-    a.result {
-        cursor: pointer;
-        margin-left: 1rem;
-        margin-right: 1rem;
-        padding: 0.5rem;
-        transition: all 200ms;
-
-        color: inherit;
-        text-decoration: none;
-        display: block;
-    }
-
-    .result:hover {
-        background-color: #eef;
-        box-shadow: 0 0 1rem #99f;
-    }
-
-    .headline {
-        font-size: 1.2rem;
-    }
-
-    .de-emphasize {
-        color: #777;
-    }
-
-    .extra-details,
-    .extra-details * {
-        color: #555;
-        font-size: 0.9rem;
-        font-family: "Courier New", Courier, monospace;
-    }
-
-    .location {
-        color: darkslategray;
-        font-weight: bold;
-    }
-
-    .title {
-        text-align: center;
-        margin-top: 2rem;
-        margin-bottom: 2rem;
-        color: #2c3e50;
-    }
-    .title h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        letter-spacing: -0.1rem;
-        margin-bottom: 0.5rem;
-    }
-    .title p {
-        font-size: 1.2rem;
-        color: #555;
-        margin-bottom: 1rem;
     }
     .pagination {
         text-align: center;
@@ -303,11 +234,5 @@
         background: none;
         cursor: default;
     }
-    .bigarrow {
-        font-size: 2rem;
-        line-height: 0.1;
-        vertical-align: middle;
-        display: inline-block;
-        margin-top: -0.5rem;
-    }
+
 </style>

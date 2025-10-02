@@ -1,15 +1,25 @@
 <script lang="ts">
     import type { PageProps } from "./$types";
-    import type { TravelTrip, SRTStop, TravelStopTime } from "translink-rail-api";
+    import type {
+        TravelTrip,
+        SRTStop,
+        TravelStopTime,
+    } from "translink-rail-api";
+    import "$lib/styles/common.css";
 
     const { data }: PageProps = $props();
     let { service }: { service: TravelTrip } = data;
 
-    const run = service.serviceName.split(" ")[0].length == 4
+    const run =
+        service.serviceName.split(" ")[0].length == 4
             ? service.serviceName.split(" ")[0]
             : null;
 
-    const destination = service.stops.at(-1)?.placeName.replace(/^Brisbane -/, "").trim() || "Unknown";
+    const destination =
+        service.stops
+            .at(-1)
+            ?.placeName.replace(/^Brisbane -/, "")
+            .trim() || "Unknown";
 
     const stopsToFilter: string[] = [
         // "NORMANBY",
@@ -20,55 +30,71 @@
         // "AIRPORT JUNCTION"
     ];
 
-    const filteredStops = (service.stopsWithPassing || service.stops).filter(st => {
-        const isSrtStop = 'isStop' in st;
-        if (isSrtStop) {
-            const isPassing = !(st as SRTStop).isStop;
-            if (isPassing) {
-                return !stopsToFilter.some(filterName => st.placeName.toUpperCase().includes(filterName));
+    const replace: { [key: string]: string } = {
+        "TOWNSVILLE - CHARTERS TOWERS ROAD": "TOWNSVILLE",
+    };
+
+    const filteredStops = (service.stopsWithPassing || service.stops).filter(
+        (st) => {
+            const isSrtStop = "isStop" in st;
+            if (isSrtStop) {
+                const isPassing = !(st as SRTStop).isStop;
+                if (isPassing) {
+                    return !stopsToFilter.some((filterName) =>
+                        st.placeName.toUpperCase().includes(filterName),
+                    );
+                }
             }
-        }
-        return true;
-    });
+            return true;
+        },
+    );
 
     function formatTime(isoString?: string | null): string {
         if (!isoString || isoString === "0001-01-01T00:00:00") return "--:--";
         try {
-            return new Date(isoString).toTimeString().slice(0, 5);
+            let d = new Date(isoString);
+            let n = new Date();
+
+            return (
+                `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}` +
+                ` (${d.getDate()}/${d.getMonth() + 1}${d.getFullYear() != n.getFullYear() ? '/' + d.getFullYear() : ''})`
+            );
         } catch (e) {
             return isoString.slice(11, 16);
         }
     }
 
     function getDelay(stop: SRTStop) {
-        const delaySecs = stop?.departureDelaySeconds ?? stop?.arrivalDelaySeconds;
+        const delaySecs =
+            stop?.departureDelaySeconds ?? stop?.arrivalDelaySeconds;
         if (delaySecs === null || delaySecs === undefined) {
-            return { delayString: 'scheduled', delayClass: 'scheduled' };
+            return { delayString: "scheduled", delayClass: "scheduled" };
         }
         const roundedDelay = Math.round(delaySecs / 60) * 60;
         const delayString =
             delaySecs == 0
-            ? "on time"
-            : `${Math.floor(roundedDelay / 3600)}h ${Math.floor(
-                (Math.abs(roundedDelay) % 3600) / 60
-                )}m ${delaySecs > 0 ? "late" : "early"}`
-                .replace(/^0h/, "")
-                .trim();
-        const delayClass: "very-late" | "late" | "early" | "on-time" = 
+                ? "on time"
+                : `${Math.floor(roundedDelay / 3600)}h ${Math.floor(
+                      (Math.abs(roundedDelay) % 3600) / 60,
+                  )}m ${delaySecs > 0 ? "late" : "early"}`
+                      .replace(/^0h/, "")
+                      .trim();
+        const delayClass: "very-late" | "late" | "early" | "on-time" =
             roundedDelay > 0
                 ? roundedDelay > 5 * 60
-                ? "very-late"
-                : "late"
+                    ? "very-late"
+                    : "late"
                 : roundedDelay < 0
-                ? "early"
-                : "on-time";
+                  ? "early"
+                  : "on-time";
         return { delayString, delayClass };
     }
 </script>
 
 <svelte:head>
     <title>
-        {run} {destination} service - TRAX TripViewer
+        {run}
+        {destination} service - TRAX TripViewer
     </title>
     <style>
         :root {
@@ -124,37 +150,51 @@
             <div class="info-item">
                 <span class="info-label">Offers Gold Class:</span>
                 <span class="info-value">
-                    {service.offersGoldClass ? 'Yes' : 'No'}
+                    {service.offersGoldClass ? "Yes" : "No"}
                 </span>
             </div>
         </div>
 
         {#if service.disruption}
-        <div class="info-section">
-            <h3>Service Disruption</h3>
-            <div class="info-item">
-                <span class="info-label">Title:</span>
-                <span class="info-value">{service.disruption.Title}</span>
+            <div class="info-section">
+                <h3>Service Disruption</h3>
+                <div class="info-item">
+                    <span class="info-label">Title:</span>
+                    <span class="info-value">{service.disruption.Title}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Summary:</span>
+                    <span class="info-value"
+                        >{service.disruption.SummaryText}</span
+                    >
+                </div>
+                {#if service.disruption.PageURL}
+                    <div class="info-item">
+                        <span class="info-label">More Info:</span>
+                        <span class="info-value"
+                            ><a
+                                href={service.disruption.PageURL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >{service.disruption.PageURL}</a
+                            ></span
+                        >
+                    </div>
+                {/if}
             </div>
-            <div class="info-item">
-                <span class="info-label">Summary:</span>
-                <span class="info-value">{service.disruption.SummaryText}</span>
-            </div>
-            {#if service.disruption.PageURL}
-            <div class="info-item">
-                <span class="info-label">More Info:</span>
-                <span class="info-value"><a href={service.disruption.PageURL} target="_blank" rel="noopener noreferrer">{service.disruption.PageURL}</a></span>
-            </div>
-            {/if}
-        </div>
         {/if}
 
         <div class="info-section">
             <h3>Stoptimes</h3>
             <div class="stoptimes">
                 {#each filteredStops as st}
-                    {@const isSrtStop = 'isStop' in st}
-                    {@const delay = isSrtStop ? getDelay(st as SRTStop) : { delayString: (st as TravelStopTime).delayString, delayClass: (st as TravelStopTime).delayClass }}
+                    {@const isSrtStop = "isStop" in st}
+                    {@const delay = isSrtStop
+                        ? getDelay(st as SRTStop)
+                        : {
+                              delayString: (st as TravelStopTime).delayString,
+                              delayClass: (st as TravelStopTime).delayClass,
+                          }}
                     <div
                         class="stop-time {isSrtStop && !(st as SRTStop).isStop
                             ? 'passing'
@@ -168,17 +208,33 @@
                         </span>
                         <span class="smalltext">
                             <span class="time">
-                                {formatTime(st.actualDeparture === '0001-01-01T00:00:00' || !st.actualDeparture ? (st.actualArrival === '0001-01-01T00:00:00' || !st.actualArrival ? (isSrtStop ? (st as SRTStop).estimatedPassingTime : st.plannedDeparture) : st.actualArrival) : st.actualDeparture)}
+                                {formatTime(
+                                    st.actualDeparture ===
+                                        "0001-01-01T00:00:00" ||
+                                        !st.actualDeparture
+                                        ? st.actualArrival ===
+                                              "0001-01-01T00:00:00" ||
+                                          !st.actualArrival
+                                            ? isSrtStop
+                                                ? (st as SRTStop)
+                                                      .estimatedPassingTime
+                                                : st.plannedDeparture
+                                            : st.actualArrival
+                                        : st.actualDeparture,
+                                )}
                             </span>
-                            <span
-                                class="delay {delay.delayClass}"
-                            >
+                            <span class="delay {delay.delayClass}">
                                 ({delay.delayString})
                             </span>
                             <br />
                             <span class="station">
-                                {st.placeName
+                                {replace[st.placeName
                                     .replace(/station/i, "")
+                                    .replace(/^Brisbane - /i, "")
+                                    .trim()
+                                    .toUpperCase()] ?? st.placeName
+                                    .replace(/station/i, "")
+                                    .replace(/^Brisbane - /i, "")
                                     .trim()
                                     .toUpperCase()}
                             </span>
@@ -203,48 +259,6 @@
 <style>
     * {
         font-family: "Arial", sans-serif;
-    }
-
-    nav {
-        text-align: center;
-        margin: 1rem 0;
-    }
-
-    nav a {
-        margin: 0 1rem;
-        color: #2980b9;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    nav a:hover {
-        text-decoration: underline;
-    }
-
-    .header {
-        text-align: center;
-        color: #2c3e50;
-        margin: 1.2rem 0;
-        padding: 0 1rem;
-    }
-    .header h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: -0.03rem;
-        margin-bottom: 0.2rem;
-    }
-
-    .header h2 {
-        font-size: 1.3rem;
-        font-weight: 500;
-        color: #555;
-        margin: 0.3rem 0;
-    }
-
-    .header p {
-        font-size: 0.95rem;
-        color: #777;
-        margin: 0.3rem 0;
     }
 
     .container {

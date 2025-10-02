@@ -1,6 +1,8 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import type { PageProps } from "./$types";
+    import "$lib/styles/trip-results.css";
+    import "$lib/styles/common.css";
 
     const { data }: PageProps = $props();
 
@@ -177,91 +179,11 @@
         font-size: 1em;
     }
 
-    nav {
-        text-align: center;
-        margin: 1rem 0;
-    }
 
-    nav a {
-        margin: 0 1rem;
-        color: #2980b9;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    nav a:hover {
-        text-decoration: underline;
-    }
-
-    .header {
-        text-align: center;
-        color: #2c3e50;
-        margin: 1.2rem 0;
-        padding: 0 1rem;
-    }
-
-    .header h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: -0.03rem;
-        margin-bottom: 0.2rem;
-    }
-
-    .header h2 {
-        font-size: 1.3rem;
-        font-weight: 500;
-        color: #555;
-        margin: 0.3rem 0;
-    }
 
     .content {
         margin: 0 auto;
         max-width: 600px;
         padding: 0 1rem;
-    }
-
-    a.result {
-        cursor: pointer;
-        margin-left: 1rem;
-        margin-right: 1rem;
-        padding: 0.5rem;
-        transition: all 200ms;
-
-        color: inherit;
-        text-decoration: none;
-        display: block;
-    }
-
-    .result:hover {
-        background-color: #eef;
-        box-shadow: 0 0 1rem #99f;
-    }
-
-    .headline {
-        font-size: 1.2rem;
-    }
-
-    .de-emphasize {
-        color: #777;
-    }
-
-    .extra-details,
-    .extra-details * {
-        color: #555;
-        font-size: 0.9rem;
-        font-family: "Courier New", Courier, monospace;
-    }
-
-    .location {
-        color: darkslategray;
-        font-weight: bold;
-    }
-
-    .bigarrow {
-        font-size: 2rem;
-        line-height: 0.1;
-        vertical-align: middle;
-        display: inline-block;
-        margin-top: -0.5rem;
     }
 </style>
