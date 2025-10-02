@@ -141,7 +141,8 @@
       </a>
       <hr />
     {:else if dep.dep_type === "qrt"}
-      <div class="departure {dep.passing ? 'passing' : 'qr-travel'}">
+      <a class="departure {dep.passing ? 'passing' : 'qr-travel'} qrt" 
+        href={`/TV/trip/QRT/${dep.service.serviceId}#stoptimes`}>
         <!-- <span class="last-stop">
         {dep.last_stop_id.slice(-6, -3).toUpperCase()}
       </span> -->
@@ -172,7 +173,7 @@
         <span class="departs_in">
           {dep.departureString}
         </span>
-      </div>
+      </a>
       <hr />
     {/if}
   {/each}
@@ -346,9 +347,14 @@
     margin-top: 0.7rem;
   }
 
-  .gtfs {
+  .gtfs, .qrt {
     cursor: pointer;
     transition: all 200ms;
+  }
+
+  .qrt:hover {
+    background-color: hsl(28, 100%, 90%);
+    box-shadow: 0 0 1rem hsl(24, 78%, 60%);
   }
 
   .gtfs:hover {

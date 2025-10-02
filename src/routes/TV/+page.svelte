@@ -80,7 +80,7 @@
 
 <div class="title">
   <h1>TRAX <i>TripViewer</i></h1>
-  <p>Search for a trip to view details...</p>
+  <p>Search for a GTFS trip to view details...</p>
 
   {#if loading}
     <p><img src="/img/loading.svg" alt="Loading..." /></p>
