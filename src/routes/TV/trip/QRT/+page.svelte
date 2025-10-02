@@ -27,7 +27,8 @@
 
 <nav>
 	<a href="/">Home</a>
-	<a href="/TV">Back</a>
+	<a href="/DB">DepartureBoard</a>
+	<a href="/TV">TripViewer</a>
 </nav>
 
 <div class="title">
