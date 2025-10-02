@@ -39,7 +39,7 @@
   <p>Select a station to view departures...</p>
   {#if loading}
     <p><img src="/img/loading.svg" alt="Loading..." /></p>
-    <p>Loading...</p>
+    <p>Loading... This will most likely take less than 2 minutes</p>
   {:else}
     <input
       type="text"
