@@ -24,7 +24,8 @@ export async function loadTRAX(freshLoad = false) {
 
       console.log("Reloading static TRAX GTFS data...");
       if (fs.existsSync(".TRAXCACHE.sqlite")) fs.rmSync(".TRAXCACHE.sqlite");
-      if (fs.existsSync(".TRAXCACHE.sqlite-journal")) fs.rmSync(".TRAXCACHE.sqlite-journal");
+      if (fs.existsSync(".TRAXCACHE.sqlite-journal"))
+        fs.rmSync(".TRAXCACHE.sqlite-journal");
       await TRAX.loadGTFS(true, true, 120_000);
       fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
     } else {
@@ -32,9 +33,10 @@ export async function loadTRAX(freshLoad = false) {
       await TRAX.loadGTFS(true, false, 120_000);
     }
 
-    if(!intervalSet) setInterval(() => {
-      loadTRAX(true);
-    }, 1000 * 60 * 60 * 6); // Reload TRAX every 6h
+    if (!intervalSet)
+      setInterval(() => {
+        loadTRAX(true);
+      }, 1000 * 60 * 60 * 6); // Reload TRAX every 6h
 
     isTRAXLoading = false;
     isTRAXLoaded = true;
@@ -93,7 +95,7 @@ export function getUpcomingQRTravelDepartures(
         Math.round(
           new Date(
             (stop?.actualDeparture === "0001-01-01T00:00:00" ||
-              !stop?.actualDeparture
+            !stop?.actualDeparture
               ? stop?.actualArrival === "0001-01-01T00:00:00" ||
                 !stop?.actualArrival
                 ? stop?.estimatedPassingTime
@@ -102,32 +104,6 @@ export function getUpcomingQRTravelDepartures(
           ).getTime() - Date.now()
         ) / 1000;
       departsInSecs = Math.round(departsInSecs / 60) * 60;
-      const delaySecs =
-        stop?.departureDelaySeconds || stop?.arrivalDelaySeconds;
-      const roundedDelay = delaySecs ? Math.round(delaySecs / 60) * 60 : 0;
-      const delayString = delaySecs
-        ? delaySecs == 0
-          ? "on time"
-          : `${Math.floor(roundedDelay / 3600)}h ${Math.floor(
-            (Math.abs(roundedDelay) % 3600) / 60
-          )}m ${delaySecs > 0 ? "late" : "early"}`
-            .replace(/^0h/, "")
-            .trim()
-        : "scheduled";
-      const delayClass:
-        | "very-late"
-        | "late"
-        | "early"
-        | "on-time"
-        | "scheduled" = delaySecs
-          ? roundedDelay > 0
-            ? roundedDelay > 5 * 60
-              ? "very-late"
-              : "late"
-            : roundedDelay < 0
-              ? "early"
-              : "on-time"
-          : "scheduled";
       return {
         dep_type: "qrt" as "qrt",
         service: v,
@@ -142,12 +118,11 @@ export function getUpcomingQRTravelDepartures(
         )
           .replace(/^0h/, "")
           .trim(),
-        delayString,
-        delayClass,
-        run:
-          v.serviceName.split(" ")[0].length == 4
-            ? v.serviceName.split(" ")[0]
-            : null,
+        delayString:
+          stop?.arrivalDelayString ?? stop?.departureDelayString ?? "scheduled",
+        delayClass:
+          stop?.arrivalDelayClass ?? stop?.departureDelayClass ?? "scheduled",
+        run: v.run,
       };
     })
     .filter((v) => v.departsInSecs > 0 && v.departsInSecs <= max_hours * 3600)

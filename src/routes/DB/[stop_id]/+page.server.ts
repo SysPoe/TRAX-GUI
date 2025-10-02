@@ -11,47 +11,26 @@ import {
   type UpcomingQRTravelDeparture,
 } from "$lib";
 import type { PageServerLoad } from "./$types";
-import { error } from '@sveltejs/kit';
+import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ params }) => {
   if (!isTRAXLoaded) {
     loadTRAX();
-    throw error(503, 'Loading TRAX data... Please retry in a few minutes.');
+    throw error(503, "Loading TRAX data... Please retry in a few minutes.");
   }
 
   const { stop_id } = params;
 
   let today = Number.parseInt(
-    new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", "")
+    new Date(Date.now() + 10 * 3_600_000)
+      .toISOString()
+      .split("T")[0]
+      .replaceAll("-", "")
   );
 
   let now = new Date();
   let startTime = now.getHours() + ":" + now.getMinutes() + ":00";
   let endTime = now.getHours() + 4 + ":" + now.getMinutes() + ":00";
-
-  function timeDiff(t1: string, t2: string): string {
-    // t1 and t2 are in 'HH:mm' format
-    const [h1, m1] = t1.split(":").map(Number);
-    const [h2, m2] = t2.split(":").map(Number);
-    let total1 = h1 * 60 + m1;
-    let total2 = h2 * 60 + m2;
-    let diff = total1 - total2;
-    if (diff < 0) diff += 24 * 60; // handle overnight
-    const hours = Math.floor(diff / 60);
-    const mins = diff % 60;
-    return `${hours}h ${mins}m`;
-  }
-
-  function secTimeDiff(t1: string, t2: string): number {
-    // t1 and t2 are in 'HH:mm' format
-    const [h1, m1] = t1.split(":").map(Number);
-    const [h2, m2] = t2.split(":").map(Number);
-    let total1 = h1 * 3600 + m1 * 60;
-    let total2 = h2 * 3600 + m2 * 60;
-    let diff = total1 - total2;
-    if (diff < 0) diff += 24 * 3600; // handle overnight
-    return diff;
-  }
 
   let stop = TRAX.getAugmentedStops(stop_id)[0];
   if (stop === undefined || stop === null)
@@ -67,8 +46,12 @@ export const load: PageServerLoad = async ({ params }) => {
     .getDepartures(today, startTime, endTime)
     .map((v) => {
       const actualTime = formatTimestamp(
-        (v.actual_departure_timestamp || v.actual_arrival_timestamp)
-          ? Math.floor((v.actual_departure_timestamp || v.actual_arrival_timestamp || 0) / 60) * 60
+        v.actual_departure_timestamp || v.actual_arrival_timestamp
+          ? Math.floor(
+              (v.actual_departure_timestamp ||
+                v.actual_arrival_timestamp ||
+                0) / 60
+            ) * 60
           : v.actual_departure_timestamp || v.actual_arrival_timestamp
       );
       // Get current time in HH:mm
@@ -92,11 +75,11 @@ export const load: PageServerLoad = async ({ params }) => {
           "",
         departs_in:
           actualTime && actualTime.match(/^\d{2}:\d{2}/)
-            ? timeDiff(actualTime.slice(0, 5), nowTime)
+            ? TRAX.utils.time.timeDiff(actualTime.slice(0, 5), nowTime)
             : "-",
         departsInSecs:
           actualTime && actualTime.match(/^\d{2}:\d{2}/)
-            ? secTimeDiff(actualTime.slice(0, 5), nowTime)
+            ? TRAX.utils.time.secTimeDiff(actualTime.slice(0, 5), nowTime)
             : -1,
       };
     })
@@ -131,13 +114,13 @@ export const load: PageServerLoad = async ({ params }) => {
 
   let mixed: (
     | (SerializableAugmentedStopTime & {
-      dep_type: "gtfs";
-      express_string: string;
-      last_stop_id: string;
-      scheduled_departure_time: string;
-      departs_in: string;
-      departsInSecs: number;
-    })
+        dep_type: "gtfs";
+        express_string: string;
+        last_stop_id: string;
+        scheduled_departure_time: string;
+        departs_in: string;
+        departsInSecs: number;
+      })
     | UpcomingQRTravelDeparture
   )[] = [...departures, ...qrtDepartures].sort((a, b) => {
     return (a.departsInSecs || 0) - (b.departsInSecs || 0);

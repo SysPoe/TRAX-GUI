@@ -38,10 +38,7 @@
 <div class="results">
     <hr />
     {#each services as service}
-        {@const run =
-            service.serviceName.split(" ")[0].length == 4
-                ? service.serviceName.split(" ")[0]
-                : `${service.direction} ${service.line}`}
+        {@const run = service.run}
         {@const start =
             replace[
                 service.stops[0]?.placeName
@@ -64,7 +61,7 @@
             "UNKNOWN"}
         <a href="/TV/trip/QRT/{service.serviceId}" class="result">
             <span class="headline">
-                {run} &mdash; {start} &ndash; {end}
+                <span class="de-emphasize">{run} &mdash;</span> {start} &ndash; {end}
             </span><br />
             <span class="extra-details">
                 {formatTime(service.stops[0].actualDeparture)}
