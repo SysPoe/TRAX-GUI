@@ -32,6 +32,7 @@ export const load: PageServerLoad = async ({ url }) => {
     }
     const trainNumberType = url.searchParams.get("train-number-type") ?? "";
     const trainNumberDestination = url.searchParams.get("train-number-destination") ?? "";
+    const dateMode = url.searchParams.get("date-mode") ?? "actual_sch";
 
     // Pagination
     const page = parseInt(url.searchParams.get("page") ?? "1", 10);
@@ -52,8 +53,14 @@ export const load: PageServerLoad = async ({ url }) => {
             st.scheduled_parent_station?.stop_id === stop ||
             st.scheduled_stop?.stop_id === stop
         ));
+    
     for (const date of serviceDates)
-        trips = trips.filter(trip => trip.scheduledTripDates.includes(Number.parseInt(date)));
+        if (dateMode === "actual_sch")
+            trips = trips.filter(trip => trip.scheduledTripDates.includes(Number.parseInt(date)));
+        else if (dateMode === "actual_rt")
+            trips = trips.filter(trip => trip.actualTripDates.includes(Number.parseInt(date)));
+        else if (dateMode === "GTFS")
+            trips = trips.filter(trip => trip.scheduledStartServiceDates.includes(Number.parseInt(date)));
     if (trainNumberType.trim() !== "")
         trips = trips.filter(trip => trip.run[0].toLowerCase() === trainNumberType.toLowerCase());
     if (trainNumberDestination.trim() !== "")
@@ -63,17 +70,26 @@ export const load: PageServerLoad = async ({ url }) => {
     let results = trips.length;
 
     trips = trips.sort((a, b) => {
-        const aServiceDate = a.scheduledTripDates.sort()[0];
-        const bServiceDate = b.scheduledTripDates.sort()[0];
+        let aServiceDate = 0, bServiceDate = 0;
+        if (dateMode === "actual_sch") {
+            aServiceDate = a.scheduledTripDates.sort()[0];
+            bServiceDate = b.scheduledTripDates.sort()[0];
+        } else if (dateMode === "actual_rt") {
+            aServiceDate = a.actualTripDates.sort()[0];
+            bServiceDate = b.actualTripDates.sort()[0];
+        } else if (dateMode === "GTFS") {
+            aServiceDate = a.scheduledStartServiceDates.sort()[0];
+            bServiceDate = b.scheduledStartServiceDates.sort()[0];
+        }
         if (aServiceDate !== bServiceDate) return aServiceDate - bServiceDate;
 
         const aDepartureTime = a.stopTimes[0].scheduled_departure_timestamp ?? 0;
         const bDepartureTime = b.stopTimes[0].scheduled_departure_timestamp ?? 0;
         if (aDepartureTime !== bDepartureTime) return aDepartureTime - bDepartureTime;
-        
+
         const runComparison = a.run.localeCompare(b.run);
         if (runComparison !== 0) return runComparison;
-        
+
         return 0;
     });
 

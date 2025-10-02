@@ -124,27 +124,30 @@
             <span class="headline">
                 {trip.run}
                 <span class="de-emphasize">
+                    {#if [...new Set(Object.values(trip.runSeries))].length == 1}
+                        ({trip.runSeries[
+                            Number.parseInt(Object.keys(trip.runSeries)[0])
+                        ]})
+                    {:else}
+                        (<i>VARS</i>)
+                    {/if}
                     {route?.route_short_name}
-                </span> &mdash;
+                </span>
+                &mdash;
                 {route?.route_long_name}
-                
             </span><br />
             <span class="extra-details">
                 {departure_time}
                 <span class="location">
                     {startParent?.stop_name?.replace(" station", "").trim() ??
-                        startStation?.stop_name
-                            ?.replace(" station", "")
-                            .trim()}
+                        startStation?.stop_name?.replace(" station", "").trim()}
                     {startStation?.platform_code}
                 </span>
                 <span class="bigarrow">&rarr;</span>
                 {arrival_time}
                 <span class="location">
                     {endParent?.stop_name?.replace(" station", "").trim() ??
-                        endStation?.stop_name
-                            ?.replace(" station", "")
-                            .trim()}
+                        endStation?.stop_name?.replace(" station", "").trim()}
                     {startStation?.platform_code}
                 </span>
                 {#if date_offset > 0}

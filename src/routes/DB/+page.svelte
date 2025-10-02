@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { PageProps } from "./$types";
+  import { goto } from "$app/navigation";
 
   const { data }: PageProps = $props();
   let loading = $state(false);
@@ -46,6 +47,7 @@
 <svelte:head>
   <title>TRAX Departure Board</title>
   <link rel="icon" type="image/svg+xml" href="/favicon-DB.svg" />
+  <link rel="prefetch" href="/img/loading.svg" />
 </svelte:head>
 
 <nav><a href="/">Home</a></nav>
@@ -53,34 +55,41 @@
 <div class="title">
   <h1>TRAX <i>DepartureBoard</i></h1>
   <p>Select a station to view departures...</p>
-  <input
-    type="text"
-    name="filter"
-    id="filter"
-    placeholder="Filter stations..."
-    onkeypress={filterStations}
-  />
   {#if loading}
-    <p><img src="/img/loading.svg" alt="Loading..."></p>
+    <p><img src="/img/loading.svg" alt="Loading..." /></p>
+    <p>Loading...</p>
+  {:else}
+    <input
+      type="text"
+      name="filter"
+      id="filter"
+      placeholder="Filter stations..."
+      onkeypress={filterStations}
+    />
   {/if}
 </div>
 
-<div class="stations">
-  {#each data.stations as station}
-    <div
-      data-id={station.stop_id}
-      data-name={station.stop_name}
-      class="station"
-    >
-      <a
-        href="/DB/{station.stop_id}"
-        onclick={() => {
-          loading = true;
-        }}>{station.stop_name}</a
+{#if !loading}
+  <div class="stations">
+    {#each data.stations as station}
+      <div
+        data-id={station.stop_id}
+        data-name={station.stop_name}
+        class="station"
       >
-    </div>
-  {/each}
-</div>
+        <a
+          href="/DB/{station.stop_id}"
+          onclick={() => {
+            loading = true;
+            goto(`/DB/${station.stop_id}`);
+          }}
+        >
+          {station.stop_name}
+        </a>
+      </div>
+    {/each}
+  </div>
+{/if}
 
 <style>
   nav {
