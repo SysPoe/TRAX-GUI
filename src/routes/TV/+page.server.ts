@@ -10,17 +10,20 @@ export const load: PageServerLoad = async ({}) => {
 	}
 
 	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
-	
+
 	let stations = TRAX.getStations()
 		.map((v) => v.toSerializable())
 		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
+	let today = Number.parseInt(new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", ""));
 	let dates = [
 		...new Set(
 			TRAX.getAugmentedTrips()
 				.map((v) => v.scheduledTripDates)
 				.flat(),
 		),
-	].sort();
+	]
+		.sort()
+		.filter((v) => v >= today);
 
 	let routes: { [key: string]: string } = {};
 	let routePairs: { [key: string]: string } = {};
@@ -43,5 +46,5 @@ export const load: PageServerLoad = async ({}) => {
 	// 			.flat(),
 	// 	),
 	// ]);
-	return { stations, dates, routes, routePairs};
+	return { stations, dates, routes, routePairs };
 };
