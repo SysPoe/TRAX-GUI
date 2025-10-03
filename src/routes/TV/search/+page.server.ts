@@ -32,45 +32,72 @@ export const load: PageServerLoad = async ({ url }) => {
 	}
 	const trainNumberType = url.searchParams.get("train-number-type") ?? "";
 	const trainNumberDestination = url.searchParams.get("train-number-destination") ?? "";
+	const trainNumber = (url.searchParams.get("train-number") ?? "").trim().toUpperCase();
+
+	if (trainNumber.length > 0 && trainNumber.length != 4)
+		throw error(400, "Train number must be exactly 4 characters long.");
+	if (!/^[A-Z0-9]{0,4}$/.test(trainNumber)) throw error(400, "Train number must be alphanumeric.");
+
 	const dateMode = url.searchParams.get("date-mode") ?? "actual_sch";
+	const rsLeaderBehaviour = url.searchParams.get("rs-leader-behaviour") ?? "include";
 
 	// Pagination
 	const page = parseInt(url.searchParams.get("page") ?? "1", 10);
 	const perPage = 20;
-	let trips = TRAX.getAugmentedTrips();
-
-	if (startStation.trim() !== "")
-		trips = trips.filter(
-			(trip) =>
+	let trips = TRAX.getAugmentedTrips().filter((trip) => {
+		if (
+			startStation.trim() !== "" &&
+			!(
 				trip.stopTimes[0].scheduled_parent_station?.stop_id == startStation ||
-				trip.stopTimes[0].scheduled_stop?.stop_id == startStation,
-		);
-	if (endStation.trim() !== "")
-		trips = trips.filter(
-			(trip) =>
+				trip.stopTimes[0].scheduled_stop?.stop_id == startStation
+			)
+		)
+			return false;
+
+		if (
+			endStation.trim() !== "" &&
+			!(
 				trip.stopTimes[trip.stopTimes.length - 1].scheduled_parent_station?.stop_id == endStation ||
-				trip.stopTimes[trip.stopTimes.length - 1].scheduled_stop?.stop_id == endStation,
-		);
-	for (const stop of intermediateStations)
-		trips = trips.filter((trip) =>
-			trip.stopTimes.some(
-				(st) => st.scheduled_parent_station?.stop_id === stop || st.scheduled_stop?.stop_id === stop,
-			),
-		);
+				trip.stopTimes[trip.stopTimes.length - 1].scheduled_stop?.stop_id == endStation
+			)
+		)
+			return false;
 
-	for (const date of serviceDates)
-		if (dateMode === "actual_sch")
-			trips = trips.filter((trip) => trip.scheduledTripDates.includes(Number.parseInt(date)));
-		else if (dateMode === "actual_rt")
-			trips = trips.filter((trip) => trip.actualTripDates.includes(Number.parseInt(date)));
-		else if (dateMode === "GTFS")
-			trips = trips.filter((trip) => trip.scheduledStartServiceDates.includes(Number.parseInt(date)));
-	if (trainNumberType.trim() !== "")
-		trips = trips.filter((trip) => trip.run[0].toLowerCase() === trainNumberType.toLowerCase());
-	if (trainNumberDestination.trim() !== "")
-		trips = trips.filter((trip) => trip.run[1].toLowerCase() === trainNumberDestination.toLowerCase());
+		for (const stop of intermediateStations) {
+			if (
+				!trip.stopTimes.some(
+					(st) => st.scheduled_parent_station?.stop_id === stop || st.scheduled_stop?.stop_id === stop,
+				)
+			)
+				return false;
+		}
 
-	let concatenated = false;
+		for (const date of serviceDates) {
+			if (dateMode === "actual_sch") {
+				if (!trip.scheduledTripDates.includes(Number.parseInt(date))) return false;
+			} else if (dateMode === "actual_rt") {
+				if (!trip.actualTripDates.includes(Number.parseInt(date))) return false;
+			} else if (dateMode === "GTFS") {
+				if (!trip.scheduledStartServiceDates.includes(Number.parseInt(date))) return false;
+			}
+		}
+
+		if (trainNumberType.trim() !== "" && trip.run[0].toLowerCase() !== trainNumberType.toLowerCase()) return false;
+		if (trainNumberDestination.trim() !== "" && trip.run[1].toLowerCase() !== trainNumberDestination.toLowerCase())
+			return false;
+		if (trainNumber !== "" && trip.run.trim().toUpperCase() !== trainNumber) return false;
+
+		if (rsLeaderBehaviour !== "include") {
+			const isLeader =
+				[...new Set(Object.values(trip.runSeries))].length == 1 &&
+				trip.runSeries[Number.parseInt(Object.keys(trip.runSeries)[0])] === trip.run;
+			if (rsLeaderBehaviour === "only" && !isLeader) return false;
+			if (rsLeaderBehaviour === "exclude" && isLeader) return false;
+		}
+
+		return true;
+	});
+
 	let results = trips.length;
 
 	trips = trips.sort((a, b) => {
@@ -101,7 +128,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	// Pagination logic
 	const totalPages = Math.ceil(trips.length / perPage);
 	const pagedTrips = trips.slice((page - 1) * perPage, page * perPage);
-	if (trips.length > perPage) concatenated = true;
+	let concatenated = trips.length > perPage;
 
 	// Capture original query params for pagination links
 	const originalParams: Record<string, string[]> = {};

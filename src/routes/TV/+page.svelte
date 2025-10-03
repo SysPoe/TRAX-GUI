@@ -190,6 +190,8 @@
 			<option value="Y">Y - Virginia - Kippa-Ring</option>
 			<option value="Z">Z - Exhibition </option>
 		</select><br />
+		<label for="train-number">Train Number:</label>
+		<input type="text" name="train-number" id="train-number" /><br />
 		<hr />
 		<details>
 			<summary>Advanced</summary>
@@ -199,6 +201,13 @@
 				<option value="actual_sch">Actual SCH (default)</option>
 				<option value="actual_rt">Actual RT</option>
 				<option value="GTFS">GTFS</option>
+			</select><br />
+
+			<label for="rs-leader-behaviour">RS Confirmed Leader Behaviour:</label>
+			<select name="rs-leader-behaviour" id="rs-leader-behaviour">
+				<option value="include">Include (default)</option>
+				<option value="exclude">Exclude</option>
+				<option value="only">Only</option>
 			</select>
 		</details>
 		<hr />
