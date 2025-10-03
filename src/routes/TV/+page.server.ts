@@ -18,5 +18,27 @@ export const load: PageServerLoad = async ({}) => {
 				.flat(),
 		),
 	].sort();
-	return { stations, dates };
+
+	let routes: { [key: string]: string } = {};
+	let routePairs: { [key: string]: string } = {};
+
+	for (const v of TRAX.getRawRoutes().filter((v) => v.route_type == 2)) {
+		if (v.route_short_name?.slice(0, 2) && v.route_long_name?.split("-")[0].trim())
+			routes[v.route_short_name?.slice(0, 2)] = v.route_long_name?.split("-")[0].trim();
+		if (v.route_short_name?.slice(2) && v.route_long_name?.split("-")[1]?.trim())
+			routes[v.route_short_name?.slice(2)] = v.route_long_name?.split("-")[1]?.trim();
+		if (v.route_short_name && v.route_long_name) routePairs[v.route_short_name] = v.route_long_name;
+	}
+
+	// console.log([
+	// 	...new Set(
+
+	// 			.map((v) => [
+	// 				[, v.route_long_name?.split("-")[0].trim()],
+	// 				[v.route_short_name?.slice(2), v.route_long_name?.split("-")[1]?.trim()]
+	// 			])
+	// 			.flat(),
+	// 	),
+	// ]);
+	return { stations, dates, routes, routePairs};
 };

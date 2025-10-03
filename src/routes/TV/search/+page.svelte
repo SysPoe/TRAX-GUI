@@ -108,10 +108,12 @@
 			<span class="headline">
 				{trip.run}
 				<span class="de-emphasize">
-					{#if [...new Set(Object.values(trip.runSeries))].length == 1}
-						({trip.runSeries[Number.parseInt(Object.keys(trip.runSeries)[0])]})
-					{:else}
-						(<i>VARS</i>)
+					{#if data.extraDetails}
+						{#if [...new Set(Object.values(trip.runSeries))].length == 1}
+							({trip.runSeries[Number.parseInt(Object.keys(trip.runSeries)[0])]})
+						{:else}
+							(<i>VARS</i>)
+						{/if}
 					{/if}
 					{route?.route_short_name}
 				</span>
@@ -138,14 +140,16 @@
 				<br />
 				{data.expressStrings[trip._trip.trip_id]} <br />
 
-				{#if trip.scheduledStartServiceDates.length == 1}
-					Service date:
-				{:else}
-					Service dates:
+				{#if data.extraDetails}
+					{#if trip.scheduledStartServiceDates.length == 1}
+						Service date:
+					{:else}
+						Service dates:
+					{/if}
+					{#each trip.scheduledStartServiceDates as date, i (date)}
+						{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
+					{/each}
 				{/if}
-				{#each trip.scheduledStartServiceDates as date, i (date)}
-					{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
-				{/each}
 			</span>
 		</a>
 		<hr />

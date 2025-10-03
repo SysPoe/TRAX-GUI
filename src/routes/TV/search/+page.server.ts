@@ -38,8 +38,14 @@ export const load: PageServerLoad = async ({ url }) => {
 		throw error(400, "Train number must be exactly 4 characters long.");
 	if (!/^[A-Z0-9]{0,4}$/.test(trainNumber)) throw error(400, "Train number must be alphanumeric.");
 
+	const route = url.searchParams.get("route") ?? "";
+	const routePair = url.searchParams.get("route-pair") ?? "";
+	const routePairReversible = url.searchParams.get("route-pair-reversible") === "on";
+
+	// Advanced options
 	const dateMode = url.searchParams.get("date-mode") ?? "actual_sch";
 	const rsLeaderBehaviour = url.searchParams.get("rs-leader-behaviour") ?? "include";
+	const extraDetails = url.searchParams.get("extra-details") === "on";
 
 	// Pagination
 	const page = parseInt(url.searchParams.get("page") ?? "1", 10);
@@ -71,6 +77,12 @@ export const load: PageServerLoad = async ({ url }) => {
 			)
 				return false;
 		}
+
+		if (routePair !== "" && trip._trip.route_id.slice(0, 4) !== routePair)
+			return (
+				routePairReversible && trip._trip.route_id.slice(0, 4) === routePair.slice(2, 4) + routePair.slice(0, 2)
+			);
+		if (route !== "" && !trip._trip.route_id.slice(0, 4).includes(route)) return false;
 
 		for (const date of serviceDates) {
 			if (dateMode === "actual_sch") {
@@ -184,5 +196,6 @@ export const load: PageServerLoad = async ({ url }) => {
 		expressStrings,
 		originalParams,
 		routes,
+		extraDetails,
 	};
 };

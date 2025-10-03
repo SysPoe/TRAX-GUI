@@ -193,6 +193,24 @@
 		<label for="train-number">Train Number:</label>
 		<input type="text" name="train-number" id="train-number" /><br />
 		<hr />
+		<b>Filter by Lines</b> <br />
+		<select name="route" id="route">
+			<option value="">Any Line</option>
+			{#each Object.keys(data.routes).sort() as route}
+				<option value={route}>{data.routes[route]}</option>
+			{/each}
+		</select><br />
+		<select name="route-pair" id="route-pair">
+			<option value="">Any Line Pair</option>
+			{#each Object.keys(data.routePairs).sort() as pair}
+				<option value={pair}>{data.routePairs[pair]}</option>
+			{/each}
+		</select>
+		<label for="route-pair-reversible">Reversible:</label>
+		<input type="checkbox" name="route-pair-reversible" id="route-pair-reversible" />
+		<br />
+
+		<hr />
 		<details>
 			<summary>Advanced</summary>
 
@@ -208,7 +226,10 @@
 				<option value="include">Include (default)</option>
 				<option value="exclude">Exclude</option>
 				<option value="only">Only</option>
-			</select>
+			</select><br />
+
+			<label for="extra-details">Show Extra Details:</label>
+			<input type="checkbox" name="extra-details" id="extra-details" />
 		</details>
 		<hr />
 		<input
