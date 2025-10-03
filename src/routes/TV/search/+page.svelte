@@ -39,6 +39,15 @@
 		if (total > 1) pages.push(total);
 		return pages;
 	}
+
+	const types: { [key: string]: string } = {
+		"1": "6 car SMU in revenue service",
+		D: "NGR in revenue service",
+		J: "3 car SMU in revenue service",
+		T: "6 car IMU in revenue service",
+		U: "3 car IMU in revenue service",
+		X: "Train equipped w/ L2 ETCS in revenue service ",
+	};
 </script>
 
 <svelte:head>
@@ -140,15 +149,18 @@
 				<br />
 				{data.expressStrings[trip._trip.trip_id]} <br />
 
+				{#if trip.scheduledStartServiceDates.length == 1}
+					Service date:
+				{:else}
+					Service dates:
+				{/if}
+				{#each trip.scheduledStartServiceDates as date, i (date)}
+					{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
+				{/each}
+
 				{#if data.extraDetails}
-					{#if trip.scheduledStartServiceDates.length == 1}
-						Service date:
-					{:else}
-						Service dates:
-					{/if}
-					{#each trip.scheduledStartServiceDates as date, i (date)}
-						{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
-					{/each}
+					<br />
+					{types[trip.run[0]] ?? "Unknown train type"}<br />
 				{/if}
 			</span>
 		</a>

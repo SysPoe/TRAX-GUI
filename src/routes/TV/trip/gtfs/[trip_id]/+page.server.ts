@@ -1,5 +1,5 @@
 import TRAX from "translink-rail-api";
-import { isTRAXLoaded, loadTRAX } from "$lib";
+import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import type { SerializableAugmentedStop } from "translink-rail-api";
@@ -9,6 +9,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		loadTRAX();
 		throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 	}
+
+	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
+	
 	let { trip_id } = params;
 	let trip = TRAX.getAugmentedTrips(trip_id)[0];
 	if (!trip) throw error(404, `Trip "${trip_id}" not found`);

@@ -1,5 +1,5 @@
 import TRAX, { type SerializableAugmentedStop } from "translink-rail-api";
-import { isTRAXLoaded, loadTRAX } from "$lib";
+import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
 import type { PageServerLoad } from "./$types";
 import type * as gtfs from "gtfs";
 import { error } from "@sveltejs/kit";
@@ -9,6 +9,8 @@ export const load: PageServerLoad = async ({ url }) => {
 		loadTRAX();
 		throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 	}
+
+	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 
 	const startStation = url.searchParams.get("start-station") ?? "";
 	const endStation = url.searchParams.get("end-station") ?? "";
@@ -39,12 +41,15 @@ export const load: PageServerLoad = async ({ url }) => {
 	if (!/^[A-Z0-9]{0,4}$/.test(trainNumber)) throw error(400, "Train number must be alphanumeric.");
 
 	const route = url.searchParams.get("route") ?? "";
+	const routeStart = url.searchParams.get("route-start") ?? "";
+	const routeEnd = url.searchParams.get("route-end") ?? "";
 	const routePair = url.searchParams.get("route-pair") ?? "";
 	const routePairReversible = url.searchParams.get("route-pair-reversible") === "on";
 
 	// Advanced options
 	const dateMode = url.searchParams.get("date-mode") ?? "actual_sch";
 	const rsLeaderBehaviour = url.searchParams.get("rs-leader-behaviour") ?? "include";
+	const multiDateBehaviour = url.searchParams.get("multi-date-behaviour") ?? "original";
 	const extraDetails = url.searchParams.get("extra-details") === "on";
 
 	// Pagination
@@ -83,6 +88,8 @@ export const load: PageServerLoad = async ({ url }) => {
 				routePairReversible && trip._trip.route_id.slice(0, 4) === routePair.slice(2, 4) + routePair.slice(0, 2)
 			);
 		if (route !== "" && !trip._trip.route_id.slice(0, 4).includes(route)) return false;
+		if (routeStart !== "" && trip._trip.route_id.slice(0, 2) !== routeStart) return false;
+		if (routeEnd !== "" && trip._trip.route_id.slice(2, 4) !== routeEnd) return false;
 
 		for (const date of serviceDates) {
 			if (dateMode === "actual_sch") {
@@ -110,9 +117,35 @@ export const load: PageServerLoad = async ({ url }) => {
 		return true;
 	});
 
-	let results = trips.length;
+	let serializedTrips = trips.map((v) => v.toSerializable());
 
-	trips = trips.sort((a, b) => {
+	if (multiDateBehaviour === "duplicate")
+		serializedTrips = serializedTrips
+			.map((trip) => {
+				const dates =
+					dateMode === "actual_sch"
+						? trip.scheduledTripDates
+						: dateMode === "actual_rt"
+							? trip.actualTripDates
+							: trip.scheduledStartServiceDates;
+				let expanded = dates.map((v) => ({
+					...trip,
+					actualTripDates: [v],
+					scheduledTripDates: [v],
+					scheduledStartServiceDates: [v],
+				}));
+				expanded = expanded.filter((v) => {
+					for (const date of serviceDates)
+						if (!v.scheduledTripDates.includes(Number.parseInt(date))) return false;
+					return true;
+				});
+				return expanded;
+			})
+			.flat();
+
+	let results = serializedTrips.length;
+
+	serializedTrips = serializedTrips.sort((a, b) => {
 		let aServiceDate = 0,
 			bServiceDate = 0;
 		if (dateMode === "actual_sch") {
@@ -138,9 +171,10 @@ export const load: PageServerLoad = async ({ url }) => {
 	});
 
 	// Pagination logic
-	const totalPages = Math.ceil(trips.length / perPage);
-	const pagedTrips = trips.slice((page - 1) * perPage, page * perPage);
-	let concatenated = trips.length > perPage;
+	const totalPages = Math.ceil(serializedTrips.length / perPage);
+	const pagedTrips = serializedTrips.slice((page - 1) * perPage, page * perPage);
+	const unserializedPagedTrips = trips.slice((page - 1) * perPage, page * perPage);
+	let concatenated = serializedTrips.length > perPage;
 
 	// Capture original query params for pagination links
 	const originalParams: Record<string, string[]> = {};
@@ -152,7 +186,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	}
 
 	let stations: { [key: string]: SerializableAugmentedStop } = {};
-	for (const trip of pagedTrips) {
+	for (const trip of unserializedPagedTrips) {
 		for (const stopTime of trip.stopTimes) {
 			if (stopTime.scheduled_stop) {
 				stations[stopTime.scheduled_stop.stop_id] = stopTime.scheduled_stop.toSerializable();
@@ -189,7 +223,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		concatenated,
 		results,
 		perPage,
-		trips: pagedTrips.map((v) => v.toSerializable()),
+		trips: pagedTrips,
 		page,
 		totalPages,
 		stations,

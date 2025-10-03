@@ -2,7 +2,7 @@ import TRAX, { type TravelTrip, type SRTStop } from "translink-rail-api";
 import fs from "fs";
 
 export let isTRAXLoaded = false;
-let isTRAXLoading = false;
+export let isTRAXLoading = false;
 let intervalSet = false;
 
 export async function loadTRAX(freshLoad = false) {

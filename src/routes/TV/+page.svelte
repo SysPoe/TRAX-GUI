@@ -195,7 +195,19 @@
 		<hr />
 		<b>Filter by Lines</b> <br />
 		<select name="route" id="route">
-			<option value="">Any Line</option>
+			<option value="">Any Included Line</option>
+			{#each Object.keys(data.routes).sort() as route}
+				<option value={route}>{data.routes[route]}</option>
+			{/each}
+		</select>
+		<select name="route-start" id="route-start">
+			<option value="">Any Starting Line</option>
+			{#each Object.keys(data.routes).sort() as route}
+				<option value={route}>{data.routes[route]}</option>
+			{/each}
+		</select>
+		<select name="route-end" id="route-end">
+			<option value="">Any Ending Line</option>
 			{#each Object.keys(data.routes).sort() as route}
 				<option value={route}>{data.routes[route]}</option>
 			{/each}
@@ -214,18 +226,24 @@
 		<details>
 			<summary>Advanced</summary>
 
-			<label for="date-mod">Date Mode:</label>
+			<label for="date-mod">Date Selection:</label>
 			<select name="date-mode" id="date-mod">
 				<option value="actual_sch">Actual SCH (default)</option>
 				<option value="actual_rt">Actual RT</option>
 				<option value="GTFS">GTFS</option>
 			</select><br />
 
-			<label for="rs-leader-behaviour">RS Confirmed Leader Behaviour:</label>
+			<label for="rs-leader-behaviour">RS Confirmed Leaders:</label>
 			<select name="rs-leader-behaviour" id="rs-leader-behaviour">
 				<option value="include">Include (default)</option>
 				<option value="exclude">Exclude</option>
 				<option value="only">Only</option>
+			</select><br />
+
+			<label for="multi-date-behaviour">Multi-Date Behaviour:</label>
+			<select name="multi-date-behaviour" id="multi-date-behaviour">
+				<option value="original">Original (defualt)</option>
+				<option value="duplicate">Duplicate</option>
 			</select><br />
 
 			<label for="extra-details">Show Extra Details:</label>

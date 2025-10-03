@@ -4,7 +4,7 @@ import TRAX, {
 	type SerializableAugmentedTrip,
 } from "translink-rail-api";
 import * as gtfs from "gtfs";
-import { getUpcomingQRTravelDepartures, isTRAXLoaded, loadTRAX, type UpcomingQRTravelDeparture } from "$lib";
+import { getUpcomingQRTravelDepartures, isTRAXLoaded, isTRAXLoading, loadTRAX, type UpcomingQRTravelDeparture } from "$lib";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
@@ -13,6 +13,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		loadTRAX();
 		throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 	}
+
+	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 
 	const { stop_id } = params;
 
