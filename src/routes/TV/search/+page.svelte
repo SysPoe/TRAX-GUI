@@ -111,7 +111,15 @@
 
 		<a
 			class="result"
-			onclick={() => goto(`/TV/trip/gtfs/${trip._trip.trip_id}`)}
+			onclick={(ev) => {
+				if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+					// Open in new tab if modifier key is held
+					ev.preventDefault();
+					window.open(`/TV/trip/gtfs/${trip._trip.trip_id}`, "_blank");
+					return;
+				}
+				goto(`/TV/trip/gtfs/${trip._trip.trip_id}`);
+			}}
 			href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
 		>
 			<span class="headline">

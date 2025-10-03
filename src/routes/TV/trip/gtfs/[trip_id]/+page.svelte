@@ -118,7 +118,13 @@
 						{#if series !== null && series !== undefined}
 							<a
 								href={`/TV/run-series/${date}/${series}`}
-								onclick={() => {
+								onclick={(ev) => {
+									if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+										// Open in new tab if modifier key is held
+										ev.preventDefault();
+										window.open(`/TV/run-series/${date}/${series}`, "_blank");
+										return;
+									}
 									goto(`/TV/run-series/${date}/${series}`);
 								}}
 							>
@@ -161,7 +167,15 @@
 							? 'cancelled'
 							: ''}"
 						href={`/DB/${st.scheduled_parent_station || st.scheduled_stop}`}
-						onclick={() => goto(`/DB/${st.scheduled_parent_station || st.scheduled_stop}`)}
+						onclick={(ev) => {
+							if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+								// Open in new tab if modifier key is held
+								ev.preventDefault();
+								window.open(`/DB/${st.scheduled_parent_station || st.scheduled_stop}`, "_blank");
+								return;
+							}
+							goto(`/DB/${st.scheduled_parent_station || st.scheduled_stop}`);
+						}}
 					>
 						<span class="platform" style="background-color: #{route.route_color || '000000'}">
 							{st.scheduled_platform_code || "?"}

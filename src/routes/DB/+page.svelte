@@ -21,6 +21,12 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === "Enter" && filteredStations.length === 1) {
 			loading = true;
+			if (event.shiftKey || event.ctrlKey || event.metaKey) {
+				// Open in new tab if modifier key is held
+				window.open(`/DB/${filteredStations[0].stop_id}`, "_blank");
+				loading = false;
+				return;
+			}
 			goto(`/DB/${filteredStations[0].stop_id}`);
 		}
 	}
@@ -62,8 +68,15 @@
 			<div data-id={station.stop_id} data-name={station.stop_name} class="station">
 				<a
 					href="/DB/{station.stop_id}"
-					onclick={() => {
+					onclick={(ev) => {
 						loading = true;
+						if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+							// Open in new tab if modifier key is held
+							ev.preventDefault();
+							window.open(`/DB/${station.stop_id}`, "_blank");
+							loading = false;
+							return;
+						}
 						goto(`/DB/${station.stop_id}`);
 					}}
 				>
