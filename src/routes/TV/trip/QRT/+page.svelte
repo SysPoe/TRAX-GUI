@@ -68,7 +68,8 @@
 				</span>
 				<span class="bigarrow">&rarr;</span>
 				{formatTime(service.stops.at(-1)?.actualArrival ?? "")}
-				<span class="location">{end}</span>
+				<span class="location">{end}</span><br />
+				{service.serviceName} &mdash; {service.serviceId} {service.direction} {service.line}<br />
 			</span>
 		</a>
 		<hr />

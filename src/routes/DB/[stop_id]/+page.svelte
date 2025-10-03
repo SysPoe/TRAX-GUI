@@ -251,6 +251,7 @@
 		-webkit-text-stroke-width: 0.2rem;
 		-webkit-text-stroke-color: black;
 	}
+
 	.platform.qr-travel,
 	.service-type.qr-travel {
 		background-color: rgb(255, 132, 0);
@@ -272,7 +273,7 @@
 		font-synthesis: weight;
 		font-weight: 700;
 		line-height: 0.9;
-		font-size: 1.6rem;
+		font-size: 1.8rem;
 		text-transform: uppercase;
 	}
 
