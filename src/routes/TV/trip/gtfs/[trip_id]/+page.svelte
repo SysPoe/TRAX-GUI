@@ -206,6 +206,13 @@
 							{/if}
 							<br />
 							<span class="station">
+								{@html st.actual_exit_side
+									? st.actual_exit_side == "left"
+										? "◀"
+										: st.actual_exit_side == "right"
+											? "▶"
+											: ""
+									: ""}
 								{(
 									stations[st.scheduled_parent_station || ""]?.stop_name ||
 									stations[st.scheduled_stop || ""]?.stop_name ||
