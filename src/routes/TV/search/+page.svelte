@@ -6,6 +6,8 @@
 
 	const { data }: PageProps = $props();
 
+	console.log(data);
+
 	// Borrowed from TRAX
 	function formatTimestamp(ts?: number | null): string {
 		if (ts === null || ts === undefined) return "--:--";
@@ -99,13 +101,17 @@
 	<hr />
 	{#each data?.trips as trip}
 		{@const departure_time = formatTimestamp(trip.stopTimes[0].scheduled_departure_timestamp)}
-		{@const arrival_time = formatTimestamp(trip.stopTimes[trip.stopTimes.length - 1].scheduled_arrival_timestamp)}
-		{@const startStation = data.stations[trip.stopTimes[0].scheduled_stop ?? 0]}
-		{@const endStation = data.stations[trip.stopTimes[trip.stopTimes.length - 1].scheduled_stop ?? 0]}
-		{@const startParent = startStation?.parent_station ? data.stations[startStation.parent_station] : null}
-		{@const endParent = endStation?.parent_station ? data.stations[endStation.parent_station] : null}
+		{@const arrival_time = formatTimestamp(trip.stopTimes.at(-1)?.scheduled_arrival_timestamp)}
+		{@const startStation = data.stations[trip.stopTimes[0].scheduled_stop ?? ""]}
+		{@const endStation = data.stations[trip.stopTimes.at(-1)?.scheduled_stop ?? ""]}
+		{@const startParent = trip.stopTimes[0].scheduled_parent_station
+			? data.stations[trip.stopTimes[0].scheduled_parent_station]
+			: null}
+		{@const endParent = trip.stopTimes.at(-1)?.scheduled_parent_station
+			? data.stations[trip.stopTimes.at(-1)?.scheduled_parent_station ?? ""]
+			: null}
 		{@const date_offset =
-			trip.stopTimes[trip.stopTimes.length - 1].scheduled_arrival_date_offset -
+			(trip.stopTimes.at(-1)?.scheduled_arrival_date_offset ?? 0) -
 			trip.stopTimes[0].scheduled_departure_date_offset}
 		{@const route = data.routes[trip._trip.route_id]}
 
@@ -140,16 +146,16 @@
 			<span class="extra-details">
 				{departure_time}
 				<span class="location">
-					{startParent?.stop_name?.replace(" station", "").trim() ??
+					{startParent?.stop_name?.replace(" station", "")?.trim() ??
 						startStation?.stop_name?.replace(" station", "").trim()}
-					{startStation?.platform_code}
+					{trip.stopTimes[0]?.scheduled_platform_code}
 				</span>
 				<span class="bigarrow">&rarr;</span>
 				{arrival_time}
 				<span class="location">
 					{endParent?.stop_name?.replace(" station", "").trim() ??
 						endStation?.stop_name?.replace(" station", "").trim()}
-					{startStation?.platform_code}
+					{trip.stopTimes.at(-1)?.scheduled_platform_code}
 				</span>
 				{#if date_offset > 0}
 					(+{date_offset} {date_offset == 1 ? "day" : "days"})
