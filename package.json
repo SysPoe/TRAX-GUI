@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"gtfs": "^4.17.5",
+		"svelte-kit-sessions": "^0.4.0",
 		"translink-rail-api": "github:SysPoe/TRAX"
 	}
 }
