@@ -6,8 +6,6 @@
 
 	const { data }: PageProps = $props();
 
-	console.log(data);
-
 	// Borrowed from TRAX
 	function formatTimestamp(ts?: number | null): string {
 		if (ts === null || ts === undefined) return "--:--";
@@ -50,6 +48,27 @@
 		U: "3 car IMU in revenue service",
 		X: "Train equipped w/ L2 ETCS in revenue service ",
 	};
+
+	const TRAIN_GURU_URL_PREFIX = "https://syspoe.github.io/train-wiki/#Other/Resources/TRNGuru/?trainNumber=";
+
+	function getTrainGuruUrl(run: string) {
+		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
+	}
+
+	function handleTripNavigation(event: MouseEvent, tripId: string) {
+		if (
+			event.defaultPrevented ||
+			event.button !== 0 ||
+			event.metaKey ||
+			event.ctrlKey ||
+			event.shiftKey ||
+			event.altKey
+		) {
+			return;
+		}
+		event.preventDefault();
+		goto(`/TV/trip/gtfs/${tripId}`);
+	}
 </script>
 
 <svelte:head>
@@ -115,69 +134,76 @@
 			trip.stopTimes[0].scheduled_departure_date_offset}
 		{@const route = data.routes[trip._trip.route_id]}
 
-		<a
-			class="result"
-			onclick={(ev) => {
-				if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
-					// Open in new tab if modifier key is held
-					ev.preventDefault();
-					window.open(`/TV/trip/gtfs/${trip._trip.trip_id}`, "_blank");
-					return;
-				}
-				goto(`/TV/trip/gtfs/${trip._trip.trip_id}`);
-			}}
-			href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
-		>
-			<span class="headline">
-				{trip.run}
-				<span class="de-emphasize">
-					{#if data.extraDetails}
-						{#if [...new Set(Object.values(trip.runSeries))].length == 1}
-							({trip.runSeries[Number.parseInt(Object.keys(trip.runSeries)[0])]})
-						{:else}
-							(<i>VARS</i>)
+		<div class="result-wrapper">
+			<a
+				class="result"
+				href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
+				onclick={(event) => handleTripNavigation(event, trip._trip.trip_id)}
+			>
+				<span class="headline">
+					{trip.run}
+					<span class="de-emphasize">
+						{#if data.extraDetails}
+							{#if [...new Set(Object.values(trip.runSeries))].length == 1}
+								({trip.runSeries[Number.parseInt(Object.keys(trip.runSeries)[0])]})
+							{:else}
+								(<i>VARS</i>)
+							{/if}
 						{/if}
+						{route?.route_short_name}
+					</span>
+					&mdash;
+					{route?.route_long_name}
+				</span><br />
+				<span class="extra-details">
+					{departure_time}
+					<span class="location">
+						{startParent?.stop_name?.replace(" station", "")?.trim() ??
+							startStation?.stop_name?.replace(" station", "").trim()}
+						{trip.stopTimes[0]?.scheduled_platform_code}
+					</span>
+					<span class="bigarrow">&rarr;</span>
+					{arrival_time}
+					<span class="location">
+						{endParent?.stop_name?.replace(" station", "").trim() ??
+							endStation?.stop_name?.replace(" station", "").trim()}
+						{trip.stopTimes.at(-1)?.scheduled_platform_code}
+					</span>
+					{#if date_offset > 0}
+						(+{date_offset} {date_offset == 1 ? "day" : "days"})
 					{/if}
-					{route?.route_short_name}
-				</span>
-				&mdash;
-				{route?.route_long_name}
-			</span><br />
-			<span class="extra-details">
-				{departure_time}
-				<span class="location">
-					{startParent?.stop_name?.replace(" station", "")?.trim() ??
-						startStation?.stop_name?.replace(" station", "").trim()}
-					{trip.stopTimes[0]?.scheduled_platform_code}
-				</span>
-				<span class="bigarrow">&rarr;</span>
-				{arrival_time}
-				<span class="location">
-					{endParent?.stop_name?.replace(" station", "").trim() ??
-						endStation?.stop_name?.replace(" station", "").trim()}
-					{trip.stopTimes.at(-1)?.scheduled_platform_code}
-				</span>
-				{#if date_offset > 0}
-					(+{date_offset} {date_offset == 1 ? "day" : "days"})
-				{/if}
-				<br />
-				{data.expressStrings[trip._trip.trip_id]} <br />
-
-				{#if trip.scheduledStartServiceDates.length == 1}
-					Service date:
-				{:else}
-					Service dates:
-				{/if}
-				{#each trip.scheduledStartServiceDates as date, i (date)}
-					{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
-				{/each}
-
-				{#if data.extraDetails}
 					<br />
-					{types[trip.run[0]] ?? "Unknown train type"}<br />
-				{/if}
-			</span>
-		</a>
+					{data.expressStrings[trip._trip.trip_id]} <br />
+
+					{#if trip.scheduledStartServiceDates.length == 1}
+						Service date:
+					{:else}
+						Service dates:
+					{/if}
+					{#each trip.scheduledStartServiceDates as date, i (date)}
+						{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
+					{/each}
+
+					{#if data.extraDetails}
+						<br />
+						{types[trip.run[0]] ?? "Unknown train type"}<br />
+					{/if}
+				</span>
+			</a>
+			{#if data.extraDetails}
+				<a
+					class="trn-button"
+					title="Open in TrainGuru"
+					aria-label={`Consult TRNGuru for train ${trip.run}`}
+					href={getTrainGuruUrl(trip.run)}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<img src="/img/trnguru.svg" alt="" aria-hidden="true" class="trn-icon" />
+					<span class="sr-only">Open in TrainGuru</span>
+				</a>
+			{/if}
+		</div>
 		<hr />
 	{/each}
 </div>

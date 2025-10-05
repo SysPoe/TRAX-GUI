@@ -1,47 +1,29 @@
 /*
     Common styles for TRAX trip search results.
     Layout:
+    - .result-wrapper: Positioning context for each trip card.
     - a.result: A block-level link container for each trip.
         - .headline: The main title of the trip (run number, route name).
             - .de-emphasize: Less important details within the headline.
         - .extra-details: A block for smaller, secondary information.
             - .location: Highlights the start and end locations.
             - .bigarrow: A large arrow separating the locations.
-
-  e.g.
-
-    <a class="result">
-        <span class="headline">
-            Run <span class="de-emphasize"> (Run Series) Short name e.g. IPCA </span>
-            &mdash; Ipswich - Caboolture
-        </span><br />
-        <span class="extra-details">
-            {departure_time}
-            <span class="location">
-                {startStation} {startPlatform}
-            </span>
-            <span class="bigarrow">&rarr;</span>
-            {arrival_time}
-            <span class="location">
-                {endStation} {endPlatform}
-            </span>
-            (+x day/s if applicable)
-            <br />
-            All stops <br />
-
-            Service dates: 20250101, 20250102, 20250103, ...
-        </span>
-    </a>
+    - .trn-button: External link shortcut for TrainGuru.
 */
+
+.result-wrapper {
+    position: relative;
+}
+
 a.result {
-	cursor: pointer;
-	margin-left: 1rem;
-	margin-right: 1rem;
-	padding: 0.5rem;
-	transition: all 200ms;
-	color: inherit;
-	text-decoration: none;
-	display: block;
+    cursor: pointer;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding: 0.5rem 3.5rem 0.5rem 0.5rem;
+    transition: all 200ms;
+    color: inherit;
+    text-decoration: none;
+    display: block;
 }
 
 .result:hover {
@@ -75,4 +57,46 @@ a.result {
 	vertical-align: middle;
 	display: inline-block;
 	margin-top: -0.5rem;
+}
+
+.trn-icon {
+	width: 1.1rem;
+	aspect-ratio: 1;
+}
+
+.trn-button {
+    position: absolute;
+    top: 0.6rem;
+    right: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem;
+    margin: 0;
+    color: inherit;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 0.25rem;
+    text-decoration: none;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: opacity 150ms ease-in-out, background-color 150ms ease-in-out;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.trn-button:hover,
+.trn-button:focus-visible {
+    opacity: 0.75;
+    background-color: rgba(224, 224, 255, 0.9);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
