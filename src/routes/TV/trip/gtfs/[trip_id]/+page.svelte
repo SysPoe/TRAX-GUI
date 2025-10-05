@@ -21,6 +21,12 @@
 		const d = new Date(ts * 1000);
 		return d.toISOString().slice(11, 16);
 	}
+
+	const TRAIN_GURU_URL_PREFIX = "https://syspoe.github.io/train-wiki/#Other/Resources/TRNGuru/?trainNumber=";
+
+	function getTrainGuruUrl(run: string) {
+		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
+	}
 </script>
 
 <svelte:head>
@@ -68,8 +74,20 @@
 				<span class="info-value">{data.expressString}</span>
 			</div>
 			<div class="info-item">
-				<span class="info-label">Run Number:</span>
-				<span class="info-value">{trip.run}</span>
+				<span class="info-label">TRN:</span>
+				<span class="info-value">
+					{trip.run}
+					<a
+						class="trnguru-link-inline"
+						title="Open in TrainGuru"
+						aria-label={`Consult TRNGuru for train ${trip.run}`}
+						href={getTrainGuruUrl(trip.run)}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<img src="/img/trnguru.svg" alt="TRNGuru" class="trnguru-icon-inline" />
+					</a>
+				</span>
 			</div>
 			<div class="info-item">
 				<span class="info-label">Service Dates:</span>
@@ -291,6 +309,24 @@
 		flex: 1;
 		color: #333;
 		font-size: 0.95rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.trnguru-link-inline {
+		display: inline-flex;
+		vertical-align: middle;
+	}
+
+	.trnguru-icon-inline {
+		height: 1.2em;
+		width: 1.2em;
+		transition: transform 0.2s ease-in-out;
+	}
+
+	.trnguru-link-inline:hover .trnguru-icon-inline {
+		transform: scale(1.2);
 	}
 
 	.run-series-item {

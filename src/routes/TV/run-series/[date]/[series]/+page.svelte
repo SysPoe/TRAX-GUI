@@ -18,6 +18,12 @@
 		const dateStr = date.toString();
 		return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
 	}
+
+	const TRAIN_GURU_URL_PREFIX = "https://syspoe.github.io/train-wiki/#Other/Resources/TRNGuru/?trainNumber=";
+
+	function getTrainGuruUrl(run: string) {
+		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
+	}
 </script>
 
 <svelte:head>
@@ -93,57 +99,70 @@
 					trip.stopTimes[trip.stopTimes.length - 1].scheduled_arrival_date_offset -
 					trip.stopTimes[0].scheduled_departure_date_offset}
 
-				<a
-					class="result"
-					onclick={(ev) => {
-						if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
-							// Open in new tab if modifier key is held
-							ev.preventDefault();
-							window.open(`/TV/trip/gtfs/${trip._trip.trip_id}`, "_blank");
-							return;
-						}
-						goto(`/TV/trip/gtfs/${trip._trip.trip_id}`);
-					}}
-					href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
-				>
-					<span class="headline">
-						{trip.run}
-						<span class="de-emphasize">
-							{route?.route_short_name}
-						</span>
-						&mdash;
-						{route?.route_long_name}
-					</span><br />
-					<span class="extra-details">
-						{departure_time}
-						<span class="location">
-							{startParent?.stop_name?.replace(" station", "").trim() ??
-								startStation?.stop_name?.replace(" station", "").trim()}
-							{startStation?.platform_code}
-						</span>
-						<span class="bigarrow">&rarr;</span>
-						{arrival_time}
-						<span class="location"
-							>{endParent?.stop_name?.replace(" station", "").trim() ??
-								endStation?.stop_name?.replace(" station", "").trim()}
-							{endStation?.platform_code}
-						</span>
-						{#if date_offset > 0}
-							(+{date_offset} {date_offset == 1 ? "day" : "days"})
-						{/if}
-						<br />
-						{data.expressStrings[trip._trip.trip_id]} <br />
+				<div class="result-wrapper">
+					<a
+						class="result"
+						onclick={(ev) => {
+							if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+								// Open in new tab if modifier key is held
+								ev.preventDefault();
+								window.open(`/TV/trip/gtfs/${trip._trip.trip_id}`, "_blank");
+								return;
+							}
+							goto(`/TV/trip/gtfs/${trip._trip.trip_id}`);
+						}}
+						href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
+					>
+						<span class="headline">
+							{trip.run}
+							<span class="de-emphasize">
+								{route?.route_short_name}
+							</span>
+							&mdash;
+							{route?.route_long_name}
+						</span><br />
+						<span class="extra-details">
+							{departure_time}
+							<span class="location">
+								{startParent?.stop_name?.replace(" station", "").trim() ??
+									startStation?.stop_name?.replace(" station", "").trim()}
+								{startStation?.platform_code}
+							</span>
+							<span class="bigarrow">&rarr;</span>
+							{arrival_time}
+							<span class="location"
+								>{endParent?.stop_name?.replace(" station", "").trim() ??
+									endStation?.stop_name?.replace(" station", "").trim()}
+								{endStation?.platform_code}
+							</span>
+							{#if date_offset > 0}
+								(+{date_offset} {date_offset == 1 ? "day" : "days"})
+							{/if}
+							<br />
+							{data.expressStrings[trip._trip.trip_id]} <br />
 
-						{#if trip.scheduledStartServiceDates.length == 1}
-							Service date:
-						{:else}
-							Service dates:
-						{/if}
-						{#each trip.scheduledStartServiceDates as date, i (date)}
-							{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
-						{/each}
-					</span>
-				</a>
+							{#if trip.scheduledStartServiceDates.length == 1}
+								Service date:
+							{:else}
+								Service dates:
+							{/if}
+							{#each trip.scheduledStartServiceDates as date, i (date)}
+								{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
+							{/each}
+						</span>
+					</a>
+					<a
+						class="trn-button"
+						title="Open in TrainGuru"
+						aria-label={`Consult TRNGuru for train ${trip.run}`}
+						href={getTrainGuruUrl(trip.run)}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<img src="/img/trnguru.svg" alt="" aria-hidden="true" class="trn-icon" />
+						<span class="sr-only">Open in TrainGuru</span>
+					</a>
+				</div>
 				<hr />
 			{/each}
 		</div>
