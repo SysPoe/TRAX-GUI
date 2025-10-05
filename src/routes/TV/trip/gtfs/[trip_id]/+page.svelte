@@ -74,7 +74,7 @@
 					{trip.run}
 					<a
 						class="trnguru-link-inline"
-						title="Open in TrainGuru"
+						title="Consult TRNGuru"
 						aria-label={`Consult TRNGuru for train ${trip.run}`}
 						href={getTrainGuruUrl(trip.run)}
 						target="_blank"

@@ -148,14 +148,14 @@
 					</a>
 					<a
 						class="trn-button"
-						title="Open in TrainGuru"
+						title="Consult TRNGuru"
 						aria-label={`Consult TRNGuru for train ${trip.run}`}
 						href={getTrainGuruUrl(trip.run)}
 						target="_blank"
 						rel="noopener noreferrer"
 					>
 						<img src="/img/trnguru.svg" alt="" aria-hidden="true" class="trn-icon" />
-						<span class="sr-only">Open in TrainGuru</span>
+						<span class="sr-only">Consult TRNGuru</span>
 					</a>
 				</div>
 				<hr />

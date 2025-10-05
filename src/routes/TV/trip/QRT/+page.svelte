@@ -18,6 +18,12 @@
 			` (${d.getDate()}/${d.getMonth() + 1}${d.getFullYear() != n.getFullYear() ? "/" + d.getFullYear() : ""})`
 		);
 	}
+
+	const TRAIN_GURU_URL_PREFIX = "https://syspoe.github.io/train-wiki/#Other/Resources/TRNGuru/?trainNumber=";
+
+	function getTrainGuruUrl(run: string) {
+		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
+	}
 </script>
 
 <svelte:head>
@@ -51,22 +57,35 @@
 				?.placeName.replace(/^Brisbane - /, "")
 				.trim() ??
 			"UNKNOWN"}
-		<a href="/TV/trip/QRT/{service.serviceId}" class="result">
-			<span class="headline">
-				<span class="de-emphasize">{run} &mdash;</span>
-				{start} &ndash; {end}
-			</span><br />
-			<span class="extra-details">
-				{formatTime(service.stops[0].actualDeparture)}
-				<span class="location">
-					{start}
+		<div class="result-wrapper">
+			<a href="/TV/trip/QRT/{service.serviceId}" class="result">
+				<span class="headline">
+					<span class="de-emphasize">{run} &mdash;</span>
+					{start} &ndash; {end}
+				</span><br />
+				<span class="extra-details">
+					{formatTime(service.stops[0].actualDeparture)}
+					<span class="location">
+						{start}
+					</span>
+					<span class="bigarrow">&rarr;</span>
+					{formatTime(service.stops.at(-1)?.actualArrival ?? "")}
+					<span class="location">{end}</span><br />
+					{service.serviceName} &mdash; {service.serviceId} {service.direction} {service.line}<br />
 				</span>
-				<span class="bigarrow">&rarr;</span>
-				{formatTime(service.stops.at(-1)?.actualArrival ?? "")}
-				<span class="location">{end}</span><br />
-				{service.serviceName} &mdash; {service.serviceId} {service.direction} {service.line}<br />
-			</span>
-		</a>
+			</a>
+			<a
+				class="trn-button"
+				title="Consult TRNGuru"
+				aria-label={`Consult TRNGuru for train ${run}`}
+				href={getTrainGuruUrl(run)}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<img src="/img/trnguru.svg" alt="" aria-hidden="true" class="trn-icon" />
+				<span class="sr-only">Consult TRNGuru</span>
+			</a>
+		</div>
 		<hr />
 	{/each}
 </div>
