@@ -38,11 +38,6 @@
 	<link rel="prefetch" href="/img/loading.svg" />
 </svelte:head>
 
-<nav>
-	<a href="/">Home</a>
-	<a href="/DB">DepartureBoard</a>
-	<a href="/TV">TripViewer</a>
-</nav>
 
 <div class="title">
 	<h1>TRAX <i>DepartureBoard</i></h1>

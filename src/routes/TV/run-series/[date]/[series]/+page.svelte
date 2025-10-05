@@ -33,11 +33,6 @@
 	<link rel="icon" type="image/svg+xml" href="/favicon-TV.svg" />
 </svelte:head>
 
-<nav>
-	<a href="/">Home</a>
-	<a href="/DB">DepartureBoard</a>
-	<a href="/TV">TripViewer</a>
-</nav>
 
 <div class="header">
 	<h1>TRAX <i>TripViewer</i></h1>
