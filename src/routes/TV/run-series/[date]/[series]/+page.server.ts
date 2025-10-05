@@ -4,14 +4,14 @@ import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import * as gtfs from "gtfs";
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isTRAXLoaded) {
 		loadTRAX();
 		throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 	}
 
 	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
-	
+
 	let { date, series } = params;
 
 	let runSeries = TRAX.getRunSeries(Number.parseInt(date), series, true);
@@ -38,6 +38,8 @@ export const load: PageServerLoad = async ({ params }) => {
 	let stations: { [station_id: string]: gtfs.Stop } = {};
 	let _st = TRAX.getRawStops();
 	for (const station of _st) stations[station.stop_id] = station;
+
+	if (!locals.session?.data?.expandedAccess === true) runSeries.vehicle_sightings = [];
 
 	return {
 		runSeries,

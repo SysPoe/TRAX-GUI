@@ -218,7 +218,7 @@
 		<br />
 
 		<hr />
-		<details>
+		<details open={data.extraDetails}>
 			<summary>Advanced</summary>
 
 			<label for="date-mod">Date Selection:</label>
@@ -242,7 +242,7 @@
 			</select><br />
 
 			<label for="extra-details">Show Extra Details:</label>
-			<input type="checkbox" name="extra-details" id="extra-details" />
+			<input type="checkbox" name="extra-details" id="extra-details" checked={data.extraDetails} />
 		</details>
 		<hr />
 		<input
