@@ -2,6 +2,7 @@
 	import type { PageProps } from "./$types";
 	import type { TravelTrip, SRTStop, TravelStopTime } from "translink-rail-api";
 	import "$lib/styles/common.css";
+	import "$lib/styles/stoptimes.css";
 
 	const { data }: PageProps = $props();
 	let { service }: { service: TravelTrip } = data;
@@ -311,133 +312,11 @@
 		vertical-align: middle;
 	}
 
-	.stoptimes {
-		font-family: "Arial Narrow", Arial, sans-serif;
-		padding: 0.1rem;
-		width: fit-content;
-		margin: 0 auto;
-	}
-
-	.stop-time {
-		display: block;
-		width: fit-content;
-		color: inherit;
-		text-decoration: none;
-	}
-
-	.stop-time.passing {
-		background-color: #ccc;
-	}
-
-	.stop-time.cancelled {
-		background-color: #fceaea;
-	}
-
-	.stop-time {
-		border-radius: 3px;
-		margin-bottom: 0.2rem;
-	}
-
-	.platform {
-		align-items: center;
-		color: white;
-		display: inline-block;
-		font-family: "Arial", serif;
-		font-size: 2rem;
-		font-weight: 900;
-		height: 2rem;
-		width: 2.8rem;
-		justify-content: center;
-		line-height: 0.95;
-		margin: 0.3rem;
-		outline: 0.15rem solid black;
-		text-align: center;
-		-webkit-text-stroke-width: 0.1rem;
-		-webkit-text-stroke-color: black;
-	}
-
-	.smalltext {
-		margin-top: -1rem;
-		font-size: 0.95rem;
-		width: 16rem;
-		display: inline-block;
-		vertical-align: middle;
-		font-weight: 500;
-	}
-
-	.station {
-		font-weight: 600;
-		line-height: 0.9;
-		font-size: 1.3rem;
-		text-transform: uppercase;
-	}
-
-	.service-type {
-		font-weight: 700;
-		font-size: 1.1rem;
-		text-transform: uppercase;
-		display: inline-block;
-		vertical-align: top;
-		margin-top: 0.8rem;
-		width: 1.1rem;
-		height: 1.1rem;
-		padding-bottom: 0.1rem;
-		text-align: center;
-		outline: 0.1rem solid black;
-	}
-
-	.service-type.passing {
-		background-color: rgb(120, 120, 120);
-		color: white;
-	}
-
-	.service-type.cancelled {
-		background-color: #c62828;
-		color: white;
-	}
-
-	.very-late {
-		color: #c62828;
-	}
-	.late {
-		color: #ff8f00;
-	}
-	.on-time {
-		color: #2e7d32;
-	}
-	.early {
-		color: #1565c0;
-	}
-	.scheduled,
-	.estimated {
-		color: #757575;
-	}
-	.delay.cancelled {
-		color: #fff;
-		background-color: #c62828;
-		padding: 0 0.25em;
-		border-radius: 0.25em;
-		font-weight: bold;
-	}
-
-	.date-offset {
-		font-size: 0.8rem;
-		color: #757575;
-		margin-left: 0.4rem;
-	}
-
 	footer {
 		text-align: center;
 		margin-top: 1.5rem;
 		padding: 1rem;
 		color: #757575;
 		font-size: 0.85rem;
-	}
-
-	hr {
-		border: none;
-		height: 1px;
-		background-color: #eee;
-		margin: 0.4rem 0;
 	}
 </style>
