@@ -362,7 +362,7 @@
 	}
 
 	.stop-time.passing {
-		background-color: #f5f5f5;
+		background-color: #ccc;
 	}
 
 	.stop-time.cancelled {

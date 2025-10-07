@@ -22,7 +22,7 @@
 	];
 
 	const replace: { [key: string]: string } = {
-		"TOWNSVILLE - CHARTERS TOWERS ROAD": "TOWNSVILLE",
+		"TOWNSVILLE - CHARTERS TOWERS ROAD": "TOWNSVILLE STN.",
 	};
 
 	const filteredStops = (service.stopsWithPassing || service.stops).filter((st) => {
@@ -326,7 +326,7 @@
 	}
 
 	.stop-time.passing {
-		background-color: #f5f5f5;
+		background-color: #ccc;
 	}
 
 	.stop-time.cancelled {
