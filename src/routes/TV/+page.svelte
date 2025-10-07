@@ -8,6 +8,38 @@
 	const { data }: PageProps = $props();
 	let { stations }: { stations: SerializableAugmentedStop[] } = data;
 
+	function handleStationInput(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const targetId = input.dataset.target;
+		if (!targetId) {
+			return;
+		}
+
+		const hiddenInput = document.getElementById(targetId) as HTMLInputElement | null;
+		if (!hiddenInput) {
+			return;
+		}
+
+		const rawValue = input.value.trim();
+		if (!rawValue) {
+			hiddenInput.value = "";
+			return;
+		}
+
+		const selectedStation =
+			stations.find((station) => {
+				const name = station.stop_name?.toLowerCase() ?? "";
+				return name === rawValue.toLowerCase() || station.stop_id === rawValue;
+			}) ?? null;
+
+		if (selectedStation) {
+			hiddenInput.value = selectedStation.stop_id;
+			input.value = selectedStation.stop_name ?? selectedStation.stop_id ?? rawValue;
+		} else {
+			hiddenInput.value = "";
+		}
+	}
+
 	function addIntermediate() {
 		const container = document.getElementById("intermediates");
 		const template = document.getElementById("template-intermediate-station");
@@ -16,8 +48,17 @@
 			const newIntermediate = template.cloneNode(true) as HTMLElement;
 			newIntermediate.style.display = "block";
 			newIntermediate.id += `-${id}`;
-			newIntermediate.querySelector("select")?.setAttribute("id", `intermediate-station-${id}`);
-			newIntermediate.querySelector("select")?.setAttribute("name", `intermediate-station-${id}`);
+			const displayInput = newIntermediate.querySelector("input[data-role='station-display']");
+			const hiddenInput = newIntermediate.querySelector("input[data-role='station-hidden']");
+			if (displayInput && hiddenInput) {
+				displayInput.setAttribute("id", `intermediate-station-display-${id}`);
+				displayInput.setAttribute("data-target", `intermediate-station-${id}`);
+				displayInput.addEventListener("input", handleStationInput);
+				displayInput.addEventListener("change", handleStationInput);
+				displayInput.addEventListener("blur", handleStationInput);
+				hiddenInput.setAttribute("id", `intermediate-station-${id}`);
+				hiddenInput.setAttribute("name", `intermediate-station-${id}`);
+			}
 			const button = newIntermediate.querySelector("button");
 			if (button) {
 				button.addEventListener("click", removeIntermediate);
@@ -84,6 +125,15 @@
 
 {#if !loading}
 	<form action="/TV/search" method="get">
+		<datalist id="stations-list">
+			<option value="" label="Any Station"></option>
+			{#each stations as station}
+				<option
+					value={station.stop_name ?? station.stop_id ?? ""}
+					label={station.stop_id ? `${station.stop_name ?? station.stop_id} (${station.stop_id})` : undefined}
+				></option>
+			{/each}
+		</datalist>
 		<input
 			type="submit"
 			value="Search"
@@ -94,36 +144,49 @@
 		/>
 		<hr />
 		<b>Filter by Stations</b><br />
-		<label for="start-station">Starts at:</label>
-		<select name="start-station" id="start-station">
-			<option value="">Any Station</option>
-			<!-- TODO add search functionality for stations -->
-			{#each stations as station}
-				<option value={station.stop_id}>{station.stop_name}</option>
-			{/each}
-		</select><br />
-		<label for="end-station">Ends at:</label>
-		<select name="end-station" id="end-station">
-			<option value="">Any Station</option>
-			<!-- TODO add search functionality for stations -->
-			{#each stations as station}
-				<option value={station.stop_id}>{station.stop_name}</option>
-			{/each}
-		</select><br />
+		<label for="start-station-display">Starts at:</label>
+		<input
+			list="stations-list"
+			id="start-station-display"
+			type="text"
+			placeholder="Type to search stations"
+			data-target="start-station"
+			oninput={handleStationInput}
+			onchange={handleStationInput}
+			onblur={handleStationInput}
+		/>
+		<input type="hidden" name="start-station" id="start-station" /><br />
+		<label for="end-station-display">Ends at:</label>
+		<input
+			list="stations-list"
+			id="end-station-display"
+			type="text"
+			placeholder="Type to search stations"
+			data-target="end-station"
+			oninput={handleStationInput}
+			onchange={handleStationInput}
+			onblur={handleStationInput}
+		/>
+		<input type="hidden" name="end-station" id="end-station" /><br />
 		<i
 			>Included Stations (not necessarily in order and can be start/end, service must stop at all selected stops):</i
 		><br />
-		<!-- TODO add ability to add/remove intermediate stations -->
 		<div class="intermediates" id="intermediates">
 			<div style="display: none;" id="template-intermediate-station">
-				<select name="intermediate-station" id="intermediate-station">
-					<option value="">Any Intermediate Station</option>
-					<!-- TODO add search functionality for stations -->
-					{#each stations as station}
-						<option value={station.stop_id}>{station.stop_name}</option>
-					{/each}
-				</select>
-				<button> - </button>
+				<input
+					data-role="station-display"
+					data-target="intermediate-station"
+					list="stations-list"
+					type="text"
+					placeholder="Type to search stations"
+				/>
+				<input
+					type="hidden"
+					data-role="station-hidden"
+					name="intermediate-station"
+					id="intermediate-station"
+				/>
+				<button type="button"> - </button>
 			</div>
 		</div>
 		<button type="button" onclick={addIntermediate}> + </button>
@@ -139,7 +202,7 @@
 						<option value={date}>{date}</option>
 					{/each}
 				</select>
-				<button> - </button>
+				<button type="button"> - </button>
 			</div>
 		</div>
 		<button type="button" onclick={addDate}> + </button>
