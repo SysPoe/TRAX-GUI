@@ -1,9 +1,9 @@
 import { json } from "@sveltejs/kit";
 
-export function GET({ locals }) {
-	locals.session.setData({
+export async function GET({ locals }) {
+	await locals.session.setData({
 		extraDetails: !(locals.session?.data?.extraDetails ?? false),
 	});
-	locals.session.save();
+	await locals.session.save();
 	return json({ extraDetails: locals.session?.data?.extraDetails ?? false });
 }
