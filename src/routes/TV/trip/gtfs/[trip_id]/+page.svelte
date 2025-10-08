@@ -16,6 +16,8 @@
 		route: gtfs.Route;
 	} = data;
 
+	let useRealtime = $state(true);
+
 	// Borrowed from TRAX
 	function formatTimestamp(ts?: number | null): string {
 		if (ts === null || ts === undefined) return "--:--";
@@ -173,10 +175,17 @@
 
 		<div class="info-section">
 			<h3>Stoptimes</h3>
+			<div class="stoptimes-controls">
+				<label>
+					<input type="checkbox" bind:checked={useRealtime} />
+					Show Realtime Data
+				</label>
+			</div>
 			<div class="stoptimes">
 				{#each trip.stopTimes as st}
 					<a
-						class="stop-time {st.passing ? 'passing' : ''} {st.realtime &&
+						class="stop-time {st.passing ? 'passing' : ''} {useRealtime &&
+						st.realtime &&
 						st.realtime_info?.schedule_relationship === 3
 							? 'cancelled'
 							: ''}"
@@ -192,18 +201,26 @@
 						}}
 					>
 						<span class="platform" style="background-color: #{route.route_color || '000000'}">
-							{st.scheduled_platform_code || "?"}
+							{(useRealtime && st.actual_platform_code) || st.scheduled_platform_code || "?"}
 						</span>
 						<span class="smalltext">
 							<span class="time">
-								{formatTimestamp(st.scheduled_departure_timestamp || st.scheduled_arrival_timestamp)}
+								{formatTimestamp(
+									useRealtime && (st.actual_departure_timestamp || st.actual_arrival_timestamp)
+										? st.actual_departure_timestamp || st.actual_arrival_timestamp
+										: st.scheduled_departure_timestamp || st.scheduled_arrival_timestamp,
+								)}
 							</span>
 							<span
-								class="delay {st.passing ? 'estimated' : st.realtime_info?.delay_class || 'scheduled'}"
+								class="delay {st.passing
+									? 'estimated'
+									: useRealtime && st.realtime
+										? st.realtime_info?.delay_class || 'scheduled'
+										: 'scheduled'}"
 							>
 								({st.passing
 									? "estimated"
-									: st.realtime
+									: useRealtime && st.realtime
 										? st.realtime_info?.delay_string
 										: "scheduled"})
 							</span>
@@ -220,10 +237,16 @@
 							{/if}
 							<br />
 							<span class="station">
-								{@html st.actual_exit_side
+								{@html useRealtime ? st.actual_exit_side
 									? st.actual_exit_side == "left"
 										? "◀"
 										: st.actual_exit_side == "right"
+											? "▶"
+											: ""
+									: "" : st.scheduled_exit_side
+									? st.scheduled_exit_side == "left"
+										? "◀"
+										: st.scheduled_exit_side == "right"
 											? "▶"
 											: ""
 									: ""}
@@ -239,7 +262,7 @@
 						</span>
 						{#if st.passing}
 							<span class="service-type passing">P</span>
-						{:else if st.realtime && st.realtime_info?.schedule_relationship === 3}
+						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3}
 							<span class="service-type cancelled">C</span>
 						{/if}
 					</a>
@@ -346,6 +369,15 @@
 		display: inline-block;
 		margin-left: 0.5rem;
 		vertical-align: middle;
+	}
+
+	.stoptimes-controls {
+		margin-bottom: 1rem;
+		text-align: center;
+	}
+	.stoptimes-controls label {
+		font-size: 1rem;
+		cursor: pointer;
 	}
 
 	footer {
