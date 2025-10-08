@@ -13,6 +13,7 @@
 				express_string: string;
 				last_stop_id: string;
 				scheduled_departure_time: string;
+				actual_departure_time: string;
 				departs_in: string;
 				departsInSecs: number;
 		  })
@@ -36,6 +37,12 @@
 
 		isRefreshing = true;
 		refreshError = null;
+
+		let res = await fetch("/api/traxloading").then((r) => r.json());
+		if (res.traxLoading) {
+			// TRAX is still loading, show a loading indicator
+			return;
+		}
 
 		try {
 			await invalidateAll();
@@ -161,7 +168,7 @@
 					{dep.actual_platform_code || "?"}
 				</span>
 				<span class="smalltext">
-					<span class="time">{dep.scheduled_departure_time}</span>
+					<span class="time">{dep.actual_departure_time}</span>
 					<span
 						class="delay {dep.realtime && dep.realtime_info?.schedule_relationship === 3
 							? 'cancelled'

@@ -31,6 +31,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		express_string: string;
 		last_stop_id: string;
 		scheduled_departure_time: string;
+		actual_departure_time: string;
 		departs_in: string;
 		departsInSecs: number;
 	})[] = stop
@@ -102,6 +103,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				express_string: string;
 				last_stop_id: string;
 				scheduled_departure_time: string;
+				actual_departure_time: string;
 				departs_in: string;
 				departsInSecs: number;
 		  })
