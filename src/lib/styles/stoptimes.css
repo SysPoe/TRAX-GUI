@@ -99,24 +99,24 @@ a.tv-stop-time.cancelled:hover {
 	color: white;
 }
 
-.tv-very-late {
+.very-late {
 	color: #c62828;
 }
-.tv-late {
+.late {
 	color: #ff8f00;
 }
-.tv-on-time {
+.on-time {
 	color: #2e7d32;
 }
-.tv-early {
+.early {
 	color: #1565c0;
 }
-.tv-scheduled,
-.tv-estimated {
+.scheduled,
+.estimated {
 	color: #757575;
 }
 
-.tv-delay.cancelled {
+.delay.cancelled {
 	color: #fff;
 	background-color: #c62828;
 	padding: 0 0.25em;
