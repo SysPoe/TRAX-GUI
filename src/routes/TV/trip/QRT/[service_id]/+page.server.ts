@@ -20,5 +20,5 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!extraDetails && service.stopsWithPassing)
 		service = { ...service, stopsWithPassing: service.stopsWithPassing.filter((v) => v.isStop) };
 
-	return { service };
+	return { service, extraDetails };
 };

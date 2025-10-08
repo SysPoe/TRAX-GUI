@@ -48,17 +48,25 @@
 	<link rel="icon" type="image/svg+xml" href="/favicon-TV.svg" />
 </svelte:head>
 
-
 <div class="header">
 	<h1>TRAX <i>TripViewer</i></h1>
-	<h2>
-		{trip.run} - {trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
-	</h2>
-	<p>
-		Departing: {formatTimestamp(
-			trip.stopTimes[0].scheduled_departure_timestamp || trip.stopTimes[0].scheduled_arrival_timestamp,
-		)} | Trip ID: {trip._trip.trip_id}
-	</p>
+	{#if data.extraDetails}
+		<h2>
+			{trip.run} - {trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+		</h2>
+		<p>
+			Departing: {formatTimestamp(
+				trip.stopTimes[0].scheduled_departure_timestamp || trip.stopTimes[0].scheduled_arrival_timestamp,
+			)} | Trip ID: {trip._trip.trip_id}
+		</p>
+	{:else}
+		<h2>
+			{formatTimestamp(
+				trip.stopTimes[0].scheduled_departure_timestamp || trip.stopTimes[0].scheduled_arrival_timestamp,
+			)}
+			{trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+		</h2>
+	{/if}
 </div>
 
 <hr />
@@ -72,115 +80,121 @@
 				<span class="info-value">{data.expressString}</span>
 			</div>
 			<div class="info-item">
-				<span class="info-label">TRN:</span>
-				<span class="info-value">
-					{trip.run}
-					<a
-						class="trnguru-link-inline"
-						title="Consult TRNGuru"
-						aria-label={`Consult TRNGuru for train ${trip.run}`}
-						href={getTrainGuruUrl(trip.run)}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						<img src="/img/trnguru.svg" alt="TRNGuru" class="trnguru-icon-inline" />
-					</a>
-				</span>
-			</div>
-			<div class="info-item">
 				<span class="info-label">Service Dates:</span>
 				<span class="info-value">
 					{trip.scheduledStartServiceDates.join(", ")}
 				</span>
 			</div>
-			<div class="info-item">
-				<span class="info-label">Headsign:</span>
-				<span class="info-value">
-					{@html trip._trip.trip_headsign || "<b>null</b>"}
-				</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Trip Short Name:</span>
-				<span class="info-value">
-					{@html trip._trip.trip_short_name || "<b>null</b>"}
-				</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Direction ID:</span>
-				<span class="info-value">
-					{@html trip._trip.direction_id || "<b>null</b>"}
-				</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Block ID:</span>
-				<span class="info-value">
-					{@html trip._trip.block_id || "<b>null</b>"}
-				</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Shape ID:</span>
-				<span class="info-value">
-					{@html trip._trip.shape_id || "<b>null</b>"}
-				</span>
-			</div>
+			{#if data.extraDetails}
+				<div class="info-item">
+					<span class="info-label">TRN:</span>
+					<span class="info-value">
+						{trip.run}
+						<a
+							class="trnguru-link-inline"
+							title="Consult TRNGuru"
+							aria-label={`Consult TRNGuru for train ${trip.run}`}
+							href={getTrainGuruUrl(trip.run)}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<img src="/img/trnguru.svg" alt="TRNGuru" class="trnguru-icon-inline" />
+						</a>
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Headsign:</span>
+					<span class="info-value">
+						{@html trip._trip.trip_headsign || "<b>null</b>"}
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Trip Short Name:</span>
+					<span class="info-value">
+						{@html trip._trip.trip_short_name || "<b>null</b>"}
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Direction ID:</span>
+					<span class="info-value">
+						{@html trip._trip.direction_id || "<b>null</b>"}
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Block ID:</span>
+					<span class="info-value">
+						{@html trip._trip.block_id || "<b>null</b>"}
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Shape ID:</span>
+					<span class="info-value">
+						{@html trip._trip.shape_id || "<b>null</b>"}
+					</span>
+				</div>
+			{/if}
 		</div>
 
-		<div class="info-section">
-			<h3>Run Series</h3>
-			{#each Object.entries(trip.runSeries) as [date, series]}
+		{#if data.extraDetails}
+			<div class="info-section">
+				<h3>Run Series</h3>
+				{#each Object.entries(trip.runSeries) as [date, series]}
+					<div class="info-item">
+						<span class="info-label">{date}:</span>
+						<span class="info-value">
+							{#if series !== null && series !== undefined}
+								<a
+									href={`/TV/run-series/${date}/${series}`}
+									onclick={(ev) => {
+										if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+											// Open in new tab if modifier key is held
+											ev.preventDefault();
+											window.open(`/TV/run-series/${date}/${series}`, "_blank");
+											return;
+										}
+										goto(`/TV/run-series/${date}/${series}`);
+									}}
+								>
+									{series}
+								</a>
+							{:else}
+								<b>null</b>
+							{/if}
+						</span>
+					</div>
+				{/each}
+			</div>
+
+			<div class="info-section">
+				<h3>Route Information ({route.route_id})</h3>
 				<div class="info-item">
-					<span class="info-label">{date}:</span>
+					<span class="info-label">Route Name:</span>
 					<span class="info-value">
-						{#if series !== null && series !== undefined}
-							<a
-								href={`/TV/run-series/${date}/${series}`}
-								onclick={(ev) => {
-									if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
-										// Open in new tab if modifier key is held
-										ev.preventDefault();
-										window.open(`/TV/run-series/${date}/${series}`, "_blank");
-										return;
-									}
-									goto(`/TV/run-series/${date}/${series}`);
-								}}
-							>
-								{series}
-							</a>
-						{:else}
-							<b>null</b>
+						{@html route.route_long_name || route.route_short_name || "<b>null</b>"}
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Route Color:</span>
+					<span class="info-value">
+						{@html route.route_color || "<b>null</b>"}
+						{#if route.route_color}
+							<div class="color-square" style="background-color: #{route.route_color};"></div>
 						{/if}
 					</span>
 				</div>
-			{/each}
-		</div>
-
-		<div class="info-section">
-			<h3>Route Information ({route.route_id})</h3>
-			<div class="info-item">
-				<span class="info-label">Route Name:</span>
-				<span class="info-value">
-					{@html route.route_long_name || route.route_short_name || "<b>null</b>"}
-				</span>
 			</div>
-			<div class="info-item">
-				<span class="info-label">Route Color:</span>
-				<span class="info-value">
-					{@html route.route_color || "<b>null</b>"}
-					{#if route.route_color}
-						<div class="color-square" style="background-color: #{route.route_color};"></div>
-					{/if}
-				</span>
-			</div>
-		</div>
+		{/if}
 
 		<div class="info-section">
 			<h3>Stoptimes</h3>
-			<div class="stoptimes-controls">
-				<label>
-					<input type="checkbox" bind:checked={useRealtime} />
-					Show Realtime Data
-				</label>
-			</div>
+			{#if data.extraDetails}
+				<div class="stoptimes-controls">
+					<label>
+						<input type="checkbox" bind:checked={useRealtime} />
+						Show Realtime Data
+					</label>
+				</div>
+			{/if}
 			<div class="stoptimes">
 				{#each trip.stopTimes as st}
 					<a
@@ -237,19 +251,21 @@
 							{/if}
 							<br />
 							<span class="station">
-								{@html useRealtime ? st.actual_exit_side
-									? st.actual_exit_side == "left"
-										? "◀"
-										: st.actual_exit_side == "right"
-											? "▶"
-											: ""
-									: "" : st.scheduled_exit_side
-									? st.scheduled_exit_side == "left"
-										? "◀"
-										: st.scheduled_exit_side == "right"
-											? "▶"
-											: ""
-									: ""}
+								{@html useRealtime
+									? st.actual_exit_side
+										? st.actual_exit_side == "left"
+											? "◀"
+											: st.actual_exit_side == "right"
+												? "▶"
+												: ""
+										: ""
+									: st.scheduled_exit_side
+										? st.scheduled_exit_side == "left"
+											? "◀"
+											: st.scheduled_exit_side == "right"
+												? "▶"
+												: ""
+										: ""}
 								{(
 									stations[st.scheduled_parent_station || ""]?.stop_name ||
 									stations[st.scheduled_stop || ""]?.stop_name ||
@@ -273,9 +289,11 @@
 	</div>
 </div>
 
-<footer>
-	<p>* Passing stop times and stations are estimated and may not be accurate.</p>
-</footer>
+{#if data.extraDetails}
+	<footer>
+		<p>* Passing stop times and stations are estimated and may not be accurate.</p>
+	</footer>
+{/if}
 
 <style>
 	* {

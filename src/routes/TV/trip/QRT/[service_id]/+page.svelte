@@ -72,7 +72,6 @@
 	<link rel="icon" type="image/svg+xml" href="/favicon-TV.svg" />
 </svelte:head>
 
-
 <div class="header">
 	<h1>TRAX <i>TripViewer</i></h1>
 	<h2>
@@ -89,26 +88,28 @@
 	<div class="content">
 		<div class="info-section">
 			<h3>Trip Information</h3>
-			<div class="info-item">
-				<span class="info-label">TRN:</span>
-				<span class="info-value">
-					{service.run}
-					<a
-						class="trnguru-link-inline"
-						title="Consult TRNGuru"
-						aria-label={`Consult TRNGuru for train ${service.run}`}
-						href={getTrainGuruUrl(service.run)}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						<img src="/img/trnguru.svg" alt="TRNGuru" class="trnguru-icon-inline" />
-					</a>
-				</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Service Name:</span>
-				<span class="info-value">{service.serviceName}</span>
-			</div>
+			{#if data.extraDetails}
+				<div class="info-item">
+					<span class="info-label">TRN:</span>
+					<span class="info-value">
+						{service.run}
+						<a
+							class="trnguru-link-inline"
+							title="Consult TRNGuru"
+							aria-label={`Consult TRNGuru for train ${service.run}`}
+							href={getTrainGuruUrl(service.run)}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<img src="/img/trnguru.svg" alt="TRNGuru" class="trnguru-icon-inline" />
+						</a>
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Service Name:</span>
+					<span class="info-value">{service.serviceName}</span>
+				</div>
+			{/if}
 			<div class="info-item">
 				<span class="info-label">Line:</span>
 				<span class="info-value">{service.line}</span>
@@ -121,18 +122,20 @@
 				<span class="info-label">Status:</span>
 				<span class="info-value">{service.status}</span>
 			</div>
-			<div class="info-item">
-				<span class="info-label">Service Date:</span>
-				<span class="info-value">
-					{service.serviceDate}
-				</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Offers Gold Class:</span>
-				<span class="info-value">
-					{service.offersGoldClass ? "Yes" : "No"}
-				</span>
-			</div>
+			{#if data.extraDetails}
+				<div class="info-item">
+					<span class="info-label">Service Date:</span>
+					<span class="info-value">
+						{service.serviceDate}
+					</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Offers Gold Class:</span>
+					<span class="info-value">
+						{service.offersGoldClass ? "Yes" : "No"}
+					</span>
+				</div>
+			{/if}
 		</div>
 
 		{#if service.disruption}
@@ -214,9 +217,11 @@
 	</div>
 </div>
 
-<footer>
-	<p>* Passing stop times and stations are estimated and may not be accurate.</p>
-</footer>
+{#if data.extraDetails}
+	<footer>
+		<p>* Passing stop times and stations are estimated and may not be accurate.</p>
+	</footer>
+{/if}
 
 <style>
 	* {
