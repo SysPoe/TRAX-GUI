@@ -166,16 +166,16 @@
 
 		<div class="info-section">
 			<h3>Stoptimes</h3>
-			<div class="stoptimes">
+			<div class="tv-stoptimes">
 				{#each filteredStops as st}
 					{@const isSrtStop = "isStop" in st}
 					{@const delay = {
 						delayClass: st.departureDelayClass ?? st.arrivalDelayClass,
 						delayString: st.departureDelayString ?? st.arrivalDelayString,
 					}}
-					<div class="stop-time {isSrtStop && !(st as SRTStop).isStop ? 'passing' : ''}">
-						<span class="platform" style="background-color: #ff8400"> ? </span>
-						<span class="smalltext">
+					<div class="tv-stop-time {isSrtStop && !(st as SRTStop).isStop ? 'passing' : ''}">
+						<span class="tv-platform" style="background-color: #ff8400"> ? </span>
+						<span class="tv-smalltext">
 							<span class="time">
 								{formatTime(
 									st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
@@ -187,11 +187,11 @@
 										: st.actualDeparture,
 								)}
 							</span>
-							<span class="delay {delay.delayClass}">
+							<span class="tv-delay {delay.delayClass}">
 								({delay.delayString})
 							</span>
 							<br />
-							<span class="station">
+							<span class="tv-station">
 								{replace[
 									st.placeName
 										.replace(/station/i, "")
@@ -207,7 +207,7 @@
 							</span>
 						</span>
 						{#if isSrtStop && !(st as SRTStop).isStop}
-							<span class="service-type passing">P</span>
+							<span class="tv-service-type passing">P</span>
 						{/if}
 					</div>
 					<hr />

@@ -195,10 +195,10 @@
 					</label>
 				</div>
 			{/if}
-			<div class="stoptimes">
+			<div class="tv-stoptimes">
 				{#each trip.stopTimes as st}
 					<a
-						class="stop-time {st.passing ? 'passing' : ''} {useRealtime &&
+						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
 						st.realtime &&
 						st.realtime_info?.schedule_relationship === 3
 							? 'cancelled'
@@ -214,10 +214,10 @@
 							goto(`/DB/${st.scheduled_parent_station || st.scheduled_stop}`);
 						}}
 					>
-						<span class="platform" style="background-color: #{route.route_color || '000000'}">
+						<span class="tv-platform" style="background-color: #{route.route_color || '000000'}">
 							{(useRealtime && st.actual_platform_code) || st.scheduled_platform_code || "?"}
 						</span>
-						<span class="smalltext">
+						<span class="tv-smalltext">
 							<span class="time">
 								{formatTimestamp(
 									useRealtime && (st.actual_departure_timestamp || st.actual_arrival_timestamp)
@@ -226,7 +226,7 @@
 								)}
 							</span>
 							<span
-								class="delay {st.passing
+								class="tv-delay {st.passing
 									? 'estimated'
 									: useRealtime && st.realtime
 										? st.realtime_info?.delay_class || 'scheduled'
@@ -239,7 +239,7 @@
 										: "scheduled"})
 							</span>
 							{#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
-								<span class="date-offset"
+								<span class="tv-date-offset"
 									>(+{st.scheduled_departure_timestamp
 										? st.scheduled_departure_date_offset
 										: st.scheduled_arrival_date_offset}{(st.scheduled_departure_timestamp
@@ -250,7 +250,7 @@
 								>
 							{/if}
 							<br />
-							<span class="station">
+							<span class="tv-station">
 								{@html useRealtime
 									? st.actual_exit_side
 										? st.actual_exit_side == "left"
@@ -277,9 +277,9 @@
 							</span>
 						</span>
 						{#if st.passing}
-							<span class="service-type passing">P</span>
+							<span class="tv-service-type passing">P</span>
 						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3}
-							<span class="service-type cancelled">C</span>
+							<span class="tv-service-type cancelled">C</span>
 						{/if}
 					</a>
 					<hr />

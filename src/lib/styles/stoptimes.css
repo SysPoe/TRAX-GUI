@@ -2,14 +2,14 @@
     Common styles for stop time lists in TRAX TripViewer.
 */
 
-.stoptimes {
+.tv-stoptimes {
 	font-family: "Arial Narrow", Arial, sans-serif;
 	padding: 0.1rem;
 	width: fit-content;
 	margin: 0 auto;
 }
 
-.stop-time {
+.tv-stop-time {
 	display: block;
 	width: fit-content;
 	color: inherit;
@@ -19,29 +19,29 @@
 	transition: all 150ms;
 }
 
-a.stop-time {
+a.tv-stop-time {
 	cursor: pointer;
 }
 
-a.stop-time:hover {
+a.tv-stop-time:hover {
 	background-color: #f0f7ff;
 	box-shadow: 0 0 1rem #c5d5f0;
 }
 
-a.stop-time.cancelled:hover {
+a.tv-stop-time.cancelled:hover {
 	background-color: #fceaea;
 	box-shadow: 0 0 1rem #d6b3b3;
 }
 
-.stop-time.cancelled {
+.tv-stop-time.cancelled {
 	background-color: #fceaea;
 }
 
-.stop-time.passing {
+.tv-stop-time.passing {
 	background-color: #ccc;
 }
 
-.platform {
+.tv-platform {
 	align-items: center;
 	color: white;
 	display: inline-block;
@@ -59,7 +59,7 @@ a.stop-time.cancelled:hover {
 	-webkit-text-stroke-color: black;
 }
 
-.smalltext {
+.tv-smalltext {
 	margin-top: -1rem;
 	font-size: 0.95rem;
 	width: 16rem;
@@ -68,14 +68,14 @@ a.stop-time.cancelled:hover {
 	font-weight: 500;
 }
 
-.station {
+.tv-station {
 	font-weight: 600;
 	line-height: 0.9;
 	font-size: 1.3rem;
 	text-transform: uppercase;
 }
 
-.service-type {
+.tv-service-type {
 	font-weight: 700;
 	font-size: 1.1rem;
 	text-transform: uppercase;
@@ -89,34 +89,34 @@ a.stop-time.cancelled:hover {
 	outline: 0.1rem solid black;
 }
 
-.service-type.passing {
+.tv-service-type.passing {
 	background-color: rgb(120, 120, 120);
 	color: white;
 }
 
-.service-type.cancelled {
+.tv-service-type.cancelled {
 	background-color: #c62828;
 	color: white;
 }
 
-.very-late {
+.tv-very-late {
 	color: #c62828;
 }
-.late {
+.tv-late {
 	color: #ff8f00;
 }
-.on-time {
+.tv-on-time {
 	color: #2e7d32;
 }
-.early {
+.tv-early {
 	color: #1565c0;
 }
-.scheduled,
-.estimated {
+.tv-scheduled,
+.tv-estimated {
 	color: #757575;
 }
 
-.delay.cancelled {
+.tv-delay.cancelled {
 	color: #fff;
 	background-color: #c62828;
 	padding: 0 0.25em;
@@ -124,13 +124,13 @@ a.stop-time.cancelled:hover {
 	font-weight: bold;
 }
 
-.date-offset {
+.tv-date-offset {
 	font-size: 0.8rem;
 	color: #757575;
 	margin-left: 0.4rem;
 }
 
-hr {
+.tv-hr {
 	border: none;
 	height: 1px;
 	background-color: #eee;
