@@ -209,6 +209,12 @@
 						{#if isSrtStop && !(st as SRTStop).isStop}
 							<span class="tv-service-type passing">P</span>
 						{/if}
+						{#if data.extraDetails && service.stops.find(v => v.placeName === st.placeName)}
+							{@const ost = service.stops.find(v => v.placeName === st.placeName)}
+							{#if ost?.kStation}
+								<span class="tv-service-type">K</span>
+							{/if}
+						{/if}
 					</div>
 					<hr />
 				{/each}
