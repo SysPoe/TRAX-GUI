@@ -48,8 +48,7 @@
 			await invalidateAll();
 			lastUpdated = new Date();
 		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : "Unable to refresh departures.";
+			const message = error instanceof Error ? error.message : "Unable to refresh departures.";
 			refreshError = message;
 		} finally {
 			isRefreshing = false;
@@ -91,7 +90,6 @@
 			document.removeEventListener("visibilitychange", handleVisibility);
 		};
 	});
-
 </script>
 
 <svelte:head>
@@ -108,7 +106,6 @@
 	<link rel="icon" type="image/svg+xml" href="/favicon-DB.svg" />
 </svelte:head>
 
-
 <div class="header">
 	<h1>TRAX <i>DepartureBoard</i></h1>
 	<h2>
@@ -117,7 +114,6 @@
 </div>
 
 <hr />
-
 
 <div class="refresh-bar" aria-live="polite">
 	<button class="refresh-button" onclick={refreshDepartures} disabled={isRefreshing}>
@@ -182,8 +178,10 @@
 								? dep.realtime_info?.delay_string || "scheduled"
 								: "scheduled"})
 					</span>
-					<span class="run">{trip.run}</span> to <br />
-					<span class="headsign">
+					{#if data.extraDetails}
+						<span class="run">{trip.run}</span> to
+					{/if}
+					<br /><span class="headsign">
 						{trip._trip.trip_headsign
 							?.replace(/station$/, "")
 							.trim()
@@ -314,7 +312,9 @@
 		border: 0.15rem solid #000;
 		background-color: #fff;
 		cursor: pointer;
-		transition: background-color 150ms ease, transform 150ms ease;
+		transition:
+			background-color 150ms ease,
+			transform 150ms ease;
 	}
 
 	.refresh-button:disabled {

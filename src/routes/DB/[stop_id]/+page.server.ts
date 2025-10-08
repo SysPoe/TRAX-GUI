@@ -8,7 +8,7 @@ import { getUpcomingQRTravelDepartures, isTRAXLoaded, isTRAXLoading, loadTRAX, t
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isTRAXLoaded) {
 		loadTRAX();
 		throw error(503, "Loading TRAX data... Please retry in a few minutes.");
@@ -116,5 +116,14 @@ export const load: PageServerLoad = async ({ params }) => {
 		.map((v) => v.toSerializable())
 		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
 
-	return { stations, stop_id, departures: mixed, trips, routes };
+	const extraDetails = locals.session.data?.extraDetails ?? false;
+	if (!extraDetails) {
+		mixed = mixed.filter(
+			(v) =>
+				(v.dep_type === "gtfs" && !v.passing) ||
+				v.dep_type !== "gtfs",
+		);
+	}
+
+	return { stations, stop_id, departures: mixed, trips, routes, extraDetails };
 };
