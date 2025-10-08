@@ -43,6 +43,13 @@ export async function loadTRAX(freshLoad = false) {
 		isTRAXLoading = false;
 		isTRAXLoaded = true;
 		intervalSet = true;
+
+		TRAX.on("update-realtime-start", () => {
+			isTRAXLoading = true;
+		});
+		TRAX.on("update-realtime-end", () => {
+			isTRAXLoading = false;
+		});
 	}
 }
 
