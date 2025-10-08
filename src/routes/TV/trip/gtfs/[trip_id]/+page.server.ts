@@ -34,8 +34,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			...serialized,
 			stopTimes: serialized.stopTimes.filter((v) => !v.passing),
 		};
-	
-	console.log(extraDetails, serialized.stopTimes.some(v => v.passing));
 
 	return { trip: serialized, stations, route, expressString, extraDetails };
 };
