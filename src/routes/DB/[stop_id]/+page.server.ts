@@ -116,7 +116,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.map((v) => v.toSerializable())
 		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
 
-	const extraDetails = locals.session.data?.extraDetails ?? false;
+	const extraDetails = locals.session?.data?.extraDetails ?? true;
 	if (!extraDetails) {
 		mixed = mixed.filter(
 			(v) =>

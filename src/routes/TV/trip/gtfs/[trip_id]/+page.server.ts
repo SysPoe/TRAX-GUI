@@ -28,7 +28,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	let serialized = trip.toSerializable();
 
-	const extraDetails = locals.session.data?.extraDetails ?? false;
+	const extraDetails = locals.session?.data?.extraDetails ?? true;
 	if (!extraDetails)
 		serialized = {
 			...serialized,

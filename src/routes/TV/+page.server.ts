@@ -46,5 +46,5 @@ export const load: PageServerLoad = async ({ locals }) => {
 	// 			.flat(),
 	// 	),
 	// ]);
-	return { stations, dates, routes, routePairs, extraDetails: locals.session?.data?.extraDetails ?? false };
+	return { stations, dates, routes, routePairs, extraDetails: locals.session?.data?.extraDetails ?? true };
 };

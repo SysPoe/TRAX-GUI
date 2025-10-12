@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let service: TravelTrip | undefined = TRAX.getQRTTrains().find((v) => v.serviceId == service_id);
 	if (!service) throw error(404, `Service '${service_id}' not found`);
 
-	const extraDetails = locals.session.data?.extraDetails ?? false;
+	const extraDetails = locals.session?.data?.extraDetails ?? true;
 	if (!extraDetails && service.stopsWithPassing)
 		service = { ...service, stopsWithPassing: service.stopsWithPassing.filter((v) => v.isStop) };
 
