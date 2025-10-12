@@ -5,7 +5,7 @@ export let isTRAXLoaded = false;
 export let isTRAXLoading = false;
 let intervalSet = false;
 
-export async function loadTRAX(freshLoad = false) {
+export function loadTRAX(freshLoad = false) {
 	if (!isTRAXLoaded && !isTRAXLoading) {
 		isTRAXLoading = true;
 
@@ -25,13 +25,20 @@ export async function loadTRAX(freshLoad = false) {
 			console.log("Reloading static TRAX GTFS data...");
 			if (fs.existsSync(".TRAXCACHE.sqlite")) fs.rmSync(".TRAXCACHE.sqlite");
 			if (fs.existsSync(".TRAXCACHE.sqlite-journal")) fs.rmSync(".TRAXCACHE.sqlite-journal");
-			await TRAX.loadGTFS(true, true, 120_000);
+			TRAX.loadGTFS(true, true, 120_000).then(() => {
+				isTRAXLoading = false;
+				isTRAXLoaded = true;
+			});
 			fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
 		} else {
 			// Otherwise, load from cache
-			await TRAX.loadGTFS(true, false, 120_000);
+			TRAX.loadGTFS(true, false, 120_000).then(() => {
+				isTRAXLoading = false;
+				isTRAXLoaded = true;
+			});
 		}
 
+		intervalSet = true;
 		if (!intervalSet)
 			setInterval(
 				() => {
@@ -39,10 +46,6 @@ export async function loadTRAX(freshLoad = false) {
 				},
 				1000 * 60 * 60 * 6,
 			); // Reload TRAX every 6h
-
-		isTRAXLoading = false;
-		isTRAXLoaded = true;
-		intervalSet = true;
 
 		TRAX.on("update-realtime-start", () => {
 			isTRAXLoading = true;
