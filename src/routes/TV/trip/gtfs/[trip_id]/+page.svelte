@@ -19,10 +19,10 @@
 	let useRealtime = $state(true);
 
 	// Borrowed from TRAX
-	function formatTimestamp(ts?: number | null): string {
+	function formatTimestamp(ts?: number | null, seconds: boolean = false): string {
 		if (ts === null || ts === undefined) return "--:--";
 		const d = new Date(ts * 1000);
-		return d.toISOString().slice(11, 16);
+		return seconds ? d.toISOString().slice(11, 19) : d.toISOString().slice(11, 16);
 	}
 
 	const TRAIN_GURU_URL_PREFIX = "https://syspoe.github.io/train-wiki/#Other/Resources/TRNGuru/?trainNumber=";
@@ -214,22 +214,33 @@
 							goto(`/DB/${st.scheduled_parent_station || st.scheduled_stop}`);
 						}}
 					>
-						<span class="tv-platform" style="background-color: #{route.route_color || '000000'}">
-							{(useRealtime && st.actual_platform_code) || st.scheduled_platform_code || "?"}
+						<span class="tv-platform" style="background-color: #{route.route_color ?? '000000'}">
+							{(useRealtime && st.actual_platform_code) ?? st.scheduled_platform_code ?? "?"}
 						</span>
 						<span class="tv-smalltext">
 							<span class="time">
-								{formatTimestamp(
-									useRealtime && (st.actual_departure_timestamp || st.actual_arrival_timestamp)
-										? st.actual_departure_timestamp || st.actual_arrival_timestamp
-										: st.scheduled_departure_timestamp || st.scheduled_arrival_timestamp,
-								)}
+								{#if data.extraDetails}
+									{formatTimestamp(
+										useRealtime ? st.actual_arrival_timestamp : st.scheduled_arrival_timestamp,
+										true,
+									)} &rarr;
+									{formatTimestamp(
+										useRealtime ? st.actual_departure_timestamp : st.scheduled_departure_timestamp,
+										true,
+									)}
+								{:else}
+									{formatTimestamp(
+										useRealtime && (st.actual_departure_timestamp ?? st.actual_arrival_timestamp)
+											? (st.actual_departure_timestamp ?? st.actual_arrival_timestamp)
+											: (st.scheduled_departure_timestamp ?? st.scheduled_arrival_timestamp),
+									)}
+								{/if}
 							</span>
 							<span
 								class="tv-delay {st.passing
 									? 'estimated'
 									: useRealtime && st.realtime
-										? st.realtime_info?.delay_class || 'scheduled'
+										? (st.realtime_info?.delay_class ?? 'scheduled')
 										: 'scheduled'}"
 							>
 								({st.passing
