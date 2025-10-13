@@ -2,77 +2,23 @@
 	import type { PageProps } from "./$types";
 	import type { SerializableAugmentedStop } from "translink-rail-api";
 	import "$lib/styles/common.css";
+	import StationAutocomplete from "$lib/StationAutocomplete.svelte";
 
 	let loading = $state(false);
 
 	const { data }: PageProps = $props();
 	let { stations }: { stations: SerializableAugmentedStop[] } = data;
 
-	function handleStationInput(event: Event) {
-		const input = event.currentTarget as HTMLInputElement;
-		const targetId = input.dataset.target;
-		if (!targetId) {
-			return;
-		}
-
-		const hiddenInput = document.getElementById(targetId) as HTMLInputElement | null;
-		if (!hiddenInput) {
-			return;
-		}
-
-		const rawValue = input.value.trim();
-		if (!rawValue) {
-			hiddenInput.value = "";
-			return;
-		}
-
-		const selectedStation =
-			stations.find((station) => {
-				const name = station.stop_name?.toLowerCase() ?? "";
-				return name === rawValue.toLowerCase() || station.stop_id === rawValue;
-			}) ?? null;
-
-		if (selectedStation) {
-			hiddenInput.value = selectedStation.stop_id;
-			input.value = selectedStation.stop_name ?? selectedStation.stop_id ?? rawValue;
-		} else {
-			hiddenInput.value = "";
-		}
-	}
+	let startStation = $state<SerializableAugmentedStop | null>(null);
+	let endStation = $state<SerializableAugmentedStop | null>(null);
+	let intermediateStations = $state<(SerializableAugmentedStop | null)[]>([]);
 
 	function addIntermediate() {
-		const container = document.getElementById("intermediates");
-		const template = document.getElementById("template-intermediate-station");
-		if (container && template) {
-			let id = container.children.length;
-			const newIntermediate = template.cloneNode(true) as HTMLElement;
-			newIntermediate.style.display = "block";
-			newIntermediate.id += `-${id}`;
-			const displayInput = newIntermediate.querySelector("input[data-role='station-display']");
-			const hiddenInput = newIntermediate.querySelector("input[data-role='station-hidden']");
-			if (displayInput && hiddenInput) {
-				displayInput.setAttribute("id", `intermediate-station-display-${id}`);
-				displayInput.setAttribute("data-target", `intermediate-station-${id}`);
-				displayInput.addEventListener("input", handleStationInput);
-				displayInput.addEventListener("change", handleStationInput);
-				displayInput.addEventListener("blur", handleStationInput);
-				hiddenInput.setAttribute("id", `intermediate-station-${id}`);
-				hiddenInput.setAttribute("name", `intermediate-station-${id}`);
-			}
-			const button = newIntermediate.querySelector("button");
-			if (button) {
-				button.addEventListener("click", removeIntermediate);
-			}
-			container.appendChild(newIntermediate);
-		}
+		intermediateStations.push(null);
 	}
 
-	function removeIntermediate(event: Event) {
-		const button = event.currentTarget as HTMLElement;
-		const parent = button.parentElement;
-		if (parent && parent.parentElement) {
-			parent.parentElement.removeChild(parent);
-		}
+	function removeIntermediate(index: number) {
+		intermediateStations.splice(index, 1);
 	}
 
 	function addDate() {
@@ -125,15 +71,6 @@
 
 {#if !loading}
 	<form action="/TV/search" method="get">
-		<datalist id="stations-list">
-			<option value="" label="Any Station"></option>
-			{#each stations as station}
-				<option
-					value={station.stop_name ?? station.stop_id ?? ""}
-					label={station.stop_id ? `${station.stop_name ?? station.stop_id} (${station.stop_id})` : undefined}
-				></option>
-			{/each}
-		</datalist>
 		<input
 			type="submit"
 			value="Search"
@@ -144,51 +81,22 @@
 		/>
 		<hr />
 		<b>Filter by Stations</b><br />
-		<label for="start-station-display">Starts at:</label>
-		<input
-			list="stations-list"
-			id="start-station-display"
-			type="text"
-			placeholder="Type to search stations"
-			data-target="start-station"
-			oninput={handleStationInput}
-			onchange={handleStationInput}
-			onblur={handleStationInput}
-		/>
-		<input type="hidden" name="start-station" id="start-station" /><br />
-		<label for="end-station-display">Ends at:</label>
-		<input
-			list="stations-list"
-			id="end-station-display"
-			type="text"
-			placeholder="Type to search stations"
-			data-target="end-station"
-			oninput={handleStationInput}
-			onchange={handleStationInput}
-			onblur={handleStationInput}
-		/>
-		<input type="hidden" name="end-station" id="end-station" /><br />
+		<span>Starts at:</span>
+		<StationAutocomplete bind:selectedStation={startStation} {stations} placeholder="Type to search stations" />
+		<input type="hidden" name="start-station" value={startStation?.stop_id ?? ""} id="start-station" /><br />
+		<span>Ends at:</span>
+		<StationAutocomplete bind:selectedStation={endStation} {stations} placeholder="Type to search stations" />
+		<input type="hidden" name="end-station" value={endStation?.stop_id ?? ""} id="end-station" /><br />
 		<i
 			>Included Stations (not necessarily in order and can be start/end, service must stop at all selected stops):</i
 		><br />
-		<div class="intermediates" id="intermediates">
-			<div style="display: none;" id="template-intermediate-station">
-				<input
-					data-role="station-display"
-					data-target="intermediate-station"
-					list="stations-list"
-					type="text"
-					placeholder="Type to search stations"
-				/>
-				<input
-					type="hidden"
-					data-role="station-hidden"
-					name="intermediate-station"
-					id="intermediate-station"
-				/>
-				<button type="button"> - </button>
+		{#each intermediateStations as station, index}
+			<div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+				<StationAutocomplete bind:selectedStation={intermediateStations[index]} {stations} placeholder="Type to search stations" />
+				<button type="button" onclick={() => removeIntermediate(index)} style="margin-left: 0.5rem;"> - </button>
 			</div>
-		</div>
+			<input type="hidden" name="intermediate-station-{index}" value={station?.stop_id ?? ""} />
+		{/each}
 		<button type="button" onclick={addIntermediate}> + </button>
 
 		<hr />
