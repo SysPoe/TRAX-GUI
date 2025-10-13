@@ -21,9 +21,7 @@
 	);
 
 	// svelte-ignore state_referenced_locally
-	let sortedStations = $state<SerializableAugmentedStop[]>(
-		filteredStations.sort((a, b) => a.stop_id.localeCompare(b.stop_id)),
-	);
+	let sortedStations = $state<SerializableAugmentedStop[]>([]);
 
 	$effect(() => {
 		Promise.all(
@@ -82,7 +80,10 @@
 
 	function errorCallback(error: GeolocationPositionError) {
 		console.error(`GEO ERROR(${error.code}): ${error.message}`);
+		sortedStations = [...sortedStations];
 	}
+
+	sortedStations = [...sortedStations];
 
 	onMount(() => {
 		navigator.geolocation.getCurrentPosition(() => {
