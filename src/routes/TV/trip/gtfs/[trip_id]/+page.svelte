@@ -215,7 +215,7 @@
 						}}
 					>
 						<span class="tv-platform" style="background-color: #{route.route_color ?? '000000'}">
-							{(useRealtime && st.actual_platform_code) ?? st.scheduled_platform_code ?? "?"}
+							{(useRealtime ? st.actual_platform_code : st.scheduled_platform_code) ?? "?"}
 						</span>
 						<span class="tv-smalltext">
 							<span class="time">
