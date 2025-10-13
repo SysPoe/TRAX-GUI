@@ -69,13 +69,37 @@
 		event.preventDefault();
 		goto(`/TV/trip/gtfs/${tripId}`);
 	}
+
+	function contractSD(serviceDates: number[]): string[] {
+		// servicedates are numbers e.g. 20250801
+		// convert to ranges like 20250801-20250805
+		if (serviceDates.length === 0) return [];
+		serviceDates.sort((a, b) => a - b);
+		const ranges: string[] = [];
+		let start = serviceDates[0];
+		let end = serviceDates[0];
+		for (let i = 1; i < serviceDates.length; i++) {
+			if (serviceDates[i] === end + 1) {
+				end = serviceDates[i];
+			} else {
+				if (start === end) {
+					ranges.push(start.toString());
+				} else {
+					ranges.push(start === end ? `${start}` : `${start}-${end}`);
+					start = serviceDates[i];
+					end = serviceDates[i];
+				}
+			}
+		}
+		ranges.push(start === end ? `${start}` : `${start}-${end}`);
+		return ranges;
+	}
 </script>
 
 <svelte:head>
 	<title>TRAX TripViewer - Search Results</title>
 	<link rel="icon" type="image/svg+xml" href="/favicon-TV.svg" />
 </svelte:head>
-
 
 <div class="title">
 	<h1>TRAX <i>TripViewer</i></h1>
@@ -128,6 +152,7 @@
 			(trip.stopTimes.at(-1)?.scheduled_arrival_date_offset ?? 0) -
 			trip.stopTimes[0].scheduled_departure_date_offset}
 		{@const route = data.routes[trip._trip.route_id]}
+		{@const serviceDates = contractSD(trip.scheduledStartServiceDates)}
 
 		<div class="result-wrapper">
 			<a
@@ -170,16 +195,15 @@
 					<br />
 					{data.expressStrings[trip._trip.trip_id]} <br />
 
-					{#if trip.scheduledStartServiceDates.length == 1}
-						Service date:
-					{:else}
-						Service dates:
-					{/if}
-					{#each trip.scheduledStartServiceDates as date, i (date)}
-						{date}{i < trip.scheduledStartServiceDates.length - 1 ? ", " : ""}
-					{/each}
-
 					{#if data.extraDetails}
+						{#if serviceDates.length == 1}
+							Service date:
+						{:else}
+							Service dates:
+						{/if}
+						{#each serviceDates as date, i (date)}
+							{date}{i < serviceDates.length - 1 ? ", " : ""}
+						{/each}
 						<br />
 						{types[trip.run[0]] ?? "Unknown train type"}<br />
 					{/if}
