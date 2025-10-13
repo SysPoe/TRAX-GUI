@@ -77,7 +77,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		for (const stop of intermediateStations) {
 			if (
 				!trip.stopTimes.some(
-					(st) => st.scheduled_parent_station?.stop_id === stop || st.scheduled_stop?.stop_id === stop,
+					(st) =>
+						!st.passing &&
+						(st.scheduled_parent_station?.stop_id === stop || st.scheduled_stop?.stop_id === stop),
 				)
 			)
 				return false;
