@@ -3,7 +3,7 @@
 	let extraDetails = $state(data.extraDetails);
 
 	async function toggle() {
-		let res = await fetch("/set/toggle");
+		let res = await fetch("/api/toggleextradetails");
 		let { extraDetails: newValue } = await res.json();
 		extraDetails = newValue;
 	}
