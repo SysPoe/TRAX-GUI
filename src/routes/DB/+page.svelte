@@ -2,10 +2,13 @@
 	import type { PageProps } from "./$types";
 	import { goto } from "$app/navigation";
 	import "$lib/styles/common.css";
+	import type { SerializableAugmentedStop } from "translink-rail-api";
+	import { onMount } from "svelte";
 
 	const { data }: PageProps = $props();
 	let loading = $state(false);
 	let filterText = $state("");
+	let sortedStations = $state<SerializableAugmentedStop[]>([]);
 
 	let filteredStations = $derived(
 		data.stations.filter((station) => {
@@ -17,6 +20,22 @@
 			return name.includes(filter) || id.includes(filter);
 		}),
 	);
+
+	$effect(() => {
+		Promise.all(
+			filteredStations.map(async (station) => ({
+				station,
+				dist: await dist(station.stop_lat ?? 0, station.stop_lon ?? 0),
+			})),
+		).then((results) => {
+			sortedStations = results
+				.sort((a, b) => {
+					if (a.dist !== b.dist) return a.dist - b.dist;
+					return a.station.stop_id.localeCompare(b.station.stop_id);
+				})
+				.map((r) => r.station);
+		});
+	});
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === "Enter" && filteredStations.length === 1) {
@@ -30,6 +49,42 @@
 			goto(`/DB/${filteredStations[0].stop_id}`);
 		}
 	}
+
+	// Get distance from current location
+	function dist(lat: number, lon: number): Promise<number> {
+		if (!navigator.geolocation) return new Promise<number>((res) => res(Infinity));
+		const toRad = (x: number) => (x * Math.PI) / 180;
+
+		return new Promise<number>((resolve) => {
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					const R = 6371; // km
+					const dLat = toRad(lat - position.coords.latitude);
+					const dLon = toRad(lon - position.coords.longitude);
+					const a =
+						Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+						Math.cos(toRad(position.coords.latitude)) *
+							Math.cos(toRad(lat)) *
+							Math.sin(dLon / 2) *
+							Math.sin(dLon / 2);
+					const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+					const d = R * c;
+					resolve(d);
+				},
+				() => resolve(Infinity),
+			);
+		});
+	}
+
+	function errorCallback(error: GeolocationPositionError) {
+		console.error(`GEO ERROR(${error.code}): ${error.message}`);
+	}
+
+	onMount(() => {
+		navigator.geolocation.getCurrentPosition(() => {
+			sortedStations = [...sortedStations];
+		}, errorCallback);
+	});
 </script>
 
 <svelte:head>
@@ -37,7 +92,6 @@
 	<link rel="icon" type="image/svg+xml" href="/favicon-DB.svg" />
 	<link rel="prefetch" href="/img/loading.svg" />
 </svelte:head>
-
 
 <div class="title">
 	<h1>TRAX <i>DepartureBoard</i></h1>
@@ -59,7 +113,7 @@
 
 {#if !loading}
 	<div class="stations">
-		{#each filteredStations as station (station.stop_id)}
+		{#each sortedStations as station}
 			<div data-id={station.stop_id} data-name={station.stop_name} class="station">
 				<a
 					href="/DB/{station.stop_id}"
@@ -120,7 +174,7 @@
 			box-shadow 0.2s,
 			border-color 0.2s;
 		width: 250px;
-    font-family: "Inter"  ;
+		font-family: "Inter";
 	}
 	.station:hover {
 		box-shadow: 0 4px 16px rgba(41, 128, 185, 0.12);
