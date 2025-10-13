@@ -7,10 +7,10 @@
 	const { data }: PageProps = $props();
 
 	// Borrowed from TRAX
-	function formatTimestamp(ts?: number | null): string {
+	function formatTimestamp(ts?: number | null, seconds: boolean = false): string {
 		if (ts === null || ts === undefined) return "--:--";
 		const d = new Date(ts * 1000);
-		return d.toISOString().slice(11, 16);
+		return seconds ? d.toISOString().slice(11, 19) : d.toISOString().slice(11, 16);
 	}
 
 	function makePageUrl(page: number) {
@@ -206,6 +206,29 @@
 						{/each}
 						<br />
 						{types[trip.run[0]] ?? "Unknown train type"}<br />
+
+						{#each data.filters.intermediateStations as st}
+							{@const stoptime = trip.stopTimes.find(
+								data.filters.useRT
+									? (sti) => sti.actual_stop === st || sti.actual_parent_station === st
+									: (sti) => sti.scheduled_stop === st || sti.scheduled_parent_station === st,
+							)}
+							{data.stations[st]?.stop_name ?? st}
+							arr {formatTimestamp(
+								data.filters.useRT
+									? (stoptime?.actual_arrival_timestamp ?? stoptime?.scheduled_arrival_timestamp)
+									: stoptime?.scheduled_arrival_timestamp,
+								true,
+							)}
+							dep {formatTimestamp(
+								data.filters.useRT
+									? (stoptime?.actual_departure_timestamp ?? stoptime?.scheduled_departure_timestamp)
+									: stoptime?.scheduled_departure_timestamp,
+								true,
+							)}
+							{#if st != data.filters.intermediateStations.at(-1)},
+							{/if}
+						{/each}
 					{/if}
 				</span>
 			</a>

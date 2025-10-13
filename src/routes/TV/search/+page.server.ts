@@ -221,6 +221,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			serviceDates,
 			trainNumberType,
 			trainNumberDestination,
+			useRT: dateMode === "actual_rt",
 		},
 		concatenated,
 		results,
