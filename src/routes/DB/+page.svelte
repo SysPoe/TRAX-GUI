@@ -8,7 +8,6 @@
 	const { data }: PageProps = $props();
 	let loading = $state(false);
 	let filterText = $state("");
-	let sortedStations = $state<SerializableAugmentedStop[]>([]);
 
 	let filteredStations = $derived(
 		data.stations.filter((station) => {
@@ -19,6 +18,11 @@
 			const id = station.stop_id?.toLowerCase() || "";
 			return name.includes(filter) || id.includes(filter);
 		}),
+	);
+
+	// svelte-ignore state_referenced_locally
+	let sortedStations = $state<SerializableAugmentedStop[]>(
+		filteredStations.sort((a, b) => a.stop_id.localeCompare(b.stop_id)),
 	);
 
 	$effect(() => {
