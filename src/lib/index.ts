@@ -74,33 +74,14 @@ export function getUpcomingQRTravelDepartures(
 ): UpcomingQRTravelDeparture[] {
 	const travelTrains: TravelTrip[] = TRAX.getQRTTrains();
 
-	const stations = TRAX.getStations();
-	const targetPlace: string | undefined = stations
-		.find((v: any) => v.stop_id === gtfs_station_id)
-		?.stop_name?.replace("station", "")
-		.trim()
-		.toLowerCase();
-
-	if (!targetPlace) return [];
-
 	const trains: UpcomingQRTravelDeparture[] = travelTrains
 		.filter(
 			(v) =>
-				v.stopsWithPassing &&
-				v.stopsWithPassing.some(
-					(s) =>
-						s.placeName.toLowerCase().trim().startsWith(targetPlace) ||
-						targetPlace.startsWith(s.placeName.toLowerCase().trim()) ||
-						(s.placeName.trim().toLowerCase().includes("roma st") && gtfs_station_id == "place_romsta"),
-				),
+				(v.stopsWithPassing && v.stopsWithPassing.some((s) => s.gtfsStopId == gtfs_station_id)) ||
+				v.stops.some((s) => s.gtfsStopId == gtfs_station_id),
 		)
 		.map((v) => {
-			const stop = (v.stopsWithPassing ?? []).find(
-				(s) =>
-					s.placeName.toLowerCase().trim().startsWith(targetPlace) ||
-					targetPlace.startsWith(s.placeName.toLowerCase().trim()) ||
-					(s.placeName.trim().toLowerCase().includes("roma st") && gtfs_station_id == "place_romsta"),
-			);
+			const stop = (v.stopsWithPassing ?? []).find((s) => s.gtfsStopId == gtfs_station_id);
 			let departsInSecs =
 				Math.round(
 					new Date(

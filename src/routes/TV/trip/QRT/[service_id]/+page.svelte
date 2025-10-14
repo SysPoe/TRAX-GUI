@@ -173,49 +173,98 @@
 						delayClass: st.departureDelayClass ?? st.arrivalDelayClass,
 						delayString: st.departureDelayString ?? st.arrivalDelayString,
 					}}
-					<div class="tv-stop-time {isSrtStop && !(st as SRTStop).isStop ? 'passing' : ''}">
-						<span class="tv-platform" style="background-color: #ff8400"> ? </span>
-						<span class="tv-smalltext">
-							<span class="time">
-								{formatTime(
-									st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
-										? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
-											? isSrtStop
-												? (st as SRTStop).estimatedPassingTime
-												: st.plannedDeparture
-											: st.actualArrival
-										: st.actualDeparture,
-								)}
+					{#if ((isSrtStop && st.isStop) || !isSrtStop) && st.gtfsStopId}
+						<a
+							class="tv-stop-time {isSrtStop && !(st as SRTStop).isStop ? 'passing' : ''}"
+							href={`/DB/gtfs/${st.gtfsStopId}`}
+						>
+							<span class="tv-platform" style="background-color: #ff8400"> ? </span>
+							<span class="tv-smalltext">
+								<span class="time">
+									{formatTime(
+										st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
+											? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
+												? isSrtStop
+													? (st as SRTStop).estimatedPassingTime
+													: st.plannedDeparture
+												: st.actualArrival
+											: st.actualDeparture,
+									)}
+								</span>
+								<span class="tv-delay {delay.delayClass}">
+									({delay.delayString})
+								</span>
+								<br />
+								<span class="tv-station">
+									{replace[
+										st.placeName
+											.replace(/station/i, "")
+											.replace(/^Brisbane - /i, "")
+											.trim()
+											.toUpperCase()
+									] ??
+										st.placeName
+											.replace(/station/i, "")
+											.replace(/^Brisbane - /i, "")
+											.trim()
+											.toUpperCase()}
+								</span>
 							</span>
-							<span class="tv-delay {delay.delayClass}">
-								({delay.delayString})
-							</span>
-							<br />
-							<span class="tv-station">
-								{replace[
-									st.placeName
-										.replace(/station/i, "")
-										.replace(/^Brisbane - /i, "")
-										.trim()
-										.toUpperCase()
-								] ??
-									st.placeName
-										.replace(/station/i, "")
-										.replace(/^Brisbane - /i, "")
-										.trim()
-										.toUpperCase()}
-							</span>
-						</span>
-						{#if isSrtStop && !(st as SRTStop).isStop}
-							<span class="tv-service-type passing">P</span>
-						{/if}
-						{#if data.extraDetails && service.stops.find(v => v.placeName === st.placeName)}
-							{@const ost = service.stops.find(v => v.placeName === st.placeName)}
-							{#if ost?.kStation}
-								<span class="tv-service-type">K</span>
+							{#if isSrtStop && !(st as SRTStop).isStop}
+								<span class="tv-service-type passing">P</span>
 							{/if}
-						{/if}
-					</div>
+							{#if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)}
+								{@const ost = service.stops.find((v) => v.placeName === st.placeName)}
+								{#if ost?.kStation}
+									<span class="tv-service-type">K</span>
+								{/if}
+							{/if}
+						</a>
+					{:else}
+						<div class="tv-stop-time {isSrtStop && !(st as SRTStop).isStop ? 'passing' : ''}">
+							<span class="tv-platform" style="background-color: #ff8400"> ? </span>
+							<span class="tv-smalltext">
+								<span class="time">
+									{formatTime(
+										st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
+											? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
+												? isSrtStop
+													? (st as SRTStop).estimatedPassingTime
+													: st.plannedDeparture
+												: st.actualArrival
+											: st.actualDeparture,
+									)}
+								</span>
+								<span class="tv-delay {delay.delayClass}">
+									({delay.delayString})
+								</span>
+								<br />
+								<span class="tv-station">
+									{replace[
+										st.placeName
+											.replace(/station/i, "")
+											.replace(/^Brisbane - /i, "")
+											.trim()
+											.toUpperCase()
+									] ??
+										st.placeName
+											.replace(/station/i, "")
+											.replace(/^Brisbane - /i, "")
+											.trim()
+											.toUpperCase()}
+								</span>
+							</span>
+							{#if isSrtStop && !(st as SRTStop).isStop}
+								<span class="tv-service-type passing">P</span>
+							{/if}
+							{#if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)}
+								{@const ost = service.stops.find((v) => v.placeName === st.placeName)}
+								{#if ost?.kStation}
+									<span class="tv-service-type">K</span>
+								{/if}
+							{/if}
+						</div>
+					{/if}
 					<hr />
 				{/each}
 			</div>
