@@ -203,15 +203,15 @@
 						st.realtime_info?.schedule_relationship === 3
 							? 'cancelled'
 							: ''}"
-						href={`/DB/${st.scheduled_parent_station || st.scheduled_stop}`}
+						href={`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`}
 						onclick={(ev) => {
 							if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
 								// Open in new tab if modifier key is held
 								ev.preventDefault();
-								window.open(`/DB/${st.scheduled_parent_station || st.scheduled_stop}`, "_blank");
+								window.open(`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`, "_blank");
 								return;
 							}
-							goto(`/DB/${st.scheduled_parent_station || st.scheduled_stop}`);
+							goto(`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`);
 						}}
 					>
 						<span class="tv-platform" style="background-color: #{route.route_color ?? '000000'}">
@@ -303,6 +303,7 @@
 {#if data.extraDetails}
 	<footer>
 		<p>* Passing stop times and stations are estimated and may not be accurate.</p>
+		<p>** RunSeries data is experimental and is not entirely accurate.</p>
 	</footer>
 {/if}
 

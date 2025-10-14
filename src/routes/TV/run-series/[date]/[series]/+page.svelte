@@ -39,6 +39,7 @@
 	<h2>
 		{data.runSeries.date} - {data.runSeries.series} RunSeries
 	</h2>
+	<p class="de-emphasize">RunSeries data is experimental and is not entirely accurate.</p>
 </div>
 
 <div class="container">
@@ -177,5 +178,10 @@
 		margin: 0 auto;
 		max-width: 600px;
 		padding: 0 1rem;
+	}
+
+	.de-emphasize {
+		color: #666;
+		font-size: 0.9em;
 	}
 </style>
