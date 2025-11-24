@@ -83,6 +83,7 @@
 		sortedStations = [...sortedStations];
 	}
 
+	// svelte-ignore state_referenced_locally
 	sortedStations = [...sortedStations];
 
 	onMount(() => {

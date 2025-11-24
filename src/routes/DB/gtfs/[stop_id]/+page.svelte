@@ -161,7 +161,7 @@
 					{dep.actual_platform_code || "?"}
 				</span>
 				<span class="smalltext">
-					<span class="time">{dep.actual_departure_time}</span>
+					<span class="time">{dep.scheduled_departure_time}</span>
 					<span
 						class="delay {dep.realtime && dep.realtime_info?.schedule_relationship === 3
 							? 'cancelled'
@@ -224,9 +224,9 @@
 					<span class="time"
 						>{(
 							dep.stop?.estimatedPassingTime ||
-							(dep.stop?.actualDeparture === "0001-01-01T00:00:00"
-								? dep.stop?.actualArrival
-								: dep.stop?.actualDeparture)
+							(dep.stop?.plannedDeparture === "0001-01-01T00:00:00"
+								? dep.stop?.plannedArrival
+								: dep.stop?.plannedDeparture)
 						)?.slice(11, 16)}</span
 					>
 					<span class="delay {dep.delayClass}">
