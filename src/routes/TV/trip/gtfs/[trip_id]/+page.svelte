@@ -259,7 +259,7 @@
 								({useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3
 									? "cancelled"
 									: useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8
-										? "cancelled"
+										? "skipped"
 										: st.passing
 											? "estimated"
 											: useRealtime && st.realtime
