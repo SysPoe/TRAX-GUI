@@ -4,7 +4,13 @@ import TRAX, {
 	type SerializableAugmentedTrip,
 } from "translink-rail-api";
 import * as gtfs from "gtfs";
-import { getUpcomingQRTravelDepartures, isTRAXLoaded, isTRAXLoading, loadTRAX, type UpcomingQRTravelDeparture } from "$lib";
+import {
+	getUpcomingQRTravelDepartures,
+	isTRAXLoaded,
+	isTRAXLoading,
+	loadTRAX,
+	type UpcomingQRTravelDeparture,
+} from "$lib";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
@@ -118,10 +124,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const extraDetails = locals.session?.data?.extraDetails ?? true;
 	if (!extraDetails) {
+		mixed = mixed.filter((v) => (v.dep_type === "gtfs" && !v.passing) || v.dep_type !== "gtfs");
 		mixed = mixed.filter(
 			(v) =>
-				(v.dep_type === "gtfs" && !v.passing) ||
-				v.dep_type !== "gtfs",
+				(v.dep_type === "gtfs" &&
+					v.realtime &&
+					v.realtime_info?.schedule_relationship !== 8 &&
+					v.realtime_info?.schedule_relationship !== 3) ||
+				extraDetails ||
+				v.dep_type === "qrt",
 		);
 	}
 

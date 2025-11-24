@@ -1,12 +1,5 @@
 <script lang="ts">
 	let { data } = $props();
-	let extraDetails = $state(data.extraDetails);
-
-	async function toggle() {
-		let res = await fetch("/api/toggleextradetails");
-		let { extraDetails: newValue } = await res.json();
-		extraDetails = newValue;
-	}
 </script>
 
 <svelte:head>
@@ -21,7 +14,3 @@
 {:else}
 	<a href="admin">Login</a><br />
 {/if}
-<p>
-	{extraDetails ? "Extra details are shown by default." : "Extra details are hidden by default."}
-	<button onclick={toggle}>Toggle</button>
-</p>

@@ -23,6 +23,7 @@ export const actions: Actions = {
 			await locals.session?.setData({
 				...locals.session.data,
 				admin: true,
+				extraDetails: true,
 			});
 			await locals.session?.save();
 		}
