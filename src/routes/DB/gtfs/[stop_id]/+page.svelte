@@ -145,7 +145,9 @@
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<a
-				class="departure gtfs {(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
+				class="departure gtfs {(dep as SerializableAugmentedStopTime).realtime &&
+				((dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3 ||
+					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8)
 					? 'cancelled'
 					: dep.last_stop_id == params.stop_id.toLowerCase()
 						? 'term'
@@ -163,17 +165,23 @@
 				<span class="smalltext">
 					<span class="time">{dep.scheduled_departure_time}</span>
 					<span
-						class="delay {(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
+						class="delay {(dep as SerializableAugmentedStopTime).realtime &&
+						((dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3 ||
+							(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8)
 							? 'cancelled'
 							: dep.realtime
 								? dep.realtime_info?.delay_class || 'scheduled'
 								: 'scheduled'}"
 					>
-						({(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
+						({(dep as SerializableAugmentedStopTime).realtime &&
+						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
 							? "cancelled"
-							: dep.realtime
-								? dep.realtime_info?.delay_string || "scheduled"
-								: "scheduled"})
+							: (dep as SerializableAugmentedStopTime).realtime &&
+								  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8
+								? "skipped"
+								: dep.realtime
+									? dep.realtime_info?.delay_string || "scheduled"
+									: "scheduled"})
 					</span>
 					{#if data.extraDetails}
 						<span class="run">{trip.run}</span> to
@@ -186,7 +194,9 @@
 					</span>
 				</span>
 				<span
-					class="service-type {(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
+					class="service-type {(dep as SerializableAugmentedStopTime).realtime &&
+					((dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3 ||
+						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8)
 						? 'cancelled'
 						: dep.last_stop_id == params.stop_id.toLowerCase()
 							? 'term'
@@ -196,15 +206,19 @@
 									? 'express'
 									: 'all-stops'}"
 				>
-					{(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
+					{(dep as SerializableAugmentedStopTime).realtime &&
+					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
 						? "C"
-						: dep.last_stop_id == params.stop_id.toLowerCase()
-							? "T"
-							: dep.passing
-								? "P"
-								: express
-									? "E"
-									: "A"}
+						: (dep as SerializableAugmentedStopTime).realtime &&
+							  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8
+							? "S"
+							: dep.last_stop_id == params.stop_id.toLowerCase()
+								? "T"
+								: dep.passing
+									? "P"
+									: express
+										? "E"
+										: "A"}
 				</span>
 				<span class="departs_in">
 					{dep.departs_in.replace("0h ", "")}
@@ -477,7 +491,8 @@
 	.estimated {
 		color: gray;
 	}
-	.delay.cancelled,.tv-delay.cancelled {
+	.delay.cancelled,
+	.tv-delay.cancelled {
 		color: #fff;
 		background-color: #b22222;
 		padding: 0 0.3em;

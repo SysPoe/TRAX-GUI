@@ -203,7 +203,11 @@
 			<div class="tv-stoptimes">
 				{#each trip.stopTimes as st}
 					<a
-						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3
+						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
+						st.realtime &&
+						st.realtime_info?.schedule_relationship === 3
+							? 'cancelled'
+							: ''} {useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8
 							? 'cancelled'
 							: ''}"
 						href={`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`}
@@ -244,19 +248,23 @@
 								st.realtime &&
 								st.realtime_info?.schedule_relationship === 3
 									? 'cancelled'
-									: st.passing
-										? 'estimated'
-										: useRealtime && st.realtime
-											? (st.realtime_info?.delay_class ?? 'scheduled')
-											: 'scheduled'}"
+									: useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8
+										? 'cancelled'
+										: st.passing
+											? 'estimated'
+											: useRealtime && st.realtime
+												? (st.realtime_info?.delay_class ?? 'scheduled')
+												: 'scheduled'}"
 							>
 								({useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3
 									? "cancelled"
-									: st.passing
-										? "estimated"
-										: useRealtime && st.realtime
-											? st.realtime_info?.delay_string
-											: "scheduled"})
+									: useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8
+										? "cancelled"
+										: st.passing
+											? "estimated"
+											: useRealtime && st.realtime
+												? st.realtime_info?.delay_string
+												: "scheduled"})
 							</span>
 							{#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
 								<span class="tv-date-offset"
@@ -300,6 +308,8 @@
 							<span class="tv-service-type passing">P</span>
 						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3}
 							<span class="tv-service-type cancelled">C</span>
+						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8}
+							<span class="tv-service-type cancelled">S</span>
 						{/if}
 					</a>
 					<hr />
