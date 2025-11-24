@@ -31,10 +31,6 @@
 	function getTrainGuruUrl(run: string) {
 		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
 	}
-
-	onMount(() => {
-		console.log(trip);
-	});
 </script>
 
 <svelte:head>
