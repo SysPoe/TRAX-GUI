@@ -15,7 +15,7 @@
     <form method="POST" use:enhance>
         <label>
             Password:
-            <input type="password" name="password" required placeholder="Enter password" />
+            <input type="password" name="password" required placeholder="Enter password" autofocus />
         </label>
         <button type="submit">Login</button>
     </form>
