@@ -39,7 +39,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let _st = TRAX.getRawStops();
 	for (const station of _st) stations[station.stop_id] = station;
 
-	if (!locals.session?.data?.expandedAccess === true) runSeries.vehicle_sightings = [];
+	if (!locals.session?.data?.admin === true) runSeries.vehicle_sightings = [];
 
 	return {
 		runSeries,

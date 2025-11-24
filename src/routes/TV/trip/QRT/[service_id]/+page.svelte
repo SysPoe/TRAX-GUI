@@ -7,6 +7,9 @@
 	const { data }: PageProps = $props();
 	let { service }: { service: TravelTrip } = data;
 
+	let showPassing = $state(false);
+	let useRealtime = $state(true);
+
 	const destination =
 		service.stops
 			.at(-1)
@@ -167,33 +170,57 @@
 		<div class="info-section">
 			<h3>Stoptimes</h3>
 			<div class="tv-stoptimes">
+				{#if data.extraDetails}
+					<div class="controls">
+						<label>
+							<input type="checkbox" bind:checked={showPassing} />
+							Show Passing Stops*
+						</label>
+						<label>
+							<input type="checkbox" bind:checked={useRealtime} />
+							Use Realtime Data
+						</label><br>
+						(*Passing stops use realtime data)
+					</div>
+				{/if}
+				<hr />
 				{#each filteredStops as st}
 					{@const isSrtStop = "isStop" in st}
 					{@const delay = {
 						delayClass: st.departureDelayClass ?? st.arrivalDelayClass,
 						delayString: st.departureDelayString ?? st.arrivalDelayString,
 					}}
-					{#if ((isSrtStop && st.isStop) || !isSrtStop) && st.gtfsStopId}
-						<a
-							class="tv-stop-time {isSrtStop && !(st as SRTStop).isStop ? 'passing' : ''}"
-							href={`/DB/gtfs/${st.gtfsStopId}`}
-						>
+					{@const passing = isSrtStop && !(st as SRTStop).isStop}
+					{#if ((isSrtStop && st.isStop) || !isSrtStop) && st.gtfsStopId && ((showPassing && useRealtime) || !passing)}
+						<a class="tv-stop-time {passing ? 'passing' : ''}" href={`/DB/gtfs/${st.gtfsStopId}`}>
 							<span class="tv-platform" style="background-color: #ff8400"> ? </span>
 							<span class="tv-smalltext">
 								<span class="time">
 									{formatTime(
-										st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
-											? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
-												? isSrtStop
-													? (st as SRTStop).estimatedPassingTime
-													: st.plannedDeparture
-												: st.actualArrival
-											: st.actualDeparture,
+										useRealtime
+											? st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
+												? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
+													? isSrtStop
+														? (st as SRTStop).estimatedPassingTime
+														: st.plannedDeparture
+													: st.actualArrival
+												: st.actualDeparture
+											: isSrtStop &&
+												  (st as SRTStop).estimatedPassingTime !== "0001-01-01T00:00:00" &&
+												  (st as SRTStop).estimatedPassingTime
+												? (st as SRTStop).estimatedPassingTime
+												: st.plannedDeparture === "0001-01-01T00:00:00" || !st.plannedDeparture
+													? st.plannedArrival
+													: st.plannedDeparture,
 									)}
 								</span>
-								<span class="tv-delay {delay.delayClass}">
-									({delay.delayString})
-								</span>
+								{#if useRealtime}
+									<span class="tv-delay {delay.delayClass}">
+										({delay.delayString})
+									</span>
+								{:else}
+									<span class="tv-delay scheduled"> (scheduled) </span>
+								{/if}
 								<br />
 								<span class="tv-station">
 									{replace[
@@ -210,7 +237,7 @@
 											.toUpperCase()}
 								</span>
 							</span>
-							{#if isSrtStop && !(st as SRTStop).isStop}
+							{#if passing}
 								<span class="tv-service-type passing">P</span>
 							{/if}
 							{#if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)}
@@ -220,24 +247,37 @@
 								{/if}
 							{/if}
 						</a>
-					{:else}
-						<div class="tv-stop-time {isSrtStop && !(st as SRTStop).isStop ? 'passing' : ''}">
+						<hr />
+					{:else if (showPassing && useRealtime) || !passing}
+						<div class="tv-stop-time {passing ? 'passing' : ''}">
 							<span class="tv-platform" style="background-color: #ff8400"> ? </span>
 							<span class="tv-smalltext">
 								<span class="time">
 									{formatTime(
-										st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
-											? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
-												? isSrtStop
-													? (st as SRTStop).estimatedPassingTime
-													: st.plannedDeparture
-												: st.actualArrival
-											: st.actualDeparture,
+										useRealtime
+											? st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
+												? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
+													? isSrtStop
+														? (st as SRTStop).estimatedPassingTime
+														: st.plannedDeparture
+													: st.actualArrival
+												: st.actualDeparture
+											: isSrtStop &&
+												  (st as SRTStop).estimatedPassingTime !== "0001-01-01T00:00:00" &&
+												  (st as SRTStop).estimatedPassingTime
+												? (st as SRTStop).estimatedPassingTime
+												: st.plannedDeparture === "0001-01-01T00:00:00" || !st.plannedDeparture
+													? st.plannedArrival
+													: st.plannedDeparture,
 									)}
 								</span>
-								<span class="tv-delay {delay.delayClass}">
-									({delay.delayString})
-								</span>
+								{#if useRealtime}
+									<span class="tv-delay {delay.delayClass}">
+										({delay.delayString})
+									</span>
+								{:else}
+									<span class="tv-delay scheduled"> (scheduled) </span>
+								{/if}
 								<br />
 								<span class="tv-station">
 									{replace[
@@ -254,7 +294,7 @@
 											.toUpperCase()}
 								</span>
 							</span>
-							{#if isSrtStop && !(st as SRTStop).isStop}
+							{#if passing}
 								<span class="tv-service-type passing">P</span>
 							{/if}
 							{#if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)}
@@ -264,8 +304,8 @@
 								{/if}
 							{/if}
 						</div>
+						<hr />
 					{/if}
-					<hr />
 				{/each}
 			</div>
 		</div>

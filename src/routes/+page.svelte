@@ -16,6 +16,7 @@
 <h1>SysPoe's Projects</h1>
 <a href="DB">TRAX <i>DepartureBoard</i></a><br />
 <a href="TV">TRAX <i>TripViewer</i></a><br />
+<a href="admin">Login</a><br />
 <p>
 	{extraDetails ? "Extra details are shown by default." : "Extra details are hidden by default."}
 	<button onclick={toggle}>Toggle</button>

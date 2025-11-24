@@ -41,6 +41,15 @@ a.tv-stop-time.cancelled:hover {
 	background-color: #ccc;
 }
 
+.tv-stop-time.cancelled {
+	background-color: #c48989;
+}
+
+a.tv-stop-time.cancelled:hover {
+	background-color: #c48989;
+	box-shadow: 0 0 1rem #8c4141;
+}
+
 .tv-platform {
 	align-items: center;
 	color: white;
@@ -99,29 +108,29 @@ a.tv-stop-time.cancelled:hover {
 	color: white;
 }
 
+.delay.cancelled,.tv-delay.cancelled {
+	color: #fff;
+	background-color: #b22222;
+	padding: 0 0.3em;
+	border-radius: 0.3em;
+	font-weight: bold;
+}
+
 .very-late {
-	color: #c62828;
+	color: red;
 }
 .late {
-	color: #ff8f00;
+	color: darkgoldenrod;
 }
 .on-time {
-	color: #2e7d32;
+	color: green;
 }
 .early {
-	color: #1565c0;
+	color: blue;
 }
 .scheduled,
 .estimated {
-	color: #757575;
-}
-
-.delay.cancelled {
-	color: #fff;
-	background-color: #c62828;
-	padding: 0 0.25em;
-	border-radius: 0.25em;
-	font-weight: bold;
+	color: gray;
 }
 
 .tv-date-offset {

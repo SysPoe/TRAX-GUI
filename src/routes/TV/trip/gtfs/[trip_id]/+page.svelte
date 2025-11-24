@@ -5,6 +5,7 @@
 	import type { PageProps } from "./$types";
 	import "$lib/styles/common.css";
 	import "$lib/styles/stoptimes.css";
+	import { onMount } from "svelte";
 
 	const { data }: PageProps = $props();
 	let { trip }: { trip: SerializableAugmentedTrip } = data;
@@ -30,6 +31,10 @@
 	function getTrainGuruUrl(run: string) {
 		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
 	}
+
+	onMount(() => {
+		console.log(trip);
+	});
 </script>
 
 <svelte:head>
@@ -198,9 +203,7 @@
 			<div class="tv-stoptimes">
 				{#each trip.stopTimes as st}
 					<a
-						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
-						st.realtime &&
-						st.realtime_info?.schedule_relationship === 3
+						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3
 							? 'cancelled'
 							: ''}"
 						href={`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`}
@@ -237,17 +240,23 @@
 								{/if}
 							</span>
 							<span
-								class="tv-delay {st.passing
-									? 'estimated'
-									: useRealtime && st.realtime
-										? (st.realtime_info?.delay_class ?? 'scheduled')
-										: 'scheduled'}"
+								class="tv-delay {useRealtime &&
+								st.realtime &&
+								st.realtime_info?.schedule_relationship === 3
+									? 'cancelled'
+									: st.passing
+										? 'estimated'
+										: useRealtime && st.realtime
+											? (st.realtime_info?.delay_class ?? 'scheduled')
+											: 'scheduled'}"
 							>
-								({st.passing
-									? "estimated"
-									: useRealtime && st.realtime
-										? st.realtime_info?.delay_string
-										: "scheduled"})
+								({useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3
+									? "cancelled"
+									: st.passing
+										? "estimated"
+										: useRealtime && st.realtime
+											? st.realtime_info?.delay_string
+											: "scheduled"})
 							</span>
 							{#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
 								<span class="tv-date-offset"

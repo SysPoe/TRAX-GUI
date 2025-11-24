@@ -1,7 +1,10 @@
 import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
+import { error } from "@sveltejs/kit";
 import TRAX from "translink-rail-api";
 
-export function GET() {
+export function GET({ locals }) {
+	if(!locals.session?.data?.admin) throw error(403, "Forbidden.");
+
 	if (!isTRAXLoading && isTRAXLoaded) {
 		TRAX.updateRealtime();
 		return new Response("Realtime reload initiated.", { status: 200 });

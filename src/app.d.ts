@@ -3,7 +3,7 @@ import type { Session } from "svelte-kit-sessions";
 declare module "svelte-kit-sessions" {
     interface SessionData {
         extraDetails?: boolean;
-		expandedAccess?: boolean;
+		admin?: boolean;
     }
 }
 

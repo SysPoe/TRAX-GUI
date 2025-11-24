@@ -10,6 +10,11 @@ if ((process.env.TRAX_GUI_SESSION_SECRET ?? "SUPER_SECRET_SECRET_KEY") === "SUPE
 	console.error("ERROR: Using default session secret key. This is not secure and should be changed in production.");
 }
 
+export const TRAX_GUI_ADMIN_PASS = process.env.TRAX_GUI_ADMIN_PASS ?? "admin";
+if (TRAX_GUI_ADMIN_PASS === "admin") {
+	console.error("ERROR: Using default admin password. This is not secure and should be changed in production.");
+}
+
 export const init: ServerInit = async () => {
 	loadTRAX();
 }

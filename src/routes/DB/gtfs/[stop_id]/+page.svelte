@@ -145,7 +145,7 @@
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<a
-				class="departure gtfs {dep.realtime && dep.realtime_info?.schedule_relationship === 3
+				class="departure gtfs {(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
 					? 'cancelled'
 					: dep.last_stop_id == params.stop_id.toLowerCase()
 						? 'term'
@@ -163,13 +163,13 @@
 				<span class="smalltext">
 					<span class="time">{dep.scheduled_departure_time}</span>
 					<span
-						class="delay {dep.realtime && dep.realtime_info?.schedule_relationship === 3
+						class="delay {(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
 							? 'cancelled'
 							: dep.realtime
 								? dep.realtime_info?.delay_class || 'scheduled'
 								: 'scheduled'}"
 					>
-						({dep.realtime && dep.realtime_info?.schedule_relationship === 3
+						({(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
 							? "cancelled"
 							: dep.realtime
 								? dep.realtime_info?.delay_string || "scheduled"
@@ -186,7 +186,7 @@
 					</span>
 				</span>
 				<span
-					class="service-type {dep.realtime && dep.realtime_info?.schedule_relationship === 3
+					class="service-type {(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
 						? 'cancelled'
 						: dep.last_stop_id == params.stop_id.toLowerCase()
 							? 'term'
@@ -196,7 +196,7 @@
 									? 'express'
 									: 'all-stops'}"
 				>
-					{dep.realtime && dep.realtime_info?.schedule_relationship === 3
+					{(dep as SerializableAugmentedStopTime).realtime && (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
 						? "C"
 						: dep.last_stop_id == params.stop_id.toLowerCase()
 							? "T"
@@ -477,7 +477,7 @@
 	.estimated {
 		color: gray;
 	}
-	.delay.cancelled {
+	.delay.cancelled,.tv-delay.cancelled {
 		color: #fff;
 		background-color: #b22222;
 		padding: 0 0.3em;
