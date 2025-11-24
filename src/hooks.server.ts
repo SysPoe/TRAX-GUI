@@ -1,3 +1,5 @@
+import { loadTRAX } from "$lib";
+import type { ServerInit } from "@sveltejs/kit";
 import { sveltekitSessionHandle } from "svelte-kit-sessions";
 
 export const handle = sveltekitSessionHandle({
@@ -6,4 +8,8 @@ export const handle = sveltekitSessionHandle({
 
 if ((process.env.TRAX_GUI_SESSION_SECRET ?? "SUPER_SECRET_SECRET_KEY") === "SUPER_SECRET_SECRET_KEY") {
 	console.error("ERROR: Using default session secret key. This is not secure and should be changed in production.");
+}
+
+export const init: ServerInit = async () => {
+	loadTRAX();
 }
