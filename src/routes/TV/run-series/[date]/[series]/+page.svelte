@@ -14,7 +14,7 @@
 	}
 
 	// Format date as YYYY-MM-DD
-	function formatDate(date: number): string {
+	function formatDate(date: string | number): string {
 		const dateStr = date.toString();
 		return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
 	}
@@ -83,9 +83,9 @@
 				{@const trip = data.trips[tripInfo.trip_id]}
 				{@const route = trip?._trip.route_id ? data.routes[trip._trip.route_id] : null}
 
-				{@const departure_time = formatTimestamp(trip.stopTimes[0].scheduled_departure_timestamp)}
+				{@const departure_time = formatTimestamp(trip.stopTimes[0].scheduled_departure_time)}
 				{@const arrival_time = formatTimestamp(
-					trip.stopTimes[trip.stopTimes.length - 1].scheduled_arrival_timestamp,
+					trip.stopTimes[trip.stopTimes.length - 1].scheduled_arrival_time,
 				)}
 				{@const startStation = data.stations[trip.stopTimes[0].scheduled_stop ?? 0]}
 				{@const endStation = data.stations[trip.stopTimes[trip.stopTimes.length - 1].scheduled_stop ?? 0]}

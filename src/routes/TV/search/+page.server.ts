@@ -95,11 +95,11 @@ export const load: PageServerLoad = async ({ url }) => {
 
 		for (const date of serviceDates) {
 			if (dateMode === "actual_sch") {
-				if (!trip.scheduledTripDates.includes(Number.parseInt(date))) return false;
+				if (!trip.scheduledTripDates.includes(date)) return false;
 			} else if (dateMode === "actual_rt") {
-				if (!trip.actualTripDates.includes(Number.parseInt(date))) return false;
+				if (!trip.actualTripDates.includes(date)) return false;
 			} else if (dateMode === "GTFS") {
-				if (!trip.scheduledStartServiceDates.includes(Number.parseInt(date))) return false;
+				if (!trip.scheduledStartServiceDates.includes(date)) return false;
 			}
 		}
 
@@ -138,7 +138,7 @@ export const load: PageServerLoad = async ({ url }) => {
 				}));
 				expanded = expanded.filter((v) => {
 					for (const date of serviceDates)
-						if (!v.scheduledTripDates.includes(Number.parseInt(date))) return false;
+						if (!v.scheduledTripDates.includes(date)) return false;
 					return true;
 				});
 				return expanded;
@@ -148,8 +148,8 @@ export const load: PageServerLoad = async ({ url }) => {
 	let results = serializedTrips.length;
 
 	serializedTrips = serializedTrips.sort((a, b) => {
-		let aServiceDate = 0,
-			bServiceDate = 0;
+		let aServiceDate = "0",
+			bServiceDate = "0";
 		if (dateMode === "actual_sch") {
 			aServiceDate = a.scheduledTripDates.sort()[0];
 			bServiceDate = b.scheduledTripDates.sort()[0];
@@ -160,10 +160,10 @@ export const load: PageServerLoad = async ({ url }) => {
 			aServiceDate = a.scheduledStartServiceDates.sort()[0];
 			bServiceDate = b.scheduledStartServiceDates.sort()[0];
 		}
-		if (aServiceDate !== bServiceDate) return aServiceDate - bServiceDate;
+		if (aServiceDate !== bServiceDate) return aServiceDate.localeCompare(bServiceDate);
 
-		const aDepartureTime = a.stopTimes[0].scheduled_departure_timestamp ?? 0;
-		const bDepartureTime = b.stopTimes[0].scheduled_departure_timestamp ?? 0;
+		const aDepartureTime = a.stopTimes[0].scheduled_departure_time ?? 0;
+		const bDepartureTime = b.stopTimes[0].scheduled_departure_time ?? 0;
 		if (aDepartureTime !== bDepartureTime) return aDepartureTime - bDepartureTime;
 
 		const runComparison = a.run.localeCompare(b.run);

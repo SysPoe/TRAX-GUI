@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		),
 	]
 		.sort()
-		.filter((v) => v >= today);
+		.filter((v) => Number.parseInt(v) >= today);
 
 	let routes: { [key: string]: string } = {};
 	let routePairs: { [key: string]: string } = {};

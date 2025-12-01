@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	let { date, series } = params;
 
-	let runSeries = TRAX.getRunSeries(Number.parseInt(date), series, true);
+	let runSeries = TRAX.getRunSeries(date, series, true);
 
 	// Get additional information for each trip
 	let trips: { [trip_id: string]: SerializableAugmentedTrip } = {};

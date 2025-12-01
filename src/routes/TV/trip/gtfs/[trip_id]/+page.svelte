@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import type { SerializableAugmentedStop, SerializableAugmentedTrip } from "translink-rail-api";
-	import type * as gtfs from "gtfs";
+	import * as qdf from "qdf-gtfs/types";
 	import type { PageProps } from "./$types";
 	import "$lib/styles/common.css";
 	import "$lib/styles/stoptimes.css";
-	import { onMount } from "svelte";
 
 	const { data }: PageProps = $props();
 	let { trip }: { trip: SerializableAugmentedTrip } = data;
@@ -14,7 +13,7 @@
 		route,
 	}: {
 		stations: { [stop_id: string]: SerializableAugmentedStop };
-		route: gtfs.Route;
+		route: qdf.Route;
 	} = data;
 
 	let useRealtime = $state(true);
@@ -35,9 +34,7 @@
 
 <svelte:head>
 	<title>
-		{formatTimestamp(
-			trip.stopTimes[0].scheduled_departure_timestamp || trip.stopTimes[0].scheduled_arrival_timestamp,
-		)}
+		{formatTimestamp(trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time)}
 		{trip.run}
 		{trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} service - TRAX TripViewer
 	</title>
@@ -57,14 +54,12 @@
 		</h2>
 		<p>
 			Departing: {formatTimestamp(
-				trip.stopTimes[0].scheduled_departure_timestamp || trip.stopTimes[0].scheduled_arrival_timestamp,
+				trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time,
 			)} | Trip ID: {trip._trip.trip_id}
 		</p>
 	{:else}
 		<h2>
-			{formatTimestamp(
-				trip.stopTimes[0].scheduled_departure_timestamp || trip.stopTimes[0].scheduled_arrival_timestamp,
-			)}
+			{formatTimestamp(trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time)}
 			{trip._trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
 		</h2>
 	{/if}
@@ -201,9 +196,11 @@
 					<a
 						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
 						st.realtime &&
-						st.realtime_info?.schedule_relationship === 3
+						trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
 							? 'cancelled'
-							: ''} {useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8
+							: ''} {useRealtime &&
+						st.realtime &&
+						st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 							? 'cancelled'
 							: ''}"
 						href={`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`}
@@ -224,27 +221,30 @@
 							<span class="time">
 								{#if data.extraDetails}
 									{formatTimestamp(
-										useRealtime ? st.actual_arrival_timestamp : st.scheduled_arrival_timestamp,
+										useRealtime ? st.actual_arrival_time : st.scheduled_arrival_time,
 										true,
 									)} &rarr;
 									{formatTimestamp(
-										useRealtime ? st.actual_departure_timestamp : st.scheduled_departure_timestamp,
+										useRealtime ? st.actual_departure_time : st.scheduled_departure_time,
 										true,
 									)}
 								{:else}
 									{formatTimestamp(
-										useRealtime && (st.actual_departure_timestamp ?? st.actual_arrival_timestamp)
-											? (st.actual_departure_timestamp ?? st.actual_arrival_timestamp)
-											: (st.scheduled_departure_timestamp ?? st.scheduled_arrival_timestamp),
+										useRealtime && (st.actual_departure_time ?? st.actual_arrival_time)
+											? (st.actual_departure_time ?? st.actual_arrival_time)
+											: (st.scheduled_departure_time ?? st.scheduled_arrival_time),
 									)}
 								{/if}
 							</span>
 							<span
 								class="tv-delay {useRealtime &&
 								st.realtime &&
-								st.realtime_info?.schedule_relationship === 3
+								trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
 									? 'cancelled'
-									: useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8
+									: useRealtime &&
+										  st.realtime &&
+										  st.realtime_info?.schedule_relationship ===
+												qdf.StopTimeScheduleRelationship.SKIPPED
 										? 'cancelled'
 										: st.passing
 											? 'estimated'
@@ -252,9 +252,14 @@
 												? (st.realtime_info?.delay_class ?? 'scheduled')
 												: 'scheduled'}"
 							>
-								({useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3
+								({useRealtime &&
+								st.realtime &&
+								trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
 									? "cancelled"
-									: useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8
+									: useRealtime &&
+										  st.realtime &&
+										  st.realtime_info?.schedule_relationship ===
+												qdf.StopTimeScheduleRelationship.SKIPPED
 										? "skipped"
 										: st.passing
 											? "estimated"
@@ -262,11 +267,11 @@
 												? st.realtime_info?.delay_string
 												: "scheduled"})
 							</span>
-							{#if (st.scheduled_departure_timestamp ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
+							{#if (st.scheduled_departure_time ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
 								<span class="tv-date-offset"
-									>(+{st.scheduled_departure_timestamp
+									>(+{st.scheduled_departure_time
 										? st.scheduled_departure_date_offset
-										: st.scheduled_arrival_date_offset}{(st.scheduled_departure_timestamp
+										: st.scheduled_arrival_date_offset}{(st.scheduled_departure_time
 										? st.scheduled_departure_date_offset
 										: st.scheduled_arrival_date_offset) !== 1
 										? "d"
@@ -302,9 +307,9 @@
 						</span>
 						{#if st.passing}
 							<span class="tv-service-type passing">P</span>
-						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 3}
+						{:else if useRealtime && st.realtime && trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED}
 							<span class="tv-service-type cancelled">C</span>
-						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === 8}
+						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED}
 							<span class="tv-service-type cancelled">S</span>
 						{/if}
 					</a>

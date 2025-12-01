@@ -3,7 +3,7 @@ import TRAX, {
 	type SerializableAugmentedStopTime,
 	type SerializableAugmentedTrip,
 } from "translink-rail-api";
-import * as gtfs from "gtfs";
+import * as qdf from "qdf-gtfs";
 import {
 	getUpcomingQRTravelDepartures,
 	isTRAXLoaded,
@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const { stop_id } = params;
 
-	let today = Number.parseInt(new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", ""));
+	let today = new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", "");
 
 	let now = new Date();
 	let startTime = now.getHours() + ":" + now.getMinutes() + ":00";
@@ -36,17 +36,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		dep_type: "gtfs";
 		express_string: string;
 		last_stop_id: string;
-		scheduled_departure_time: string;
-		actual_departure_time: string;
+		scheduled_departure_timestr: string;
+		actual_departure_timestr: string;
 		departs_in: string;
 		departsInSecs: number;
 	})[] = stop
 		.getDepartures(today, startTime, endTime)
 		.map((v) => {
 			const actualTime = formatTimestamp(
-				v.actual_departure_timestamp || v.actual_arrival_timestamp
-					? Math.floor((v.actual_departure_timestamp || v.actual_arrival_timestamp || 0) / 60) * 60
-					: v.actual_departure_timestamp || v.actual_arrival_timestamp,
+				v.actual_departure_time || v.actual_arrival_time
+					? Math.floor((v.actual_departure_time || v.actual_arrival_time || 0) / 60) * 60
+					: v.actual_departure_time || v.actual_arrival_time,
 			);
 			// Get current time in HH:mm
 			const nowTime = `${now.getHours().toString().padStart(2, "0")}:${now
@@ -57,9 +57,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				...v.toSerializable(),
 				dep_type: "gtfs" as "gtfs",
 				express_string: v.express_string,
-				actual_departure_time: actualTime,
-				scheduled_departure_time: formatTimestamp(
-					v.scheduled_departure_timestamp || v.scheduled_arrival_timestamp,
+				actual_departure_timestr: actualTime,
+				scheduled_departure_timestr: formatTimestamp(
+					v.scheduled_departure_time || v.scheduled_arrival_time,
 				),
 				last_stop_id:
 					TRAX.getAugmentedTrips(v.trip_id)[0].stopTimes.at(-1)?.actual_parent_station?.stop_id ||
@@ -77,8 +77,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		})
 		.sort(
 			(a, b) =>
-				(a.actual_departure_timestamp || a.actual_arrival_timestamp || 0) -
-				(b.actual_departure_timestamp || b.actual_arrival_timestamp || 0),
+				(a.actual_departure_time || a.actual_arrival_time || 0) -
+				(b.actual_departure_time || b.actual_arrival_time || 0),
 		);
 
 	let trips: {
@@ -92,7 +92,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	let routes: {
-		[route_id: string]: gtfs.Route;
+		[route_id: string]: qdf.Route;
 	} = {};
 	for (const trip of Object.values(trips)) {
 		if (trip._trip.route_id && !routes[trip._trip.route_id]) {
@@ -108,8 +108,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				dep_type: "gtfs";
 				express_string: string;
 				last_stop_id: string;
-				scheduled_departure_time: string;
-				actual_departure_time: string;
+				scheduled_departure_timestr: string;
+				actual_departure_timestr: string;
 				departs_in: string;
 				departsInSecs: number;
 		  })
@@ -129,8 +129,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			(v) =>
 				(v.dep_type === "gtfs" &&
 					v.realtime &&
-					v.realtime_info?.schedule_relationship !== 8 &&
-					v.realtime_info?.schedule_relationship !== 3) ||
+					v.realtime_info?.schedule_relationship !== qdf.StopTimeScheduleRelationship.SKIPPED) ||
 				extraDetails ||
 				v.dep_type === "qrt",
 		);

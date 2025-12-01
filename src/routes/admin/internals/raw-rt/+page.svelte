@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
-	import * as qdf from "qdf-gtfs";
+	import * as qdf from "qdf-gtfs/types";
 	const { data }: PageProps = $props();
 
 	let searchQuery = $state("");

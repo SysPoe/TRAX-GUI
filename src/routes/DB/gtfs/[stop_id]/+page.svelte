@@ -2,7 +2,7 @@
 	import { invalidateAll } from "$app/navigation";
 	import "$lib/styles/common.css";
 	import type { UpcomingQRTravelDeparture } from "$lib";
-	import type * as gtfs from "gtfs";
+	import * as qdf from "qdf-gtfs/types";
 	import { onMount } from "svelte";
 	import { type SerializableAugmentedStopTime } from "translink-rail-api";
 	import type { PageProps } from "./$types";
@@ -24,7 +24,7 @@
 	let { data, params }: PageProps = $props();
 
 	let departures = $derived(data.departures as Departure[]);
-	let routes = $derived(data.routes as { [route_id: string]: gtfs.Route });
+	let routes = $derived(data.routes as { [route_id: string]: qdf.Route });
 	let station = $derived(data.stations.find((v) => v.stop_id === data.stop_id));
 
 	let isRefreshing = $state(false);
@@ -146,8 +146,9 @@
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<a
 				class="departure gtfs {(dep as SerializableAugmentedStopTime).realtime &&
-				((dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3 ||
-					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8)
+				(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+						qdf.StopTimeScheduleRelationship.SKIPPED)
 					? 'cancelled'
 					: dep.last_stop_id == params.stop_id.toLowerCase()
 						? 'term'
@@ -163,21 +164,25 @@
 					{dep.actual_platform_code || "?"}
 				</span>
 				<span class="smalltext">
-					<span class="time">{dep.scheduled_departure_time}</span>
+					<span class="time">{qdf.formatTimestamp(dep.scheduled_departure_time)}</span>
 					<span
 						class="delay {(dep as SerializableAugmentedStopTime).realtime &&
-						((dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3 ||
-							(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8)
+						(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+							(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+								qdf.StopTimeScheduleRelationship.SKIPPED)
 							? 'cancelled'
 							: dep.realtime
 								? dep.realtime_info?.delay_class || 'scheduled'
 								: 'scheduled'}"
 					>
 						({(dep as SerializableAugmentedStopTime).realtime &&
-						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
+						(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+							(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+								qdf.StopTimeScheduleRelationship.SKIPPED)
 							? "cancelled"
 							: (dep as SerializableAugmentedStopTime).realtime &&
-								  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8
+								  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+										qdf.StopTimeScheduleRelationship.SKIPPED
 								? "skipped"
 								: dep.realtime
 									? dep.realtime_info?.delay_string || "scheduled"
@@ -195,8 +200,9 @@
 				</span>
 				<span
 					class="service-type {(dep as SerializableAugmentedStopTime).realtime &&
-					((dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3 ||
-						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8)
+					(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+							qdf.StopTimeScheduleRelationship.SKIPPED)
 						? 'cancelled'
 						: dep.last_stop_id == params.stop_id.toLowerCase()
 							? 'term'
@@ -207,10 +213,11 @@
 									: 'all-stops'}"
 				>
 					{(dep as SerializableAugmentedStopTime).realtime &&
-					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 3
+					trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
 						? "C"
 						: (dep as SerializableAugmentedStopTime).realtime &&
-							  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship === 8
+							  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+									qdf.StopTimeScheduleRelationship.SKIPPED
 							? "S"
 							: dep.last_stop_id == params.stop_id.toLowerCase()
 								? "T"

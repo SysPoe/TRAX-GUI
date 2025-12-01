@@ -70,11 +70,11 @@
 		goto(`/TV/trip/gtfs/${tripId}`);
 	}
 
-	function contractSD(serviceDates: number[]): string[] {
-		// servicedates are numbers e.g. 20250801
+	function contractSD(serviceDates: string[]): string[] {
+		// servicedates are strings e.g. 20250801
 		// convert to ranges like 20250801-20250805
 		if (serviceDates.length === 0) return [];
-		serviceDates.sort((a, b) => a - b);
+		serviceDates.sort((a, b) => Number.parseInt(a) - Number.parseInt(b));
 		const ranges: string[] = [];
 		let start = serviceDates[0];
 		let end = serviceDates[0];
@@ -138,8 +138,8 @@
 <div class="results">
 	<hr />
 	{#each data?.trips as trip}
-		{@const departure_time = formatTimestamp(trip.stopTimes[0].scheduled_departure_timestamp)}
-		{@const arrival_time = formatTimestamp(trip.stopTimes.at(-1)?.scheduled_arrival_timestamp)}
+		{@const departure_time = formatTimestamp(trip.stopTimes[0].scheduled_departure_time)}
+		{@const arrival_time = formatTimestamp(trip.stopTimes.at(-1)?.scheduled_arrival_time)}
 		{@const startStation = data.stations[trip.stopTimes[0].scheduled_stop ?? ""]}
 		{@const endStation = data.stations[trip.stopTimes.at(-1)?.scheduled_stop ?? ""]}
 		{@const startParent = trip.stopTimes[0].scheduled_parent_station
@@ -216,14 +216,14 @@
 							{data.stations[st]?.stop_name ?? st}
 							arr {formatTimestamp(
 								data.filters.useRT
-									? (stoptime?.actual_arrival_timestamp ?? stoptime?.scheduled_arrival_timestamp)
-									: stoptime?.scheduled_arrival_timestamp,
+									? (stoptime?.actual_arrival_time ?? stoptime?.scheduled_arrival_time)
+									: stoptime?.scheduled_arrival_time,
 								true,
 							)}
 							dep {formatTimestamp(
 								data.filters.useRT
-									? (stoptime?.actual_departure_timestamp ?? stoptime?.scheduled_departure_timestamp)
-									: stoptime?.scheduled_departure_timestamp,
+									? (stoptime?.actual_departure_time ?? stoptime?.scheduled_departure_time)
+									: stoptime?.scheduled_departure_time,
 								true,
 							)}
 							{#if st != data.filters.intermediateStations.at(-1)},
