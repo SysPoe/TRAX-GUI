@@ -120,24 +120,26 @@
 {#if !loading}
 	<div class="stations">
 		{#each sortedStations as station}
-			<div data-id={station.stop_id} data-name={station.stop_name} class="station">
-				<a
-					href="/DB/gtfs/{station.stop_id}"
-					onclick={(ev) => {
-						loading = true;
-						if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
-							// Open in new tab if modifier key is held
-							ev.preventDefault();
-							window.open(`/DB/gtfs/${station.stop_id}`, "_blank");
-							loading = false;
-							return;
-						}
-						goto(`/DB/gtfs/${station.stop_id}`);
-					}}
-				>
+			<button
+				data-id={station.stop_id}
+				data-name={station.stop_name}
+				class="station"
+				onclick={(ev) => {
+					loading = true;
+					if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+						// Open in new tab if modifier key is held
+						ev.preventDefault();
+						window.open(`/DB/gtfs/${station.stop_id}`, "_blank");
+						loading = false;
+						return;
+					}
+					goto(`/DB/gtfs/${station.stop_id}`);
+				}}
+			>
+				<a href="/DB/gtfs/{station.stop_id}">
 					{station.stop_name}
 				</a>
-			</div>
+			</button>
 		{/each}
 	</div>
 {/if}
@@ -181,6 +183,7 @@
 			border-color 0.2s;
 		width: 250px;
 		font-family: "Inter";
+		cursor: pointer;
 	}
 	.station:hover {
 		box-shadow: 0 4px 16px rgba(41, 128, 185, 0.12);
