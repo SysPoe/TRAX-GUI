@@ -13,6 +13,14 @@ export function loadTRAX() {
 			isTRAXLoading = false;
 			isTRAXLoaded = true;
 		});
+
+		TRAX.on("static-update-start", () => {
+			isTRAXLoading = true;
+		})
+		TRAX.on("static-update-end", () => {
+			isTRAXLoading = false;
+			isTRAXLoaded = true;
+		});
 	}
 }
 
