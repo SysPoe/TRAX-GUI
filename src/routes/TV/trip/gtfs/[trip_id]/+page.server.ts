@@ -30,10 +30,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const extraDetails = locals.session?.data?.extraDetails ?? true;
 	if (!extraDetails)
-		serialized = {
-			...serialized,
-			stopTimes: serialized.stopTimes.filter((v) => !v.passing),
-		};
+		serialized.stopTimes = serialized.stopTimes.filter((v) => !v.passing);
 
 	return { trip: serialized, stations, route, expressString, extraDetails };
 };

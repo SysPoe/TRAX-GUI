@@ -35,16 +35,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 			routes[v.route_short_name?.slice(2)] = v.route_long_name?.split("-")[1]?.trim();
 		if (v.route_short_name && v.route_long_name) routePairs[v.route_short_name] = v.route_long_name;
 	}
-
-	// console.log([
-	// 	...new Set(
-
-	// 			.map((v) => [
-	// 				[, v.route_long_name?.split("-")[0].trim()],
-	// 				[v.route_short_name?.slice(2), v.route_long_name?.split("-")[1]?.trim()]
-	// 			])
-	// 			.flat(),
-	// 	),
-	// ]);
+	
 	return { stations, dates, routes, routePairs, extraDetails: locals.session?.data?.extraDetails ?? true };
 };
