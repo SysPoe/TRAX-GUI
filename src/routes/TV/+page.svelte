@@ -2,33 +2,96 @@
 	import type { PageProps } from "./$types";
 	import type { SerializableAugmentedStop } from "translink-rail-api";
 	import "$lib/styles/common.css";
-	import StationAutocomplete from "$lib/StationAutocomplete.svelte";
+	
+	// Import the NEW generic component
+	import Autocomplete from "$lib/Autocomplete.svelte";
 
 	let loading = $state(false);
-
 	const { data }: PageProps = $props();
 	let { stations }: { stations: SerializableAugmentedStop[] } = data;
 
-	// Station State
-	let startStation = $state<SerializableAugmentedStop | null>(null);
-	let endStation = $state<SerializableAugmentedStop | null>(null);
-	let intermediateStations = $state<(SerializableAugmentedStop | null)[]>([]);
+	// --- 1. PREPARE DATA FOR AUTOCOMPLETE ---
 
-	// Date State (Refactored from DOM manipulation to Svelte State for better styling)
-	// We store unique IDs or just use an array of objects to track rows
-	let dateFilters = $state<{ id: number; value: string }[]>([]);
+	// Convert Stations to Autocomplete Format
+	const stationOptions = stations.map(s => ({
+		label: s.stop_name ?? "Unknown Station",
+		value: s.stop_id ?? "",
+		original: s 
+	}));
+
+	// Convert Dates to Autocomplete Format
+	const dateOptions = data.dates.map(d => ({
+		label: d, // Date string (e.g., "2025-12-01")
+		value: d  
+	}));
+
+	// Convert Destinations to Autocomplete Format
+	// (Hardcoding your previous list here for cleaner mapping)
+	const destRaw = [
+		{ v: "0", l: "Roma Street - Bowen Hills" },
+		{ v: "1", l: "Dakabin - Caboolture" },
+		{ v: "4", l: "Yandina - Gympie North" },
+		{ v: "5", l: "Riverview - Ipswich" },
+		{ v: "6", l: "Thomas Street - Rosewood" },
+		{ v: "7", l: "Trinder Park - Beenleigh" },
+		{ v: "8", l: "Lota - Cleveland" },
+		{ v: "9", l: "Roma Street" },
+		{ v: "A", l: "Bindha - Banyo Yard - Shorncliffe" },
+		{ v: "B", l: "Clayfield - Doomben / Pinkenba" },
+		{ v: "D", l: "Milton - Redbank" },
+		{ v: "E", l: "Windsor - Ferny Grove" },
+		{ v: "G", l: "Ormeau - Varsity Lakes" },
+		{ v: "H", l: "Manly / Cannon Hill" },
+		{ v: "K", l: "Richlands - Springfield Central" },
+		{ v: "L", l: "Elimbah - Nambour" },
+		{ v: "M", l: "Roma Street - Bowen Hills" },
+		{ v: "N", l: "Exhibition via Brisbane Central" },
+		{ v: "P", l: "International - Domestic (Airport)" },
+		{ v: "R", l: "Roma Street" },
+		{ v: "S", l: "South Brisbane - Park Road" },
+		{ v: "V", l: "Dutton Park - Kuraby" },
+		{ v: "W", l: "Albion - Northgate" },
+		{ v: "X", l: "Exhibition Direct" },
+		{ v: "Y", l: "Virginia - Kippa-Ring" },
+		{ v: "Z", l: "Exhibition" },
+	];
+	const destOptions = destRaw.map(d => ({
+		label: `${d.v} - ${d.l}`, // Combine so user can search by code OR name
+		value: d.v
+	}));
+
+
+	// --- 2. STATE VARIABLES ---
+	// We only need simple variables or arrays now, the component handles the hidden inputs
+
+	// Station State (We use the 'original' property to get the augmented stop back if needed, 
+    // but standard form submit only needs the ID which the component handles via 'name')
+	let startStationItem = $state(null);
+	let endStationItem = $state(null);
+	
+	// Intermediate Stations: Array of objects { item: Item | null }
+	let intermediateItems = $state<{ item: any }[]>([]); 
+
+	// Date State
+	let dateFilters = $state<{ id: number; item: any }[]>([]);
 	let dateCounter = 0;
 
+	// Destination State
+	let destItem = $state(null);
+
+
+	// --- 3. HELPER FUNCTIONS ---
+
 	function addIntermediate() {
-		intermediateStations.push(null);
+		intermediateItems.push({ item: null });
 	}
 
 	function removeIntermediate(index: number) {
-		intermediateStations.splice(index, 1);
+		intermediateItems.splice(index, 1);
 	}
 
 	function addDate() {
-		dateFilters.push({ id: dateCounter++, value: "" });
+		dateFilters.push({ id: dateCounter++, item: null });
 	}
 
 	function removeDate(index: number) {
@@ -36,7 +99,6 @@
 	}
 
 	function submit() {
-		// Native form submission is fine here since you are using standard GET params
 		let form = document.querySelector("form") as HTMLFormElement;
 		form.requestSubmit();
 	}
@@ -62,47 +124,40 @@
 
 	{#if !loading}
 		<form action="/TV/search" method="get" class="search-card">
+			
 			<fieldset>
 				<legend>Station Filter</legend>
 				<div class="grid-2">
 					<div class="input-group">
 						<label for="start-station-input">Starts at:</label>
-						<div id="start-station-input">
-							<StationAutocomplete
-								bind:selectedStation={startStation}
-								{stations}
-								placeholder="Search start station..."
-							/>
-						</div>
-						<input
-							type="hidden"
-							name="start-station"
-							value={startStation?.stop_id ?? ""}
-							id="start-station"
+						<Autocomplete 
+							items={stationOptions} 
+							bind:selectedItem={startStationItem}
+							name="start-station" 
+							placeholder="Search start station..."
 						/>
 					</div>
 					<div class="input-group">
 						<label for="end-station-input">Ends at:</label>
-						<div id="end-station-input">
-							<StationAutocomplete
-								bind:selectedStation={endStation}
-								{stations}
-								placeholder="Search destination..."
-							/>
-						</div>
-						<input type="hidden" name="end-station" value={endStation?.stop_id ?? ""} id="end-station" />
+						<Autocomplete 
+							items={stationOptions} 
+							bind:selectedItem={endStationItem}
+							name="end-station" 
+							placeholder="Search destination..."
+						/>
 					</div>
 				</div>
 
-				{#if intermediateStations.length > 0}
+				{#if intermediateItems.length > 0}
 					<div class="subsection">
 						<span>Via Stations (must stop at all):</span>
-						{#each intermediateStations as station, index}
+						{#each intermediateItems as row, index}
 							<div class="row-control">
 								<div class="flex-grow">
-									<StationAutocomplete
-										bind:selectedStation={intermediateStations[index]}
-										{stations}
+									<Autocomplete 
+										items={stationOptions} 
+										bind:selectedItem={row.item}
+										name="intermediate-station-{index}" 
 										placeholder="Search via station..."
 									/>
 								</div>
@@ -114,36 +169,42 @@
 								>
 									&minus;
 								</button>
-								<input
-									type="hidden"
-									name="intermediate-station-{index}"
-									value={station?.stop_id ?? ""}
-								/>
 							</div>
 						{/each}
 					</div>
 				{/if}
-				<button type="button" class="btn-secondary small" onclick={addIntermediate}> + Add Via Station </button>
+				<button type="button" class="btn-secondary small" onclick={addIntermediate}>
+					+ Add Via Station
+				</button>
 			</fieldset>
 
 			<fieldset>
 				<legend>Date Filter</legend>
 				<p class="hint">Service must run on all selected dates.</p>
 
-				{#each dateFilters as dateItem, index}
+				{#each dateFilters as row, index}
 					<div class="row-control">
-						<select name="service-date-{index}" bind:value={dateItem.value} class="flex-grow">
-							<option value="">Select a Date</option>
-							{#each data.dates as date}
-								<option value={date}>{date}</option>
-							{/each}
-						</select>
-						<button type="button" class="btn-icon" onclick={() => removeDate(index)} title="Remove Date">
+						<div class="flex-grow">
+							<Autocomplete 
+								items={dateOptions}
+								bind:selectedItem={row.item}
+								name="service-date-{index}"
+								placeholder="Select or type date (YYYYMMDD)..."
+							/>
+						</div>
+						<button
+							type="button"
+							class="btn-icon"
+							onclick={() => removeDate(index)}
+							title="Remove Date"
+						>
 							&minus;
 						</button>
 					</div>
 				{/each}
-				<button type="button" class="btn-secondary small" onclick={addDate}> + Add Date Constraint </button>
+				<button type="button" class="btn-secondary small" onclick={addDate}>
+					+ Add Date Constraint
+				</button>
 			</fieldset>
 
 			<fieldset>
@@ -164,41 +225,23 @@
 
 					<div class="input-group">
 						<label for="train-number">Specific Train Number</label>
-						<input type="text" name="train-number" id="train-number" placeholder="e.g. 1124" />
+						<input
+							type="text"
+							name="train-number"
+							id="train-number"
+							placeholder="e.g. 1124"
+						/>
 					</div>
 				</div>
 
 				<div class="input-group">
 					<label for="train-number-destination">Destination Range</label>
-					<select name="train-number-destination" id="train-number-destination">
-						<option value="">Any Destination Range</option>
-						<option value="0">0 - Roma Street - Bowen Hills</option>
-						<option value="1">1 - Dakabin - Caboolture</option>
-						<option value="4">4 - Yandina - Gympie North</option>
-						<option value="5">5 - Riverview - Ipswich</option>
-						<option value="6">6 - Thomas Street - Rosewood</option>
-						<option value="7">7 - Trinder Park - Beenleigh</option>
-						<option value="8">8 - Lota - Cleveland</option>
-						<option value="9">9 - Roma Street</option>
-						<option value="A">A - Bindha - Banyo Yard - Shorncliffe</option>
-						<option value="B">B - Clayfield - Doomben / Pinkenba</option>
-						<option value="D">D - Milton - Redbank</option>
-						<option value="E">E - Windsor - Ferny Grove</option>
-						<option value="G">G - Ormeau - Varsity Lakes </option>
-						<option value="H">H - Manly / Cannon Hill</option>
-						<option value="K">K - Richlands - Springfield Central</option>
-						<option value="L">L - Elimbah - Nambour</option>
-						<option value="M">M - Roma Street - Bowen Hills</option>
-						<option value="N">N - Exhibition via Brisbane Central</option>
-						<option value="P">P - International - Domestic (Airport)</option>
-						<option value="R">R - Roma Street</option>
-						<option value="S">S - South Brisbane - Park Road</option>
-						<option value="V">V - Dutton Park - Kuraby</option>
-						<option value="W">W - Albion - Northgate</option>
-						<option value="X">X - Exhibition Direct</option>
-						<option value="Y">Y - Virginia - Kippa-Ring</option>
-						<option value="Z">Z - Exhibition </option>
-					</select>
+					<Autocomplete
+						items={destOptions}
+						bind:selectedItem={destItem}
+						name="train-number-destination"
+						placeholder="Search destination code or name..."
+					/>
 				</div>
 			</fieldset>
 
@@ -245,7 +288,11 @@
 							{/each}
 						</select>
 						<label class="checkbox-label">
-							<input type="checkbox" name="route-pair-reversible" id="route-pair-reversible" />
+							<input
+								type="checkbox"
+								name="route-pair-reversible"
+								id="route-pair-reversible"
+							/>
 							Reversible
 						</label>
 					</div>
@@ -266,7 +313,10 @@
 						</div>
 						<div class="input-group">
 							<label for="rs-leader-behaviour">RS Confirmed Leaders</label>
-							<select name="rs-leader-behaviour" id="rs-leader-behaviour">
+							<select
+								name="rs-leader-behaviour"
+								id="rs-leader-behaviour"
+							>
 								<option value="include">Include (default)</option>
 								<option value="exclude">Exclude</option>
 								<option value="only">Only</option>
@@ -277,7 +327,10 @@
 					<div class="grid-2">
 						<div class="input-group">
 							<label for="multi-date-behaviour">Multi-Date Behaviour</label>
-							<select name="multi-date-behaviour" id="multi-date-behaviour">
+							<select
+								name="multi-date-behaviour"
+								id="multi-date-behaviour"
+							>
 								<option value="original">Original (default)</option>
 								<option value="duplicate">Duplicate</option>
 							</select>
