@@ -14,6 +14,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	const startStation = url.searchParams.get("start-station") ?? "";
 	const endStation = url.searchParams.get("end-station") ?? "";
+
 	// Collect all intermediate stations
 	const intermediateStations: string[] = [];
 	for (const [key, value] of url.searchParams.entries()) {
@@ -23,6 +24,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			}
 		}
 	}
+	
 	// Collect all service dates
 	const serviceDates: string[] = [];
 	for (const [key, value] of url.searchParams.entries()) {
@@ -32,13 +34,16 @@ export const load: PageServerLoad = async ({ url }) => {
 			}
 		}
 	}
+	
 	const trainNumberType = url.searchParams.get("train-number-type") ?? "";
 	const trainNumberDestination = url.searchParams.get("train-number-destination") ?? "";
 	const trainNumber = (url.searchParams.get("train-number") ?? "").trim().toUpperCase();
 
 	if (trainNumber.length > 0 && trainNumber.length != 4)
 		throw error(400, "Train number must be exactly 4 characters long.");
-	if (!/^[A-Z0-9]{0,4}$/.test(trainNumber)) throw error(400, "Train number must be alphanumeric.");
+	
+	if (!/^[A-Z0-9.]{0,4}$/.test(trainNumber)) 
+		throw error(400, "Train number must be alphanumeric or '.' wildcard.");
 
 	const route = url.searchParams.get("route") ?? "";
 	const routeStart = url.searchParams.get("route-start") ?? "";
@@ -55,7 +60,15 @@ export const load: PageServerLoad = async ({ url }) => {
 	// Pagination
 	const page = parseInt(url.searchParams.get("page") ?? "1", 10);
 	const perPage = 20;
+
+	// We replace valid input characters with themselves, and '.' remains '.' (regex wildcard)
+	let trainNumberRegex: RegExp | null = null;
+	if (trainNumber !== "") {
+		trainNumberRegex = new RegExp(`^${trainNumber}$`);
+	}
+
 	let trips = TRAX.getAugmentedTrips().filter((trip) => {
+		// Station filtering
 		if (
 			startStation.trim() !== "" &&
 			!(
@@ -85,6 +98,7 @@ export const load: PageServerLoad = async ({ url }) => {
 				return false;
 		}
 
+		// Route filtering
 		if (routePair !== "" && trip._trip.route_id.slice(0, 4) !== routePair)
 			return (
 				routePairReversible && trip._trip.route_id.slice(0, 4) === routePair.slice(2, 4) + routePair.slice(0, 2)
@@ -93,6 +107,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		if (routeStart !== "" && trip._trip.route_id.slice(0, 2) !== routeStart) return false;
 		if (routeEnd !== "" && trip._trip.route_id.slice(2, 4) !== routeEnd) return false;
 
+		// Date filtering
 		for (const date of serviceDates) {
 			if (dateMode === "actual_sch") {
 				if (!trip.scheduledTripDates.includes(date)) return false;
@@ -106,7 +121,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		if (trainNumberType.trim() !== "" && trip.run[0].toLowerCase() !== trainNumberType.toLowerCase()) return false;
 		if (trainNumberDestination.trim() !== "" && trip.run[1].toLowerCase() !== trainNumberDestination.toLowerCase())
 			return false;
-		if (trainNumber !== "" && trip.run.trim().toUpperCase() !== trainNumber) return false;
+		if (trainNumberRegex && !trainNumberRegex.test(trip.run.trim().toUpperCase())) return false;
 
 		if (rsLeaderBehaviour !== "include") {
 			const isLeader =
@@ -172,13 +187,11 @@ export const load: PageServerLoad = async ({ url }) => {
 		return 0;
 	});
 
-	// Pagination logic
 	const totalPages = Math.ceil(serializedTrips.length / perPage);
 	const pagedTrips = serializedTrips.slice((page - 1) * perPage, page * perPage);
 	const unserializedPagedTrips = trips.slice((page - 1) * perPage, page * perPage);
 	let concatenated = serializedTrips.length > perPage;
 
-	// Capture original query params for pagination links
 	const originalParams: Record<string, string[]> = {};
 	for (const [key, value] of url.searchParams.entries()) {
 		if (key !== "page") {
