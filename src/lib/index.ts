@@ -1,57 +1,17 @@
 import TRAX, { type TravelTrip, type SRTStop } from "translink-rail-api";
-import fs from "fs";
 
 export let isTRAXLoaded = false;
 export let isTRAXLoading = false;
-let intervalSet = false;
 
-export function loadTRAX(freshLoad = false) {
+export function loadTRAX() {
 	if (!isTRAXLoaded && !isTRAXLoading) {
 		isTRAXLoading = true;
 
 		TRAX.clearIntervals();
-
-		let lastLoaded = fs.existsSync("gtfs-last-loaded.txt")
-			? fs.readFileSync("gtfs-last-loaded.txt", "utf-8")
-			: new Date(0).toISOString();
-		const lastLoadedDate = new Date(lastLoaded);
-		if (
-			Date.now() - lastLoadedDate.getTime() > 1000 * 60 * 60 * 24 ||
-			lastLoadedDate.getDay() !== new Date().getDay() ||
-			freshLoad
-		) {
-			// If last loaded was more than 24 hours ago, reload GTFS data
-
-			console.log("Reloading static TRAX GTFS data...");
-			if (fs.existsSync(".TRAXCACHE.sqlite")) fs.rmSync(".TRAXCACHE.sqlite");
-			if (fs.existsSync(".TRAXCACHE.sqlite-journal")) fs.rmSync(".TRAXCACHE.sqlite-journal");
-			TRAX.loadGTFS(true, true, 120_000).then(() => {
-				isTRAXLoading = false;
-				isTRAXLoaded = true;
-			});
-			fs.writeFileSync("gtfs-last-loaded.txt", new Date().toISOString());
-		} else {
-			// Otherwise, load from cache
-			TRAX.loadGTFS(true, false, 120_000).then(() => {
-				isTRAXLoading = false;
-				isTRAXLoaded = true;
-			});
-		}
-
-		intervalSet = true;
-		if (!intervalSet)
-			setInterval(
-				() => {
-					loadTRAX(true);
-				},
-				1000 * 60 * 60 * 6,
-			); // Reload TRAX every 6h
-
-		TRAX.on("update-realtime-start", () => {
-			isTRAXLoading = true;
-		});
-		TRAX.on("update-realtime-end", () => {
+		
+		TRAX.loadGTFS(true, true, 60_000).then(() => {
 			isTRAXLoading = false;
+			isTRAXLoaded = true;
 		});
 	}
 }
