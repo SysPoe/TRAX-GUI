@@ -21,7 +21,7 @@
 
 	// Convert Dates to Autocomplete Format
 	const dateOptions = data.dates.map(d => ({
-		label: d, // Date string (e.g., "2025-12-01")
+		label: d, // Date string (e.g., "20251201")
 		value: d  
 	}));
 
@@ -353,10 +353,6 @@
 					type="submit"
 					value="Search Trips"
 					class="btn-primary"
-					onclick={() => {
-						loading = true;
-						submit();
-					}}
 				/>
 			</div>
 		</form>
