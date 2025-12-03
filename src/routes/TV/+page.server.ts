@@ -36,5 +36,5 @@ export const load: PageServerLoad = async ({ locals }) => {
 		if (v.route_short_name && v.route_long_name) routePairs[v.route_short_name] = v.route_long_name;
 	}
 	
-	return { stations, dates, routes, routePairs, extraDetails: locals.session?.data?.extraDetails ?? true };
+	return { stations, dates, routes, routePairs, extraDetails: locals.session?.data?.extraDetails ?? false };
 };
