@@ -40,7 +40,7 @@
 		return items.filter(item => {
 			return item.label.toLowerCase().includes(query) || 
 				   item.value.toLowerCase().includes(query);
-		}).slice(0, 50); // Limit results for performance
+		});
 	});
 
 	function handleInput(event: Event) {
