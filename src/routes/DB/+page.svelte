@@ -99,35 +99,34 @@
 <svelte:head>
 	<title>TRAX Departure Board</title>
 	<link rel="icon" type="image/svg+xml" href="/favicon-DB.svg" />
-	<link rel="prefetch" href="/img/loading.svg" />
 </svelte:head>
 
-<div class="title">
-	<h1>TRAX <i>DepartureBoard</i></h1>
-	<p>Select a station to view departures...</p>
-	{#if loading}
-		<p><img src="/img/loading.svg" alt="Loading..." /></p>
-		<p>Loading... This will most likely take less than 2 minutes</p>
-	{:else}
-		<input
-			type="text"
-			name="filter"
-			id="filter"
-			placeholder="Filter stations..."
-			bind:value={filterText}
-			onkeydown={handleKeydown}
-		/>
-	{/if}
-</div>
+<h1>TRAX DepartureBoard</h1>
+<p>Select a station to view departures.</p>
+
+{#if loading}
+    <p>Loading... Please wait.</p>
+{:else}
+    <p>
+        Filter stations:
+        <input
+            type="text"
+            name="filter"
+            size="30"
+            bind:value={filterText}
+            onkeydown={handleKeydown}
+        />
+    </p>
+{/if}
+
+<hr>
 
 {#if !loading}
-	<div class="stations">
+	<ul>
 		{#each sortedStations as station (station.stop_id)}
-			<button
-				data-id={station.stop_id}
-				data-name={station.stop_name}
-				class="station"
-				onclick={(ev) => {
+			<li>
+                <a href="/DB/gtfs/{station.stop_id}"
+                   onclick={(ev) => {
 					loading = true;
 					if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
 						ev.preventDefault();
@@ -135,72 +134,14 @@
 						loading = false;
 						return;
 					}
+					// goto is handled by anchor tag mostly, but we use it for SPA feel if needed.
+                    // Actually, for retro feel, full page load is fine, but we keep SPA for speed.
+                    ev.preventDefault();
 					goto(`/DB/gtfs/${station.stop_id}`);
-				}}
-			>
-				<a href="/DB/gtfs/{station.stop_id}">
-					{station.stop_name}
-				</a>
-			</button>
+				   }}>
+                    {station.stop_name}
+                </a>
+            </li>
 		{/each}
-	</div>
+	</ul>
 {/if}
-
-<style>
-	/* ... Keep your existing styles ... */
-	.title input[type="text"] {
-		padding: 0.5rem 1rem;
-		font-size: 1rem;
-		border: 1px solid #ccc;
-		border-radius: 6px;
-		width: 300px;
-		max-width: 90vw;
-		box-shadow: 0 2px 8px rgba(44, 62, 80, 0.05);
-		margin-top: 0.5rem;
-		transition: border-color 0.2s;
-	}
-	.title input[type="text"]:focus {
-		border-color: #2980b9;
-		outline: none;
-	}
-	.stations {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 1rem;
-		justify-content: center;
-		margin-top: 2rem;
-		max-width: 1000px;
-		margin-left: auto;
-		margin-right: auto;
-	}
-	.station {
-		background: #f8f9fa;
-		border: 1px solid #e1e4e8;
-		border-radius: 8px;
-		padding: 1rem 1.5rem;
-		min-width: 180px;
-		text-align: center;
-		box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
-		transition:
-			box-shadow 0.2s,
-			border-color 0.2s;
-		width: 250px;
-		font-family: "Inter";
-		cursor: pointer;
-	}
-	.station:hover {
-		box-shadow: 0 4px 16px rgba(41, 128, 185, 0.12);
-		border-color: #2980b9;
-	}
-	.station a {
-		text-decoration: none;
-		color: #2980b9;
-		font-size: 1.1rem;
-		font-weight: 500;
-		transition: color 0.2s;
-	}
-	.station a:hover {
-		color: #1abc9c;
-		text-decoration: underline;
-	}
-</style>

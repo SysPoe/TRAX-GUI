@@ -1,146 +1,52 @@
 /*
-    Common styles for stop time lists in TRAX TripViewer.
+    Styles for stop time lists in TRAX TripViewer.
+    Minimalist / Retro version.
 */
 
 .tv-stoptimes {
-	font-family: "Arial Narrow", Arial, sans-serif;
-	padding: 0.1rem;
-	width: fit-content;
-	margin: 0 auto;
+    font-family: "Courier New", Courier, monospace;
+    margin: 10px 0;
 }
 
+/* Treat the list as a simple block */
 .tv-stop-time {
-    display: flex;
-    align-items: center;
-    padding-right: 0.3rem;
-    width: fit-content;
-    height: fit-content;
-    color: inherit;
+    display: block;
+    margin-bottom: 5px;
+    padding: 2px;
+    border-bottom: 1px dashed #ccc;
     text-decoration: none;
-    border-radius: 3px;
-    margin-bottom: 0.2rem;
-    transition: all 150ms;
-}
-
-a.tv-stop-time {
-	cursor: pointer;
+    color: black;
 }
 
 a.tv-stop-time:hover {
-	background-color: #f0f7ff;
-	box-shadow: 0 0 1rem #c5d5f0;
-}
-
-a.tv-stop-time.cancelled:hover {
-	background-color: #fceaea;
-	box-shadow: 0 0 1rem #d6b3b3;
-}
-
-.tv-stop-time.cancelled {
-	background-color: #fceaea;
-}
-
-.tv-stop-time.passing {
-	background-color: #ccc;
-}
-
-.tv-stop-time.cancelled {
-	background-color: #c48989;
-}
-
-a.tv-stop-time.cancelled:hover {
-	background-color: #c48989;
-	box-shadow: 0 0 1rem #8c4141;
+    background-color: #eeeeee;
 }
 
 .tv-platform {
-	align-items: center;
-	color: white;
-	display: inline-block;
-	font-family: "Arial", serif;
-	font-size: 2rem;
-	font-weight: 900;
-	height: 2rem;
-	width: 2.8rem;
-	justify-content: center;
-	line-height: 0.95;
-	margin: 0.3rem;
-	outline: 0.15rem solid black;
-	text-align: center;
-	-webkit-text-stroke-width: 0.1rem;
-	-webkit-text-stroke-color: black;
-}
-
-.tv-smalltext {
-    font-size: 0.95rem;
-    width: 16rem;
-    font-weight: 500;
+    font-weight: bold;
+    margin-right: 5px;
 }
 
 .tv-station {
-	font-weight: 600;
-	line-height: 0.9;
-	font-size: 1.3rem;
-	text-transform: uppercase;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .tv-service-type {
-    margin-top: 0;
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    display: inline-block;
-    width: 1.1rem;
-    height: 1.1rem;
-    padding-bottom: 0.1rem;
-    text-align: center;
-    outline: 0.1rem solid black;
+    display: inline;
+    font-weight: bold;
+    margin-right: 5px;
 }
 
-.tv-service-type.passing {
-	background-color: rgb(120, 120, 120);
-	color: white;
-}
-
-.tv-service-type.cancelled {
-	background-color: #c62828;
-	color: white;
-}
-
-.delay.cancelled,.tv-delay.cancelled {
-	color: #fff;
-	background-color: #b22222;
-	padding: 0 0.3em;
-	border-radius: 0.3em;
-	font-weight: bold;
-}
-
-.very-late {
-	color: red;
-}
-.late {
-	color: darkgoldenrod;
-}
-.on-time {
-	color: green;
-}
-.early {
-	color: blue;
-}
-.scheduled,
-.estimated {
-	color: gray;
-}
+/* Status Colors - kept for utility but simplified */
+.very-late { color: red; }
+.late { color: #8B4500; }
+.on-time { color: green; }
+.early { color: blue; }
+.scheduled, .estimated { color: gray; }
+.cancelled { color: red; text-decoration: line-through; }
 
 .tv-date-offset {
-	font-size: 0.8rem;
-	color: #757575;
-	margin-left: 0.4rem;
-}
-
-.tv-hr {
-	border: none;
-	height: 1px;
-	background-color: #eee;
-	margin: 0.4rem 0;
+    font-size: 0.8em;
+    color: gray;
 }

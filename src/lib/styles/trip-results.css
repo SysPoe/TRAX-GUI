@@ -1,102 +1,57 @@
 /*
-    Common styles for TRAX trip search results.
-    Layout:
-    - .result-wrapper: Positioning context for each trip card.
-    - a.result: A block-level link container for each trip.
-        - .headline: The main title of the trip (run number, route name).
-            - .de-emphasize: Less important details within the headline.
-        - .extra-details: A block for smaller, secondary information.
-            - .location: Highlights the start and end locations.
-            - .bigarrow: A large arrow separating the locations.
-    - .trn-button: External link shortcut for TrainGuru.
+    Styles for TRAX trip search results.
+    Minimalist / Retro version.
 */
 
 .result-wrapper {
-    position: relative;
+    margin-bottom: 1em;
 }
 
+/* Trip result as a list item style */
 a.result {
-    cursor: pointer;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    padding: 0.5rem 3.5rem 0.5rem 0.5rem;
-    transition: all 200ms;
-    color: inherit;
-    text-decoration: none;
     display: block;
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid black;
+    text-decoration: none;
+    color: black;
+    background-color: #f9f9f9;
 }
 
-.result:hover {
-	background-color: #eef;
-	box-shadow: 0 0 1rem #99f;
+a.result:hover {
+    background-color: #e0e0e0;
 }
 
 .headline {
-	font-size: 1.2rem;
+    font-weight: bold;
+    font-size: 1.1em;
 }
 
 .de-emphasize {
-	color: #777;
+    font-weight: normal;
+    font-size: 0.9em;
 }
 
-.extra-details,
-.extra-details * {
-	color: #555;
-	font-size: 0.9rem;
-	font-family: "Courier New", Courier, monospace;
+.extra-details {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9em;
+    margin-top: 5px;
 }
 
 .location {
-	color: darkslategray;
-	font-weight: bold;
+    font-weight: bold;
 }
 
 .bigarrow {
-	font-size: 2rem;
-	line-height: 0.1;
-	vertical-align: middle;
-	display: inline-block;
-	margin-top: -0.5rem;
-}
-
-.trn-icon {
-	width: 1.1rem;
-	aspect-ratio: 1;
+    padding: 0 5px;
 }
 
 .trn-button {
-    position: absolute;
-    top: 0.6rem;
-    right: 1.1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.2rem;
-    margin: 0;
-    color: inherit;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 0.25rem;
+    float: right;
+    border: 1px solid black;
+    padding: 2px 5px;
+    background: #ddd;
     text-decoration: none;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    transition: opacity 150ms ease-in-out, background-color 150ms ease-in-out;
-    z-index: 1;
-    cursor: pointer;
-}
-
-.trn-button:hover,
-.trn-button:focus-visible {
-    opacity: 0.75;
-    background-color: rgba(224, 224, 255, 0.9);
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    font-size: 0.8em;
+    color: black;
 }
