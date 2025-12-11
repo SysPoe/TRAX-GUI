@@ -1,0 +1,271 @@
+
+> trax-gui@0.0.1 preview
+> vite preview
+
+ERROR: Using default session secret key. This is not secure and should be changed in production.
+ERROR: Using default admin password. This is not secure and should be changed in production.
+2025-12-11T01:45:12.770Z [DEBUG] [TRAX]  Downloading https://gtfsrt.api.translink.com.au/GTFS/SEQ_GTFS.zip...
+  ➜  Local:   http://localhost:4173/
+  ➜  Network: use --host to expose
+2025-12-11T01:45:14.521Z [DEBUG] [TRAX]  Loading agency.txt...
+2025-12-11T01:45:14.522Z [DEBUG] [TRAX]  Loaded 1 entries from agency.txt
+2025-12-11T01:45:14.522Z [DEBUG] [TRAX]  Loading calendar.txt...
+2025-12-11T01:45:14.522Z [DEBUG] [TRAX]  Loaded 252 entries from calendar.txt
+2025-12-11T01:45:14.523Z [DEBUG] [TRAX]  Loading calendar_dates.txt...
+2025-12-11T01:45:14.523Z [DEBUG] [TRAX]  Loaded 650 entries from calendar_dates.txt
+2025-12-11T01:45:14.523Z [DEBUG] [TRAX]  Loading feed_info.txt...
+2025-12-11T01:45:14.523Z [DEBUG] [TRAX]  Loaded 1 entries from feed_info.txt
+2025-12-11T01:45:14.523Z [DEBUG] [TRAX]  Loading routes.txt...
+2025-12-11T01:45:14.524Z [DEBUG] [TRAX]  Loaded 1784 entries from routes.txt
+2025-12-11T01:45:15.682Z [DEBUG] [TRAX]  Loading shapes.txt...
+2025-12-11T01:45:18.565Z [DEBUG] [TRAX]  Loaded 1485585 entries from shapes.txt
+2025-12-11T01:45:18.581Z [DEBUG] [TRAX]  Loading stops.txt...
+2025-12-11T01:45:18.613Z [DEBUG] [TRAX]  Loaded 13057 entries from stops.txt
+2025-12-11T01:45:25.079Z [DEBUG] [TRAX]  Loading stop_times.txt...
+2025-12-11T01:45:41.105Z [DEBUG] [TRAX]  Loaded 5932523 entries from stop_times.txt
+2025-12-11T01:45:41.244Z [DEBUG] [TRAX]  Loading trips.txt...
+2025-12-11T01:45:41.775Z [DEBUG] [TRAX]  Loaded 224472 entries from trips.txt
+2025-12-11T01:45:41.775Z [DEBUG] [TRAX]  Sorting stop times...
+2025-12-11T01:45:42.302Z [DEBUG] [TRAX]  Indexing stop times by stop_id...
+2025-12-11T01:45:42.553Z [DEBUG] [TRAX]  GTFS Data Loading Complete.
+2025-12-11T01:45:44.585Z [DEBUG] [TRAX]  Refreshing static GTFS cache...
+2025-12-11T01:45:44.585Z [DEBUG] [TRAX]  Loading QRT places...
+2025-12-11T01:45:45.498Z [DEBUG] [TRAX]  Loaded 73 QRT places.
+2025-12-11T01:45:45.498Z [DEBUG] [TRAX]  Loading stops...
+2025-12-11T01:45:45.595Z [DEBUG] [TRAX]  Loaded 13057 stops.
+2025-12-11T01:45:45.595Z [DEBUG] [TRAX]  Loading calendars...
+2025-12-11T01:45:45.597Z [DEBUG] [TRAX]  Loaded 252 calendars.
+2025-12-11T01:45:45.597Z [DEBUG] [TRAX]  Loading calendar dates...
+2025-12-11T01:45:45.598Z [DEBUG] [TRAX]  Loaded 650 calendar dates.
+2025-12-11T01:45:45.598Z [DEBUG] [TRAX]  Loading routes...
+2025-12-11T01:45:45.607Z [DEBUG] [TRAX]  Loaded 1784 routes.
+2025-12-11T01:45:45.607Z [DEBUG] [TRAX]  Loading trips...
+2025-12-11T01:45:47.131Z [DEBUG] [TRAX]  Loaded 18504 trips.
+2025-12-11T01:45:47.132Z [DEBUG] [TRAX]  Building raw cache records...
+2025-12-11T01:45:47.146Z [DEBUG] [TRAX]  Augmenting stops...
+2025-12-11T01:45:47.252Z [DEBUG] [TRAX]  Augmented 13057 stops.
+2025-12-11T01:45:47.252Z [DEBUG] [TRAX]  Augmenting trips...
+2025-12-11T01:45:53.829Z [DEBUG] [TRAX]  Augmented 18504 trips.
+2025-12-11T01:45:53.830Z [DEBUG] [TRAX]  Building augmented cache records...
+2025-12-11T01:45:53.838Z [ERROR] [TRAX]  Invalid SRT to: South Bank,Park Road,1
+2025-12-11T01:45:53.839Z [ERROR] [TRAX]  Invalid SRT from: Park Road,Dutton Park,2
+2025-12-11T01:45:53.839Z [ERROR] [TRAX]  Invalid SRT to: Rocklea,Salisbury,1
+2025-12-11T01:45:53.839Z [ERROR] [TRAX]  Invalid SRT from: Salisbury,Coopers Plains,2
+2025-12-11T01:45:53.840Z [ERROR] [TRAX]  Invalid SRT from: Park Road,Buranda,2
+2025-12-11T01:46:02.151Z  [INFO] [TRAX]  Static GTFS cache refreshed.
+2025-12-11T01:46:02.152Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:46:02.152Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:46:02.156Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:46:02.328Z [DEBUG] [TRAX]  Loaded 1841 trip updates with 34436 stop time updates.
+2025-12-11T01:46:02.329Z [DEBUG] [TRAX]  Loaded 1022 vehicle positions.
+2025-12-11T01:46:02.330Z [DEBUG] [TRAX]  Found 1841 trips with realtime updates.
+2025-12-11T01:46:02.338Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:46:02.586Z [DEBUG] [TRAX]  Re-augmented 1841 trips.
+2025-12-11T01:46:02.586Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:46:03.115Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:46:04.336Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:46:04.715Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:46:04.883Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:46:05.086Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:46:05.407Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:46:05.624Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:46:05.788Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:46:06.121Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:46:06.280Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:46:06.519Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:46:06.754Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:46:06.915Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:46:07.159Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:46:07.359Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:46:07.653Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:46:07.653Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:46:07.653Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
+2025-12-11T01:47:09.196Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:47:09.196Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:47:09.198Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:47:09.401Z [DEBUG] [TRAX]  Loaded 1841 trip updates with 34589 stop time updates.
+2025-12-11T01:47:09.402Z [DEBUG] [TRAX]  Loaded 1024 vehicle positions.
+2025-12-11T01:47:09.403Z [DEBUG] [TRAX]  Found 1841 trips with realtime updates.
+2025-12-11T01:47:09.416Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:47:09.657Z [DEBUG] [TRAX]  Re-augmented 1841 trips.
+2025-12-11T01:47:09.657Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:47:10.694Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:47:13.066Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:47:13.430Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:47:13.674Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:47:14.016Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:47:14.247Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:47:14.536Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:47:14.757Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:47:14.924Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:47:15.088Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:47:15.263Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:47:15.505Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:47:15.709Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:47:16.006Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:47:16.212Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:47:16.382Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:47:16.382Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:47:16.382Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
+2025-12-11T01:48:09.841Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:48:09.841Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:48:09.843Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:48:10.005Z [DEBUG] [TRAX]  Loaded 1842 trip updates with 34672 stop time updates.
+2025-12-11T01:48:10.006Z [DEBUG] [TRAX]  Loaded 1033 vehicle positions.
+2025-12-11T01:48:10.006Z [DEBUG] [TRAX]  Found 1842 trips with realtime updates.
+2025-12-11T01:48:10.014Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:48:10.251Z [DEBUG] [TRAX]  Re-augmented 1842 trips.
+2025-12-11T01:48:10.251Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:48:11.241Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:48:12.617Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:48:12.821Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:48:13.107Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:48:13.456Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:48:13.650Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:48:13.983Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:48:14.146Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:48:14.305Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:48:14.582Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:48:14.798Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:48:15.021Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:48:15.254Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:48:15.416Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:48:15.639Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:48:15.803Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:48:15.803Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:48:15.803Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
+2025-12-11T01:49:09.697Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:49:09.697Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:49:09.699Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:49:09.857Z [DEBUG] [TRAX]  Loaded 1840 trip updates with 34510 stop time updates.
+2025-12-11T01:49:09.858Z [DEBUG] [TRAX]  Loaded 1030 vehicle positions.
+2025-12-11T01:49:09.858Z [DEBUG] [TRAX]  Found 1840 trips with realtime updates.
+2025-12-11T01:49:09.867Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:49:10.090Z [DEBUG] [TRAX]  Re-augmented 1840 trips.
+2025-12-11T01:49:10.090Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:49:11.048Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:49:11.915Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:49:12.743Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:49:12.938Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:49:13.233Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:49:13.399Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:49:13.673Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:49:13.838Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:49:14.068Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:49:14.285Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:49:14.482Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:49:14.810Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:49:14.973Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:49:15.208Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:49:15.372Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:49:15.613Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:49:15.613Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:49:15.613Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
+2025-12-11T01:50:09.863Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:50:09.863Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:50:09.865Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:50:10.012Z [DEBUG] [TRAX]  Loaded 1831 trip updates with 34491 stop time updates.
+2025-12-11T01:50:10.012Z [DEBUG] [TRAX]  Loaded 1031 vehicle positions.
+2025-12-11T01:50:10.013Z [DEBUG] [TRAX]  Found 1831 trips with realtime updates.
+2025-12-11T01:50:10.022Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:50:10.270Z [DEBUG] [TRAX]  Re-augmented 1831 trips.
+2025-12-11T01:50:10.271Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:50:11.233Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:50:11.924Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:50:12.344Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:50:12.714Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:50:13.070Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:50:13.306Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:50:13.744Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:50:14.117Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:50:14.348Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:50:14.590Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:50:14.782Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:50:15.110Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:50:15.271Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:50:15.556Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:50:15.723Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:50:15.889Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:50:15.889Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:50:15.889Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
+2025-12-11T01:51:10.662Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:51:10.662Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:51:10.664Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:51:10.825Z [DEBUG] [TRAX]  Loaded 1841 trip updates with 34449 stop time updates.
+2025-12-11T01:51:10.826Z [DEBUG] [TRAX]  Loaded 1029 vehicle positions.
+2025-12-11T01:51:10.826Z [DEBUG] [TRAX]  Found 1841 trips with realtime updates.
+2025-12-11T01:51:10.835Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:51:11.059Z [DEBUG] [TRAX]  Re-augmented 1841 trips.
+2025-12-11T01:51:11.060Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:51:12.060Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:51:13.386Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:51:13.764Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:51:13.968Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:51:14.274Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:51:14.565Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:51:14.801Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:51:15.044Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:51:15.270Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:51:15.434Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:51:15.603Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:51:15.930Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:51:16.092Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:51:16.258Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:51:16.482Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:51:16.689Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:51:16.689Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:51:16.689Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
+2025-12-11T01:52:09.724Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:52:09.725Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:52:09.726Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:52:09.884Z [DEBUG] [TRAX]  Loaded 1824 trip updates with 34330 stop time updates.
+2025-12-11T01:52:09.885Z [DEBUG] [TRAX]  Loaded 1026 vehicle positions.
+2025-12-11T01:52:09.885Z [DEBUG] [TRAX]  Found 1824 trips with realtime updates.
+2025-12-11T01:52:09.894Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:52:10.114Z [DEBUG] [TRAX]  Re-augmented 1824 trips.
+2025-12-11T01:52:10.114Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:52:10.901Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:52:11.986Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:52:12.334Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:52:12.561Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:52:12.813Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:52:13.085Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:52:13.283Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:52:13.521Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:52:13.728Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:52:13.898Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:52:14.054Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:52:14.333Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:52:14.656Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:52:14.844Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:52:15.051Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:52:16.161Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:52:16.161Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:52:16.161Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
+2025-12-11T01:53:09.672Z [DEBUG] [TRAX]  Refreshing realtime GTFS cache...
+2025-12-11T01:53:09.673Z [DEBUG] [TRAX]  Refreshing qrtTrains cache...
+2025-12-11T01:53:09.675Z [DEBUG] [TRAX]  Loading realtime updates...
+2025-12-11T01:53:09.836Z [DEBUG] [TRAX]  Loaded 1827 trip updates with 34370 stop time updates.
+2025-12-11T01:53:09.836Z [DEBUG] [TRAX]  Loaded 1034 vehicle positions.
+2025-12-11T01:53:09.837Z [DEBUG] [TRAX]  Found 1827 trips with realtime updates.
+2025-12-11T01:53:09.845Z [DEBUG] [TRAX]  Re-augmenting updated trips...
+2025-12-11T01:53:10.068Z [DEBUG] [TRAX]  Re-augmented 1827 trips.
+2025-12-11T01:53:10.068Z [DEBUG] [TRAX]  Building augmented cache records for updated trips...
+2025-12-11T01:53:10.737Z [DEBUG] [TRAX]  Successfully fetched 32 services
+2025-12-11T01:53:12.784Z [DEBUG] [TRAX]  Successfully processed service C75T
+2025-12-11T01:53:13.586Z [DEBUG] [TRAX]  Successfully processed service 972T
+2025-12-11T01:53:13.749Z [DEBUG] [TRAX]  Successfully processed service C65T
+2025-12-11T01:53:13.988Z [DEBUG] [TRAX]  Successfully processed service S86T
+2025-12-11T01:53:14.208Z [DEBUG] [TRAX]  Successfully processed service 987T
+2025-12-11T01:53:14.450Z [DEBUG] [TRAX]  Successfully processed service J11T
+2025-12-11T01:53:14.665Z [DEBUG] [TRAX]  Successfully processed service 994T
+2025-12-11T01:53:14.944Z [DEBUG] [TRAX]  Successfully processed service 992T
+2025-12-11T01:53:15.274Z [DEBUG] [TRAX]  Successfully processed service 301T
+2025-12-11T01:53:15.436Z [DEBUG] [TRAX]  Successfully processed service K32T
+2025-12-11T01:53:15.640Z [DEBUG] [TRAX]  Successfully processed service M34T
+2025-12-11T01:53:15.799Z [DEBUG] [TRAX]  Successfully processed service K30T
+2025-12-11T01:53:15.963Z [DEBUG] [TRAX]  Successfully processed service C61T
+2025-12-11T01:53:16.152Z [DEBUG] [TRAX]  Successfully processed service 231T
+2025-12-11T01:53:16.430Z [DEBUG] [TRAX]  Successfully processed service 985T
+2025-12-11T01:53:16.431Z [DEBUG] [TRAX]  Loaded 15 QRT trains.
+2025-12-11T01:53:16.431Z  [INFO] [TRAX]  Realtime GTFS cache refreshed incrementally.
