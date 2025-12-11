@@ -23,7 +23,7 @@
 				qrTripUpdates.map((u) =>
 					u.trip.schedule_relationship
 						? qdf.TripScheduleRelationship[u.trip.schedule_relationship]
-						: "UNKNOWN",
+						: "SCHEDULED",
 				),
 			),
 		].sort(),
@@ -52,7 +52,7 @@
 				selectedTURels.has(
 					u.trip.schedule_relationship
 						? qdf.TripScheduleRelationship[u.trip.schedule_relationship]
-						: "UNKNOWN",
+						: "SCHEDULED",
 				) && matchesSearch(u.trip),
 		),
 	);
@@ -64,7 +64,7 @@
 		[
 			...new Set(
 				qrStopUpdates.map((u) =>
-					u.schedule_relationship ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "UNKNOWN",
+					u.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "SCHEDULED",
 				),
 			),
 		].sort(),
@@ -91,7 +91,7 @@
 		qrStopUpdates.filter(
 			(u) =>
 				selectedSTURels.has(
-					u.schedule_relationship ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "UNKNOWN",
+					u.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "SCHEDULED",
 				) && matchesSearch(u),
 		),
 	);
@@ -148,7 +148,7 @@
 				<b>Schedule Relationship:</b>
 				{update.trip.schedule_relationship
 					? qdf.TripScheduleRelationship[update.trip.schedule_relationship]
-					: "UNKNOWN"} <br />
+					: "SCHEDULED"} <br />
 				<b>Vehicle ID:</b>
 				{update.vehicle.id} <br />
 				<b>Vehicle Label:</b>
@@ -199,7 +199,7 @@
 				{stu.departure_time ? new Date(stu.departure_time * 1000).toLocaleString("en-au") : "NOT_PROVIDED"}
 				<br />
 				<b>Schedule Relationship:</b>
-				{stu.schedule_relationship ? qdf.StopTimeScheduleRelationship[stu.schedule_relationship] : "UNKNOWN"}
+				{stu.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[stu.schedule_relationship] : "SCHEDULED"}
 				<br />
 			</div>
 			<hr />
@@ -229,7 +229,7 @@
 				<b>Trip Schedule Relationship:</b>
 				{vp.trip.schedule_relationship
 					? qdf.TripScheduleRelationship[vp.trip.schedule_relationship]
-					: "UNKNOWN"} <br />
+					: "SCHEDULED"} <br />
 				<b>Vehicle ID:</b>
 				{vp.vehicle.id} <br />
 				<b>Vehicle Label:</b>
@@ -251,13 +251,13 @@
 				<b>Stop Id:</b>
 				{vp.stop_id} <br />
 				<b>Current Status:</b>
-				{vp.current_status ? qdf.VehicleStopStatus[vp.current_status] : "UNKNOWN"} <br />
+				{vp.current_status ? qdf.VehicleStopStatus[vp.current_status] : "SCHEDULED"} <br />
 				<b>Timestamp:</b>
 				{vp.timestamp} <br />
 				<b>Congestion Level:</b>
-				{vp.congestion_level ? qdf.CongestionLevel[vp.congestion_level] : "UNKNOWN"} <br />
+				{vp.congestion_level ? qdf.CongestionLevel[vp.congestion_level] : "SCHEDULED"} <br />
 				<b>Occupancy Status:</b>
-				{vp.occupancy_status ? qdf.OccupancyStatus[vp.occupancy_status] : "UNKNOWN"} <br />
+				{vp.occupancy_status ? qdf.OccupancyStatus[vp.occupancy_status] : "SCHEDULED"} <br />
 				<b>Occupancy Percentage:</b>
 				{vp.occupancy_percentage} <br />
 			</div>
