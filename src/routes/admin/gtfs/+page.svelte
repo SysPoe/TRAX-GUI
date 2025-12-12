@@ -64,6 +64,7 @@
     <a href="?type=calendars&page=1"><button class:active={data.type === 'calendars'}>Calendars</button></a>
     <a href="?type=calendarDates&page=1"><button class:active={data.type === 'calendarDates'}>Calendar Dates</button></a>
     <a href="?type=trips&page=1"><button class:active={data.type === 'trips'}>Trips</button></a>
+    <a href="?type=augmentedTrips&page=1"><button class:active={data.type === 'augmentedTrips'}>Augmented Trips</button></a>
     <a href="?type=stops&page=1"><button class:active={data.type === 'stops'}>Stops</button></a>
     <a href="?type=routes&page=1"><button class:active={data.type === 'routes'}>Routes</button></a>
 </div>
