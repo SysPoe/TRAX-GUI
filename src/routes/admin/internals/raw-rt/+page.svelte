@@ -20,11 +20,7 @@
 	let TURels = $derived(
 		[
 			...new Set(
-				qrTripUpdates.map((u) =>
-					u.trip.schedule_relationship
-						? qdf.TripScheduleRelationship[u.trip.schedule_relationship]
-						: "SCHEDULED",
-				),
+				qrTripUpdates.map((u) => qdf.TripScheduleRelationship[u.trip.schedule_relationship] ?? "UNKNOWN"),
 			),
 		].sort(),
 	);
@@ -49,11 +45,8 @@
 	let filteredTUs = $derived(
 		(qrTripUpdates as qdf.RealtimeTripUpdate[]).filter(
 			(u) =>
-				selectedTURels.has(
-					u.trip.schedule_relationship
-						? qdf.TripScheduleRelationship[u.trip.schedule_relationship]
-						: "SCHEDULED",
-				) && matchesSearch(u.trip),
+				selectedTURels.has(qdf.TripScheduleRelationship[u.trip.schedule_relationship] ?? "UNKNOWN") &&
+				matchesSearch(u.trip),
 		),
 	);
 
@@ -63,9 +56,7 @@
 	let STURels = $derived(
 		[
 			...new Set(
-				qrStopUpdates.map((u) =>
-					u.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "SCHEDULED",
-				),
+				qrStopUpdates.map((u) => qdf.StopTimeScheduleRelationship[u.schedule_relationship] ?? "SCHEDULED"),
 			),
 		].sort(),
 	);
@@ -90,9 +81,8 @@
 	let filteredSTUs = $derived(
 		qrStopUpdates.filter(
 			(u) =>
-				selectedSTURels.has(
-					u.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "SCHEDULED",
-				) && matchesSearch(u),
+				selectedSTURels.has(qdf.StopTimeScheduleRelationship[u.schedule_relationship] ?? "SCHEDULED") &&
+				matchesSearch(u),
 		),
 	);
 
@@ -146,9 +136,7 @@
 				<b>Trip Start Date:</b>
 				{update.trip.start_date} <br />
 				<b>Schedule Relationship:</b>
-				{update.trip.schedule_relationship
-					? qdf.TripScheduleRelationship[update.trip.schedule_relationship]
-					: "SCHEDULED"} <br />
+				{qdf.TripScheduleRelationship[update.trip.schedule_relationship]} <br />
 				<b>Vehicle ID:</b>
 				{update.vehicle.id} <br />
 				<b>Vehicle Label:</b>
@@ -192,15 +180,13 @@
 				<b>Arrival Delay:</b>
 				{stu.arrival_delay} <br />
 				<b>Arrival Time:</b>
-				{stu.arrival_time ? new Date(stu.arrival_time * 1000).toLocaleString("en-au") : "NOT_PROVIDED"} <br />
+				{stu.arrival_time} <br />
 				<b>Departure Delay:</b>
 				{stu.departure_delay} <br />
 				<b>Departure Time:</b>
-				{stu.departure_time ? new Date(stu.departure_time * 1000).toLocaleString("en-au") : "NOT_PROVIDED"}
-				<br />
+				{stu.departure_time} <br />
 				<b>Schedule Relationship:</b>
-				{stu.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[stu.schedule_relationship] : "SCHEDULED"}
-				<br />
+				{qdf.StopTimeScheduleRelationship[stu.schedule_relationship]} <br />
 			</div>
 			<hr />
 		{/each}
@@ -213,53 +199,29 @@
 
 		{#each vehiclePositions as vp}
 			<div class="trip-update">
-				<b>Update ID:</b>
-				{vp.update_id} <br />
-				<b>Is Deleted:</b>
-				{vp.is_deleted} <br />
+				<b>Update ID:</b> {vp.update_id} <br />
+				<b>Is Deleted:</b> {vp.is_deleted} <br />
 				<b>Trip ID:</b> <a href="/TV/trip/gtfs/{vp.trip.trip_id}">{vp.trip.trip_id}</a> <br />
-				<b>Trip Route ID:</b>
-				{vp.trip.route_id} <br />
-				<b>Trip Direction ID:</b>
-				{vp.trip.direction_id} <br />
-				<b>Trip Start Time:</b>
-				{vp.trip.start_time} <br />
-				<b>Trip Start Date:</b>
-				{vp.trip.start_date} <br />
-				<b>Trip Schedule Relationship:</b>
-				{vp.trip.schedule_relationship
-					? qdf.TripScheduleRelationship[vp.trip.schedule_relationship]
-					: "SCHEDULED"} <br />
-				<b>Vehicle ID:</b>
-				{vp.vehicle.id} <br />
-				<b>Vehicle Label:</b>
-				{vp.vehicle.label} <br />
-				<b>Vehicle License Plate:</b>
-				{vp.vehicle.license_plate} <br />
-				<b>Latitude:</b>
-				{vp.position.latitude} <br />
-				<b>Longitude:</b>
-				{vp.position.longitude} <br />
-				<b>Bearing:</b>
-				{vp.position.bearing} <br />
-				<b>Odometer:</b>
-				{vp.position.odometer} <br />
-				<b>Speed:</b>
-				{vp.position.speed} <br />
-				<b>Current Stop Sequence:</b>
-				{vp.current_stop_sequence} <br />
-				<b>Stop Id:</b>
-				{vp.stop_id} <br />
-				<b>Current Status:</b>
-				{vp.current_status ? qdf.VehicleStopStatus[vp.current_status] : "SCHEDULED"} <br />
-				<b>Timestamp:</b>
-				{vp.timestamp} <br />
-				<b>Congestion Level:</b>
-				{vp.congestion_level ? qdf.CongestionLevel[vp.congestion_level] : "SCHEDULED"} <br />
-				<b>Occupancy Status:</b>
-				{vp.occupancy_status ? qdf.OccupancyStatus[vp.occupancy_status] : "SCHEDULED"} <br />
-				<b>Occupancy Percentage:</b>
-				{vp.occupancy_percentage} <br />
+				<b>Trip Route ID:</b> {vp.trip.route_id} <br />
+				<b>Trip Direction ID:</b> {vp.trip.direction_id} <br />
+				<b>Trip Start Time:</b> {vp.trip.start_time} <br />
+				<b>Trip Start Date:</b> {vp.trip.start_date} <br />
+				<b>Trip Schedule Relationship:</b> {qdf.TripScheduleRelationship[vp.trip.schedule_relationship]} <br />
+				<b>Vehicle ID:</b> {vp.vehicle.id} <br />
+				<b>Vehicle Label:</b> {vp.vehicle.label} <br />
+				<b>Vehicle License Plate:</b> {vp.vehicle.license_plate} <br />
+				<b>Latitude:</b> {vp.position.latitude} <br />
+				<b>Longitude:</b> {vp.position.longitude} <br />
+				<b>Bearing:</b> {vp.position.bearing} <br />
+				<b>Odometer:</b> {vp.position.odometer} <br />
+				<b>Speed:</b> {vp.position.speed} <br />
+				<b>Current Stop Sequence:</b> {vp.current_stop_sequence} <br />
+				<b>Stop Id:</b> {vp.stop_id} <br />
+				<b>Current Status:</b> {qdf.VehicleStopStatus[vp.current_status]} <br />
+				<b>Timestamp:</b> {vp.timestamp} <br />
+				<b>Congestion Level:</b> {qdf.CongestionLevel[vp.congestion_level]} <br />
+				<b>Occupancy Status:</b> {qdf.OccupancyStatus[vp.occupancy_status]} <br />
+				<b>Occupancy Percentage:</b> {vp.occupancy_percentage} <br />
 			</div>
 			<hr />
 		{/each}
