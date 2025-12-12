@@ -14,7 +14,7 @@ export function loadTRAX() {
 
 		TRAX.clearIntervals();
 		
-		TRAX.loadGTFS(true, true, 60_000).then(() => {
+		TRAX.loadGTFS(true, 60_000).finally(() => {
 			isTRAXLoading = false;
 			isTRAXLoaded = true;
 		});
