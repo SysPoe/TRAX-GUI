@@ -111,6 +111,10 @@
 	<h2>
 		Departures from {station?.stop_name || "Unknown Station"} in the next 4 hours
 	</h2>
+
+	{#if data.extraDetails}
+		<button onclick={() => console.log(data)}>LogRaw</button>
+	{/if}
 </div>
 
 <hr />
