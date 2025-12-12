@@ -24,11 +24,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const { stop_id } = params;
 
-	let today = new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", "");
+	let now = new Date(Date.now() + 10 * 3_600_000);
 
-	let now = new Date();
-	let startTime = now.getHours() + ":" + now.getMinutes() + ":00";
-	let endTime = now.getHours() + 4 + ":" + now.getMinutes() + ":00";
+	let today = now.toISOString().split("T")[0].replaceAll("-", "");
+	let startTime = (now.getUTCHours()).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
+	let endTime = (now.getUTCHours() + 4).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
+
+	// startTime = "00:00:00";
+	endTime = "47:59:59";
 
 	let stop = TRAX.getAugmentedStops(stop_id)[0];
 	if (stop === undefined || stop === null) throw error(404, `Stop with ID "${stop_id}" not found.`);
@@ -49,8 +52,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					: v.actual_departure_time || v.actual_arrival_time,
 			);
 			// Get current time in HH:mm
-			const nowTime = `${now.getHours().toString().padStart(2, "0")}:${now
-				.getMinutes()
+			const nowTime = `${now.getUTCHours().toString().padStart(2, "0")}:${now
+				.getUTCMinutes()
 				.toString()
 				.padStart(2, "0")}`;
 			return {
@@ -105,14 +108,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	let mixed: (
 		| (SerializableAugmentedStopTime & {
-				dep_type: "gtfs";
-				express_string: string;
-				last_stop_id: string;
-				scheduled_departure_timestr: string;
-				actual_departure_timestr: string;
-				departs_in: string;
-				departsInSecs: number;
-		  })
+			dep_type: "gtfs";
+			express_string: string;
+			last_stop_id: string;
+			scheduled_departure_timestr: string;
+			actual_departure_timestr: string;
+			departs_in: string;
+			departsInSecs: number;
+		})
 		| UpcomingQRTravelDeparture
 	)[] = [...departures, ...qrtDepartures].sort((a, b) => {
 		return (a.departsInSecs || 0) - (b.departsInSecs || 0);
