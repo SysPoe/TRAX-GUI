@@ -8,11 +8,7 @@
 	const { data }: PageProps = $props();
 	let loading = $state(false);
 	let filterText = $state("");
-	
-	// Store user location in state (initialized to null)
-	let userLocation = $state<{ lat: number; lon: number } | null>(null);
 
-	// 1. First, simply filter the list based on text input
 	let filteredStations = $derived(
 		data.stations.filter((station) => {
 			const filter = filterText.toLowerCase().trim();
@@ -24,51 +20,30 @@
 		}),
 	);
 
-	// 2. Derive the sorted list based on availability of userLocation
-	let sortedStations = $derived.by(() => {
-		// If we don't have location yet, just show the filtered list immediately!
-		if (!userLocation) {
-			return filteredStations;
-		}
+	// svelte-ignore state_referenced_locally
+	let sortedStations = $state<SerializableAugmentedStop[]>([]);
 
-		// If we DO have location, sort by distance
-		return [...filteredStations].sort((a, b) => {
-			const distA = calculateDistance(
-				userLocation!.lat, 
-				userLocation!.lon, 
-				a.stop_lat ?? 0, 
-				a.stop_lon ?? 0
-			);
-			const distB = calculateDistance(
-				userLocation!.lat, 
-				userLocation!.lon, 
-				b.stop_lat ?? 0, 
-				b.stop_lon ?? 0
-			);
-			return distA - distB;
+	$effect(() => {
+		Promise.all(
+			filteredStations.map(async (station) => ({
+				station,
+				dist: await dist(station.stop_lat ?? 0, station.stop_lon ?? 0),
+			})),
+		).then((results) => {
+			sortedStations = results
+				.sort((a, b) => {
+					if (a.dist !== b.dist) return a.dist - b.dist;
+					return a.station.stop_id.localeCompare(b.station.stop_id);
+				})
+				.map((r) => r.station);
 		});
 	});
-
-	// Pure Math Helper (Synchronous)
-	function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-		const toRad = (x: number) => (x * Math.PI) / 180;
-		const R = 6371; // km
-		const dLat = toRad(lat2 - lat1);
-		const dLon = toRad(lon2 - lon1);
-		const a =
-			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-			Math.cos(toRad(lat1)) *
-				Math.cos(toRad(lat2)) *
-				Math.sin(dLon / 2) *
-				Math.sin(dLon / 2);
-		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		return R * c;
-	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === "Enter" && filteredStations.length === 1) {
 			loading = true;
 			if (event.shiftKey || event.ctrlKey || event.metaKey) {
+				// Open in new tab if modifier key is held
 				window.open(`/DB/gtfs/${filteredStations[0].stop_id}`, "_blank");
 				loading = false;
 				return;
@@ -77,22 +52,44 @@
 		}
 	}
 
-	// Fetch Location ONCE on mount
-	onMount(() => {
-		if (navigator.geolocation) {
+	// Get distance from current location
+	function dist(lat: number, lon: number): Promise<number> {
+		if (!navigator.geolocation) return new Promise<number>((res) => res(Infinity));
+		const toRad = (x: number) => (x * Math.PI) / 180;
+
+		return new Promise<number>((resolve) => {
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
-					userLocation = {
-						lat: position.coords.latitude,
-						lon: position.coords.longitude
-					};
+					const R = 6371; // km
+					const dLat = toRad(lat - position.coords.latitude);
+					const dLon = toRad(lon - position.coords.longitude);
+					const a =
+						Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+						Math.cos(toRad(position.coords.latitude)) *
+							Math.cos(toRad(lat)) *
+							Math.sin(dLon / 2) *
+							Math.sin(dLon / 2);
+					const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+					const d = R * c;
+					resolve(d);
 				},
-				(error) => {
-					console.error(`GEO ERROR(${error.code}): ${error.message}`);
-					// No need to reset sortedStations, it will just stay as filteredStations
-				}
+				() => resolve(Infinity),
 			);
-		}
+		});
+	}
+
+	function errorCallback(error: GeolocationPositionError) {
+		console.error(`GEO ERROR(${error.code}): ${error.message}`);
+		sortedStations = [...sortedStations];
+	}
+
+	// svelte-ignore state_referenced_locally
+	sortedStations = [...sortedStations];
+
+	onMount(() => {
+		navigator.geolocation.getCurrentPosition(() => {
+			sortedStations = [...sortedStations];
+		}, errorCallback);
 	});
 </script>
 
@@ -122,32 +119,30 @@
 
 {#if !loading}
 	<div class="stations">
-		{#each sortedStations as station (station.stop_id)}
-			<button
-				data-id={station.stop_id}
-				data-name={station.stop_name}
-				class="station"
-				onclick={(ev) => {
-					loading = true;
-					if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
-						ev.preventDefault();
-						window.open(`/DB/gtfs/${station.stop_id}`, "_blank");
-						loading = false;
-						return;
-					}
-					goto(`/DB/gtfs/${station.stop_id}`);
-				}}
-			>
-				<a href="/DB/gtfs/{station.stop_id}">
+		{#each sortedStations as station}
+			<div data-id={station.stop_id} data-name={station.stop_name} class="station">
+				<a
+					href="/DB/gtfs/{station.stop_id}"
+					onclick={(ev) => {
+						loading = true;
+						if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+							// Open in new tab if modifier key is held
+							ev.preventDefault();
+							window.open(`/DB/gtfs/${station.stop_id}`, "_blank");
+							loading = false;
+							return;
+						}
+						goto(`/DB/gtfs/${station.stop_id}`);
+					}}
+				>
 					{station.stop_name}
 				</a>
-			</button>
+			</div>
 		{/each}
 	</div>
 {/if}
 
 <style>
-	/* ... Keep your existing styles ... */
 	.title input[type="text"] {
 		padding: 0.5rem 1rem;
 		font-size: 1rem;
@@ -186,7 +181,6 @@
 			border-color 0.2s;
 		width: 250px;
 		font-family: "Inter";
-		cursor: pointer;
 	}
 	.station:hover {
 		box-shadow: 0 4px 16px rgba(41, 128, 185, 0.12);

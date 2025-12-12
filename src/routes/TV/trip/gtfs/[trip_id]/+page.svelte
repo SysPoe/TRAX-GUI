@@ -57,7 +57,6 @@
 				trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time,
 			)} | Trip ID: {trip._trip.trip_id}
 		</p>
-		<button onclick={() => console.log(data)}>LogRaw</button>
 	{:else}
 		<h2>
 			{formatTimestamp(trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time)}

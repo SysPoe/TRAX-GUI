@@ -7,4 +7,3 @@ gtfs-last-loaded.txt
 .gitignore
 .idea
 TRAX.log
-.TRAXCACHE

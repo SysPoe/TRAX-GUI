@@ -5,8 +5,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     if (locals.session) {
         await locals.session.setData({
             ...locals.session.data,
-            admin: false,
-            extraDetails: false
+            admin: false
         });
         await locals.session.save();
     }
