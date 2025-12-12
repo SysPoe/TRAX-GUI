@@ -25,6 +25,6 @@
 		"gtfs": "^4.17.5",
 		"qdf-gtfs": "github:SysPoe/QDF-GTFS",
 		"svelte-kit-sessions": "^0.4.0",
-		"translink-rail-api": "github:SysPoe/TRAX"
+		"translink-rail-api": "github:SysPoe/TRAX#staging"
 	}
 }

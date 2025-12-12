@@ -3,18 +3,80 @@ import TRAX, { type TravelTrip, type SRTStop } from "translink-rail-api";
 export let isTRAXLoaded = false;
 export let isTRAXLoading = false;
 
+// System Status Tracking
+const serverStartTime = Date.now();
+let lastStaticUpdate = 0;
+let lastRealtimeUpdate = 0;
+
 export function loadTRAX() {
 	if (!isTRAXLoaded && !isTRAXLoading) {
 		isTRAXLoading = true;
 
 		TRAX.clearIntervals();
 		
-		TRAX.loadGTFS(true, true, 60_000).then(() => {
+		TRAX.loadGTFS(true, 60_000).finally(() => {
 			isTRAXLoading = false;
 			isTRAXLoaded = true;
 		});
+
+		TRAX.on("static-update-start", () => {
+			isTRAXLoading = true;
+		})
+		TRAX.on("static-update-end", () => {
+			isTRAXLoading = false;
+			isTRAXLoaded = true;
+			lastStaticUpdate = Date.now();
+		});
+
+		// Listening for realtime updates
+		TRAX.on("realtime-update-end", () => {
+			lastRealtimeUpdate = Date.now();
+		});
 	}
 }
+
+export type SystemStatus = {
+	uptime: number;
+	lastStaticRefresh: number;
+	lastRealtimeUpdate: number;
+	cacheStats: {
+		routes: number;
+		trips: number;
+		stops: number;
+		tripUpdates: number;
+		stopTimeUpdates: number;
+		vehiclePositions: number;
+	};
+};
+
+export function getSystemStatus(): SystemStatus {
+	return {
+		uptime: Date.now() - serverStartTime,
+		lastStaticRefresh: lastStaticUpdate,
+		lastRealtimeUpdate: lastRealtimeUpdate,
+		cacheStats: {
+			routes: safeCount(() => TRAX.getRawRoutes()),
+			trips: safeCount(() => TRAX.getRawTrips()),
+			stops: safeCount(() => TRAX.getRawStops()),
+			// @ts-ignore
+			tripUpdates: safeCount(() => TRAX.getTripUpdates(undefined)),
+			// @ts-ignore
+			stopTimeUpdates: safeCount(() => TRAX.getStopTimeUpdates(undefined)),
+			// @ts-ignore
+			vehiclePositions: safeCount(() => TRAX.getVehiclePositions(undefined)),
+		},
+	};
+}
+
+function safeCount(getter: () => any[]): number {
+	try {
+		const res = getter();
+		return Array.isArray(res) ? res.length : 0;
+	} catch (e) {
+		return 0;
+	}
+}
+
 
 export type UpcomingQRTravelDeparture = {
 	dep_type: "qrt";

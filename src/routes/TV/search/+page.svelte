@@ -70,30 +70,68 @@
 		goto(`/TV/trip/gtfs/${tripId}`);
 	}
 
-	function contractSD(serviceDates: string[]): string[] {
-		// servicedates are strings e.g. 20250801
-		// convert to ranges like 20250801-20250805
-		if (serviceDates.length === 0) return [];
-		serviceDates.sort((a, b) => Number.parseInt(a) - Number.parseInt(b));
-		const ranges: string[] = [];
-		let start = serviceDates[0];
-		let end = serviceDates[0];
-		for (let i = 1; i < serviceDates.length; i++) {
-			if (serviceDates[i] === end + 1) {
-				end = serviceDates[i];
-			} else {
-				if (start === end) {
-					ranges.push(start.toString());
-				} else {
-					ranges.push(start === end ? `${start}` : `${start}-${end}`);
-					start = serviceDates[i];
-					end = serviceDates[i];
-				}
-			}
-		}
-		ranges.push(start === end ? `${start}` : `${start}-${end}`);
-		return ranges;
-	}
+	function contractSD(dateStrings: string[]): string[] {
+    if (dateStrings.length === 0) return [];
+
+    // 1. Parse strings into Date objects and sort them
+    // We use UTC to avoid Daylight Savings Time issues affecting day difference calculations
+    const sortedDates = [...new Set(dateStrings)] // Remove duplicates first
+        .map(ds => {
+            const year = parseInt(ds.substring(0, 4), 10);
+            const month = parseInt(ds.substring(4, 6), 10) - 1; // Months are 0-indexed in JS
+            const day = parseInt(ds.substring(6, 8), 10);
+            return new Date(Date.UTC(year, month, day));
+        })
+        .sort((a, b) => a.getTime() - b.getTime());
+
+    const ranges: string[] = [];
+    
+    if (sortedDates.length === 0) return [];
+
+    // Initialize the start and end of the current range
+    let rangeStart = sortedDates[0];
+    let rangeEnd = sortedDates[0];
+
+    // Helper to format Date back to YYYYMMDD string
+    const formatDate = (date: Date): string => {
+        const y = date.getUTCFullYear();
+        const m = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+        const d = date.getUTCDate().toString().padStart(2, '0');
+        return `${y}${m}${d}`;
+    };
+
+    for (let i = 1; i < sortedDates.length; i++) {
+        const currentDate = sortedDates[i];
+        
+        // Calculate difference in days
+        // 86400000 ms = 1 day
+        const diffTime = currentDate.getTime() - rangeEnd.getTime();
+        const diffDays = diffTime / (1000 * 3600 * 24);
+
+        if (diffDays === 1) {
+            // It is consecutive, extend the current range
+            rangeEnd = currentDate;
+        } else {
+            // Gap found, push the previous range and start a new one
+            if (rangeStart.getTime() === rangeEnd.getTime()) {
+                ranges.push(formatDate(rangeStart));
+            } else {
+                ranges.push(`${formatDate(rangeStart)}-${formatDate(rangeEnd)}`);
+            }
+            rangeStart = currentDate;
+            rangeEnd = currentDate;
+        }
+    }
+
+    // Push the final range remaining after the loop finishes
+    if (rangeStart.getTime() === rangeEnd.getTime()) {
+        ranges.push(formatDate(rangeStart));
+    } else {
+        ranges.push(`${formatDate(rangeStart)}-${formatDate(rangeEnd)}`);
+    }
+
+    return ranges;
+}
 </script>
 
 <svelte:head>
