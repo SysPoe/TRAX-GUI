@@ -31,7 +31,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let endTime = (now.getUTCHours() + 4).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
 
 	// startTime = "00:00:00";
-	endTime = "47:59:59";
+	// endTime = "47:59:59";
 
 	let stop = TRAX.getAugmentedStops(stop_id)[0];
 	if (stop === undefined || stop === null) throw error(404, `Stop with ID "${stop_id}" not found.`);
