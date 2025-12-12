@@ -15,6 +15,6 @@ if (TRAX_GUI_ADMIN_PASS === "admin") {
 	console.error("ERROR: Using default admin password. This is not secure and should be changed in production.");
 }
 
-export const init: ServerInit = async () => {
+export const init: ServerInit = () => {
 	loadTRAX();
 }
