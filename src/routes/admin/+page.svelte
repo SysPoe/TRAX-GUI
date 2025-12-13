@@ -5,7 +5,7 @@
     let extraDetails = $state(data.user?.extraDetails ?? false);
     let status = $state(data.status);
 
-	async function toggle() {
+	async function toggleExtraDetails() {
 		let res = await fetch("/api/toggleextradetails");
 		let { extraDetails: newValue } = await res.json();
 		extraDetails = newValue;
@@ -97,7 +97,7 @@ Links:
 
 <p>
 	{extraDetails ? "Extra details are shown by default." : "Extra details are hidden by default."}
-	<button onclick={toggle}>Toggle</button>
+	<button onclick={toggleExtraDetails}>Toggle</button>
 </p>
 
 <style>
