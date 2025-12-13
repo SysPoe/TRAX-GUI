@@ -48,7 +48,11 @@
             </tr>
             <tr>
                 <td><strong>Last Realtime Update</strong></td>
-                <td>{formatTime(status.lastRealtimeUpdate)} ({formatDuration(new Date().getTime() - new Date(status.lastRealtimeUpdate).getTime())} ago)</td>
+                <td>{formatTime(status.lastRealtimeUpdate)}
+                    {#if formatTime(status.lastRealtimeUpdate) !== "Never"}
+                        ({formatDuration(new Date().getTime() - new Date(status.lastRealtimeUpdate).getTime())} ago)
+                    {/if}
+                </td>
             </tr>
         </tbody>
     </table>

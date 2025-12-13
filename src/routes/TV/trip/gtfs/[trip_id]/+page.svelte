@@ -5,6 +5,7 @@
 	import type { PageProps } from "./$types";
 	import "$lib/styles/common.css";
 	import "$lib/styles/stoptimes.css";
+	import UserIcon from "$lib/UserIcon.svelte";
 
 	const { data }: PageProps = $props();
 	let { trip }: { trip: SerializableAugmentedTrip } = data;
@@ -15,6 +16,7 @@
 		stations: { [stop_id: string]: SerializableAugmentedStop };
 		route: qdf.Route;
 	} = data;
+	let { serviceCapacities }: { serviceCapacities: { [stop_id: string]: string | null } } = data;
 
 	let useRealtime = $state(true);
 
@@ -270,6 +272,25 @@
 												? st.realtime_info?.delay_string
 												: "scheduled"})
 							</span>
+							{#if serviceCapacities[st.actual_stop ?? st.scheduled_stop ?? ""] != null}
+								{@const sc =
+									serviceCapacities[st.actual_stop ?? st.scheduled_stop ?? ""] ?? ""}
+								<span class="serviceCapacity">
+									{#if sc.toLowerCase().trim() === "space available"}
+										<UserIcon fill="black" />
+										<UserIcon fill="#DDD" />
+										<UserIcon fill="#DDD" />
+									{:else if sc.toLowerCase().trim() === "some space available"}
+										<UserIcon fill="black" />
+										<UserIcon fill="black" />
+										<UserIcon fill="#DDD" />
+									{:else if sc.toLowerCase().trim() === "limited space available"}
+										<UserIcon fill="black" />
+										<UserIcon fill="black" />
+										<UserIcon fill="black" />
+									{/if}
+								</span>
+							{/if}
 							{#if (st.scheduled_departure_time ? st.scheduled_departure_date_offset : st.scheduled_arrival_date_offset) !== 0}
 								<span class="tv-date-offset"
 									>(+{st.scheduled_departure_time

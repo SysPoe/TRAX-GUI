@@ -270,10 +270,7 @@
 								: dep.stop?.plannedDeparture)
 						)?.slice(11, 16)}</span
 					>
-					<span class="delay {dep.delayClass}">
-						({dep.delayString})
-					</span>
-					<span class="run">{dep.run}</span> to <br />
+					<span class="run">{dep.run}</span> service to <br />
 					<span class="headsign">
 						{dep.service.stops
 							.at(-1)
@@ -284,8 +281,14 @@
 				<span class="service-type {dep.passing ? 'passing' : 'qr-travel'}">
 					{dep.passing ? "P" : "Q"}
 				</span>
-				<span class="departs_in">
-					{dep.departureString}
+				<span class="time-container">
+					<span class="departs_in">
+						{dep.departureString}
+					</span>
+					
+					<span class="departs-sub delay {dep.delayClass}">
+						{dep.delayString}
+					</span>
 				</span>
 			</a>
 			<hr />
