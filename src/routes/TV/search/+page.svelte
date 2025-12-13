@@ -232,16 +232,17 @@
 					{/if}
 					<br />
 					{data.expressStrings[trip._trip.trip_id]} <br />
+					
+					{#if serviceDates.length == 1}
+						Service date:
+					{:else}
+						Service dates:
+					{/if}
+					{#each serviceDates as date, i (date)}
+						{date}{i < serviceDates.length - 1 ? ", " : ""}
+					{/each}
 
 					{#if data.extraDetails}
-						{#if serviceDates.length == 1}
-							Service date:
-						{:else}
-							Service dates:
-						{/if}
-						{#each serviceDates as date, i (date)}
-							{date}{i < serviceDates.length - 1 ? ", " : ""}
-						{/each}
 						<br />
 						{types[trip.run[0]] ?? "Unknown train type"}<br />
 

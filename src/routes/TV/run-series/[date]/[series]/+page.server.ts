@@ -2,7 +2,7 @@ import TRAX, { type SerializableAugmentedTrip } from "translink-rail-api";
 import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import * as gtfs from "gtfs";
+import * as gtfs from "qdf-gtfs";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isTRAXLoaded) {

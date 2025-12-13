@@ -114,7 +114,7 @@
 		Departures from {station?.stop_name || "Unknown Station"} in the next 4 hours
 	</h2>
 
-	{#if data.extraDetails}
+	{#if data.admin && data.extraDetails}
 		<button onclick={() => console.log(data)}>LogRaw</button>
 	{/if}
 </div>
@@ -207,7 +207,7 @@
 				</span>
 				<div class="time-container">
 					<span class="departs_in">
-						{dep.departs_in.replace("0h ", "").replace(/(?<=h) 0m/, "")}
+						{dep.departs_in.replace(/^0h /, "").replace(/(?<=h) 0m/, "")}
 					</span>
 					<div class="departs-sub">
 						<span

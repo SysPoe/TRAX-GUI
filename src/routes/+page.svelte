@@ -1,6 +1,6 @@
 <script lang="ts">
 	let { data } = $props();
-	let extraDetails = $state(data.user?.extraDetails ?? false);
+	let extraDetails = $state(data.extraDetails ?? false);
 	async function toggleExtraDetails() {
 		let res = await fetch("/api/toggleextradetails");
 		let { extraDetails: newValue } = await res.json();

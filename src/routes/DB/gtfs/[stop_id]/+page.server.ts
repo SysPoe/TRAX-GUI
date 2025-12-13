@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const { stop_id } = params;
 
 	let now = new Date(Date.now() + 10 * 3_600_000);
-	let tomDate = now;
+	let tomDate = new Date(now);
 	tomDate.setUTCDate(tomDate.getUTCDate() + 1);
 
 	let today = now.toISOString().split("T")[0].replaceAll("-", "");
