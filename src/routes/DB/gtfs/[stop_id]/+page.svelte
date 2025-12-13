@@ -263,7 +263,7 @@
 				<span class="platform qr-travel"> ? </span>
 				<span class="smalltext">
 					<span class="time"
-						>{(
+						>Sch. {(
 							dep.stop?.estimatedPassingTime ||
 							(dep.stop?.plannedDeparture === "0001-01-01T00:00:00"
 								? dep.stop?.plannedArrival
@@ -285,7 +285,7 @@
 					<span class="departs_in">
 						{dep.departureString}
 					</span>
-					
+
 					<span class="departs-sub delay {dep.delayClass}">
 						{dep.delayString}
 					</span>
