@@ -125,7 +125,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.map((v) => v.toSerializable())
 		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
 
-	const extraDetails = locals.session?.data?.extraDetails ?? true;
+	const extraDetails = locals.session?.data?.extraDetails ?? false;
 	if (!extraDetails) {
 		mixed = mixed.filter((v) => (v.dep_type === "gtfs" && !v.passing) || v.dep_type !== "gtfs");
 		mixed = mixed.filter(
