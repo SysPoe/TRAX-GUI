@@ -168,33 +168,11 @@
 					{dep.actual_platform_code || "?"}
 				</span>
 				<span class="smalltext">
-					<span class="time">{qdf.formatTimestamp(dep.scheduled_departure_time)}</span>
-					<span
-						class="delay {(dep as SerializableAugmentedStopTime).realtime &&
-						(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
-							(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-								qdf.StopTimeScheduleRelationship.SKIPPED)
-							? 'cancelled'
-							: dep.realtime
-								? dep.realtime_info?.delay_class || 'scheduled'
-								: 'scheduled'}"
-					>
-						({(dep as SerializableAugmentedStopTime).realtime &&
-						(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
-							(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-								qdf.StopTimeScheduleRelationship.SKIPPED)
-							? "cancelled"
-							: (dep as SerializableAugmentedStopTime).realtime &&
-								  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-										qdf.StopTimeScheduleRelationship.SKIPPED
-								? "skipped"
-								: dep.realtime
-									? dep.realtime_info?.delay_string || "scheduled"
-									: "scheduled"})
-					</span>
+					<span class="time">Sch. {qdf.formatTimestamp(dep.scheduled_departure_time)}</span>
 					{#if data.extraDetails}
-						<span class="run">{trip.run}</span> to
+						<span class="run">{trip.run}</span>
 					{/if}
+					service to
 					<br /><span class="headsign">
 						{trip._trip.trip_headsign
 							?.replace(/station$/, "")
@@ -231,9 +209,36 @@
 										? "E"
 										: "A"}
 				</span>
-				<span class="departs_in">
-					{dep.departs_in.replace("0h ", "")}
-				</span>
+				<div class="time-container">
+					<span class="departs_in">
+						{dep.departs_in.replace("0h ", "").replace(/(?<=h) 0m/, "")}
+					</span>
+					<div class="departs-sub">
+						<span
+							class="delay {(dep as SerializableAugmentedStopTime).realtime &&
+							(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+								(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+									qdf.StopTimeScheduleRelationship.SKIPPED)
+								? 'cancelled'
+								: dep.realtime
+									? dep.realtime_info?.delay_class || 'scheduled'
+									: 'scheduled'}"
+						>
+							{(dep as SerializableAugmentedStopTime).realtime &&
+							(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+								(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+									qdf.StopTimeScheduleRelationship.SKIPPED)
+								? "cancelled"
+								: (dep as SerializableAugmentedStopTime).realtime &&
+									  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
+											qdf.StopTimeScheduleRelationship.SKIPPED
+									? "skipped"
+									: dep.realtime
+										? dep.realtime_info?.delay_string || "scheduled"
+										: "scheduled"}
+						</span>
+					</div>
+				</div>
 			</a>
 			<hr />
 		{:else if dep.dep_type === "qrt"}
@@ -402,13 +407,14 @@
 
 	.smalltext {
 		margin-top: -1.6rem;
-		font-size: 1.2rem;
+		font-size: 1.1rem;
 		width: 20rem;
 		display: inline-block;
 		vertical-align: middle;
 		font-weight: 500;
 		font-synthesis: weight;
 		font-synthesis-weight: 500;
+		color: gray;
 	}
 
 	.headsign {
@@ -418,6 +424,7 @@
 		line-height: 0.9;
 		font-size: 1.8rem;
 		text-transform: uppercase;
+		color: black;
 	}
 
 	.run {
@@ -463,11 +470,24 @@
 		font-synthesis: weight;
 		font-synthesis-weight: 900;
 		font-size: 2rem;
-		width: 9rem;
-		height: 3rem;
 		display: inline-block;
 		vertical-align: top;
-		margin-top: 0.7rem;
+		margin: 0;
+	}
+
+	.time-container {
+		display: inline-flex;
+		flex-direction: column;
+		justify-content: center;
+		vertical-align: top;
+		width: 9rem;
+		height: 4rem;
+		margin-top: 0;
+		padding: 0;
+	}
+
+	.departs-sub {
+		line-height: 0;
 	}
 
 	.gtfs,
