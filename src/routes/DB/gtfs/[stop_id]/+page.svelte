@@ -153,7 +153,7 @@
 				(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
 					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
 						qdf.StopTimeScheduleRelationship.SKIPPED)
-					? 'cancelled'
+					? 'canceled'
 					: dep.last_stop_id == params.stop_id.toLowerCase()
 						? 'term'
 						: dep.passing
@@ -161,9 +161,6 @@
 							: ''}"
 				href={`/TV/trip/gtfs/${trip._trip.trip_id}#stoptimes`}
 			>
-				<!-- <span class="last-stop">
-        {dep.last_stop_id.slice(-6, -3).toUpperCase()}
-      </span> -->
 				<span class="platform" style="background-color: #{route.route_color}">
 					{dep.actual_platform_code || "?"}
 				</span>
@@ -174,10 +171,7 @@
 					{/if}
 					service to
 					<br /><span class="headsign">
-						{trip._trip.trip_headsign
-							?.replace(/station$/, "")
-							.trim()
-							.toUpperCase()}
+						{trip._trip.trip_headsign?.replace(/station$/, "").trim()}
 					</span>
 				</span>
 				<span
@@ -185,7 +179,7 @@
 					(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
 						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
 							qdf.StopTimeScheduleRelationship.SKIPPED)
-						? 'cancelled'
+						? 'canceled'
 						: dep.last_stop_id == params.stop_id.toLowerCase()
 							? 'term'
 							: dep.passing
@@ -219,16 +213,14 @@
 							(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
 								(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
 									qdf.StopTimeScheduleRelationship.SKIPPED)
-								? 'cancelled'
+								? 'canceled'
 								: dep.realtime
 									? dep.realtime_info?.delay_class || 'scheduled'
 									: 'scheduled'}"
 						>
 							{(dep as SerializableAugmentedStopTime).realtime &&
-							(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
-								(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-									qdf.StopTimeScheduleRelationship.SKIPPED)
-								? "cancelled"
+							trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED 
+								? "canceled"
 								: (dep as SerializableAugmentedStopTime).realtime &&
 									  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
 											qdf.StopTimeScheduleRelationship.SKIPPED
@@ -313,10 +305,10 @@
 	.departure.qr-travel {
 		background-color: #fec796;
 	}
-	.departure.cancelled {
+	.departure.canceled {
 		background-color: #c48989;
 	}
-	.departure.cancelled:hover {
+	.departure.canceled:hover {
 		background-color: #c48989;
 		box-shadow: 0 0 1rem #8c4141;
 	}
@@ -414,7 +406,7 @@
 		font-weight: 500;
 		font-synthesis: weight;
 		font-synthesis-weight: 500;
-		color: gray;
+		color: rgba(0,0,0,0.7);
 	}
 
 	.headsign {
@@ -459,7 +451,7 @@
 		background-color: blue;
 		color: white;
 	}
-	.service-type.cancelled {
+	.service-type.canceled {
 		background-color: #b22222;
 		color: white;
 	}
@@ -522,8 +514,8 @@
 	.estimated {
 		color: gray;
 	}
-	.delay.cancelled,
-	.tv-delay.cancelled {
+	.delay.canceled,
+	.tv-delay.canceled {
 		color: #fff;
 		background-color: #b22222;
 		padding: 0 0.3em;
