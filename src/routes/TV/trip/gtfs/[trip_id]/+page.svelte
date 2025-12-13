@@ -228,8 +228,7 @@
 									{formatTimestamp(
 										useRealtime ? st.actual_arrival_time : st.scheduled_arrival_time,
 										true,
-									)} &rarr;
-									{formatTimestamp(
+									)}&rarr;{formatTimestamp(
 										useRealtime ? st.actual_departure_time : st.scheduled_departure_time,
 										true,
 									)}
@@ -273,8 +272,7 @@
 												: "scheduled"})
 							</span>
 							{#if serviceCapacities[st.actual_stop ?? st.scheduled_stop ?? ""] != null}
-								{@const sc =
-									serviceCapacities[st.actual_stop ?? st.scheduled_stop ?? ""] ?? ""}
+								{@const sc = serviceCapacities[st.actual_stop ?? st.scheduled_stop ?? ""] ?? ""}
 								<span class="serviceCapacity">
 									{#if sc.toLowerCase().trim() === "space available"}
 										<UserIcon fill="black" />
