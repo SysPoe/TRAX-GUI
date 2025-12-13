@@ -232,21 +232,21 @@
 										: "scheduled"}
 						</span>
 						{#if dep.serviceCapacity != null}
-						<span class="serviceCapacity">
-							{#if dep.serviceCapacity.toLowerCase().trim() === "space available"}
-								<UserIcon width="1rem" height="1rem" fill="black" />
-								<UserIcon width="1rem" height="1rem" fill="lightgray" />
-								<UserIcon width="1rem" height="1rem" fill="lightgray" />
-							{:else if dep.serviceCapacity.toLowerCase().trim() === "some space available"}
-								<UserIcon width="1rem" height="1rem" fill="black" />
-								<UserIcon width="1rem" height="1rem" fill="black" />
-								<UserIcon width="1rem" height="1rem" fill="lightgray" />
-							{:else if dep.serviceCapacity.toLowerCase().trim() === "limited space available"}
-								<UserIcon width="1rem" height="1rem" fill="black" />
-								<UserIcon width="1rem" height="1rem" fill="black" />
-								<UserIcon width="1rem" height="1rem" fill="black" />
-							{/if}
-						</span>
+							<span class="serviceCapacity">
+								{#if dep.serviceCapacity.toLowerCase().trim() === "space available"}
+									<UserIcon fill="black" />
+									<UserIcon fill="#DDD" />
+									<UserIcon fill="#DDD" />
+								{:else if dep.serviceCapacity.toLowerCase().trim() === "some space available"}
+									<UserIcon fill="black" />
+									<UserIcon fill="black" />
+									<UserIcon fill="#DDD" />
+								{:else if dep.serviceCapacity.toLowerCase().trim() === "limited space available"}
+									<UserIcon fill="black" />
+									<UserIcon fill="black" />
+									<UserIcon fill="black" />
+								{/if}
+							</span>
 						{/if}
 					</div>
 				</div>
