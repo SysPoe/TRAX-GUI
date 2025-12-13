@@ -6,6 +6,7 @@
 	import { onMount } from "svelte";
 	import { type SerializableAugmentedStopTime } from "translink-rail-api";
 	import type { PageProps } from "./$types";
+	import UserIcon from "$lib/UserIcon.svelte";
 
 	type Departure =
 		| (SerializableAugmentedStopTime & {
@@ -16,6 +17,7 @@
 				actual_departure_time: string;
 				departs_in: string;
 				departsInSecs: number;
+				serviceCapacity: string | null;
 		  })
 		| UpcomingQRTravelDeparture;
 
@@ -219,7 +221,7 @@
 									: 'scheduled'}"
 						>
 							{(dep as SerializableAugmentedStopTime).realtime &&
-							trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED 
+							trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
 								? "canceled"
 								: (dep as SerializableAugmentedStopTime).realtime &&
 									  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
@@ -229,6 +231,23 @@
 										? dep.realtime_info?.delay_string || "scheduled"
 										: "scheduled"}
 						</span>
+						{#if dep.serviceCapacity != null}
+						<span class="serviceCapacity">
+							{#if dep.serviceCapacity.toLowerCase().trim() === "space available"}
+								<UserIcon width="1rem" height="1rem" fill="black" />
+								<UserIcon width="1rem" height="1rem" fill="lightgray" />
+								<UserIcon width="1rem" height="1rem" fill="lightgray" />
+							{:else if dep.serviceCapacity.toLowerCase().trim() === "some space available"}
+								<UserIcon width="1rem" height="1rem" fill="black" />
+								<UserIcon width="1rem" height="1rem" fill="black" />
+								<UserIcon width="1rem" height="1rem" fill="lightgray" />
+							{:else if dep.serviceCapacity.toLowerCase().trim() === "limited space available"}
+								<UserIcon width="1rem" height="1rem" fill="black" />
+								<UserIcon width="1rem" height="1rem" fill="black" />
+								<UserIcon width="1rem" height="1rem" fill="black" />
+							{/if}
+						</span>
+						{/if}
 					</div>
 				</div>
 			</a>
@@ -406,7 +425,7 @@
 		font-weight: 500;
 		font-synthesis: weight;
 		font-synthesis-weight: 500;
-		color: rgba(0,0,0,0.7);
+		color: rgba(0, 0, 0, 0.7);
 	}
 
 	.headsign {
@@ -521,5 +540,8 @@
 		padding: 0 0.3em;
 		border-radius: 0.3em;
 		font-weight: bold;
+	}
+	.serviceCapacity {
+		font-size: 1rem;
 	}
 </style>

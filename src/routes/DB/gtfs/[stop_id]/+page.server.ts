@@ -25,8 +25,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const { stop_id } = params;
 
 	let now = new Date(Date.now() + 10 * 3_600_000);
+	let tomDate = now;
+	tomDate.setUTCDate(tomDate.getUTCDate() + 1);
 
 	let today = now.toISOString().split("T")[0].replaceAll("-", "");
+	let tomorrow = tomDate.toISOString().split("T")[0].replaceAll("-", "");
 	let startTime = (now.getUTCHours()).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
 	let endTime = (now.getUTCHours() + 4).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
 
@@ -43,19 +46,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		actual_departure_timestr: string;
 		departs_in: string;
 		departsInSecs: number;
+		serviceCapacity: string | null;
 	})[] = stop
 		.getDepartures(today, startTime, endTime)
 		.map((v) => {
 			const actualTime = formatTimestamp(
-				v.actual_departure_time || v.actual_arrival_time
-					? Math.floor((v.actual_departure_time || v.actual_arrival_time || 0) / 60) * 60
-					: v.actual_departure_time || v.actual_arrival_time,
+				v.actual_departure_time ?? v.actual_arrival_time
+					? Math.floor((v.actual_departure_time ?? v.actual_arrival_time ?? 0) / 60) * 60
+					: v.actual_departure_time ?? v.actual_arrival_time,
 			);
 			// Get current time in HH:mm
 			const nowTime = `${now.getUTCHours().toString().padStart(2, "0")}:${now
 				.getUTCMinutes()
 				.toString()
 				.padStart(2, "0")}`;
+			let isTomorrow = (v.actual_departure_time ?? v.actual_arrival_time ?? v.scheduled_departure_time ?? v.scheduled_arrival_time ?? 0) < (now.getUTCHours() * 3600 + now.getUTCMinutes() * 60);
 			return {
 				...v.toSerializable(),
 				dep_type: "gtfs" as "gtfs",
@@ -76,6 +81,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					actualTime && actualTime.match(/^\d{2}:\d{2}/)
 						? TRAX.utils.time.secTimeDiff(actualTime.slice(0, 5), nowTime)
 						: -1,
+				serviceCapacity: isTomorrow ? v.getServiceCapacity(tomorrow) : v.getServiceCapacity(today),
 			};
 		})
 		.sort(
