@@ -48,7 +48,7 @@
             </tr>
             <tr>
                 <td><strong>Last Realtime Update</strong></td>
-                <td>{formatTime(status.lastRealtimeUpdate)}</td>
+                <td>{formatTime(status.lastRealtimeUpdate)} ({formatDuration(new Date().getTime() - new Date(status.lastRealtimeUpdate).getTime())} ago)</td>
             </tr>
         </tbody>
     </table>
@@ -113,9 +113,11 @@ Links:
     table {
         border-collapse: collapse;
         width: 100%;
-        max-width: 400px;
+        max-width: 600px;
+        width: fit-content;
     }
     td {
         padding: 4px 8px;
+        width: fit-content;
     }
 </style>
