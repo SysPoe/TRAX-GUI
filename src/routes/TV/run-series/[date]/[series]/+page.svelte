@@ -81,7 +81,7 @@
 			<h3>Trips in this Series</h3>
 			{#each data.runSeries.trips as tripInfo}
 				{@const trip = data.trips[tripInfo.trip_id]}
-				{@const route = trip?._trip.route_id ? data.routes[trip._trip.route_id] : null}
+				{@const route = trip?.route_id ? data.routes[trip.route_id] : null}
 
 				{@const departure_time = formatTimestamp(trip.stopTimes[0].scheduled_departure_time)}
 				{@const arrival_time = formatTimestamp(
@@ -102,12 +102,12 @@
 							if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
 								// Open in new tab if modifier key is held
 								ev.preventDefault();
-								window.open(`/TV/trip/gtfs/${trip._trip.trip_id}`, "_blank");
+								window.open(`/TV/trip/gtfs/${trip.trip_id}`, "_blank");
 								return;
 							}
-							goto(`/TV/trip/gtfs/${trip._trip.trip_id}`);
+							goto(`/TV/trip/gtfs/${trip.trip_id}`);
 						}}
-						href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
+						href={`/TV/trip/gtfs/${trip.trip_id}`}
 					>
 						<span class="headline">
 							{trip.run}
@@ -135,7 +135,7 @@
 								(+{date_offset} {date_offset == 1 ? "day" : "days"})
 							{/if}
 							<br />
-							{data.expressStrings[trip._trip.trip_id]} <br />
+							{data.expressStrings[trip.trip_id]} <br />
 
 							{#if trip.scheduledStartServiceDates.length == 1}
 								Service date:

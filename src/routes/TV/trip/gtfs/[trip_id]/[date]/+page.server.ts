@@ -23,9 +23,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 
-	let { trip_id } = params;
+	let { trip_id, date } = params;
 	let trip = TRAX.getAugmentedTrips(trip_id)[0];
 	if (!trip) throw error(404, `Trip "${trip_id}" not found`);
+	if (!trip.scheduledStartServiceDates.includes(date)) throw error(404, `Trip "${trip_id}" does not run on date "${date}". Dates: ${trip.scheduledStartServiceDates.join(", ")}`);
 	let stations: { [stop_id: string]: SerializableAugmentedStop } = {};
 	let route = TRAX.getRawRoutes(trip.route_id)[0];
 	let expressString = TRAX.express.findExpressString(trip.expressInfo);
@@ -47,5 +48,5 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!extraDetails)
 		serialized.stopTimes = serialized.stopTimes.filter((v) => !v.passing);
 
-	return { trip: serialized, stations, route, expressString, extraDetails, serviceCapacities };
+	return { trip: serialized, stations, route, expressString, extraDetails, serviceCapacities, params };
 };

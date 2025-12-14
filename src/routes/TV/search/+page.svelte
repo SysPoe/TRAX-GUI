@@ -192,14 +192,14 @@
 		{@const date_offset =
 			(trip.stopTimes.at(-1)?.scheduled_arrival_date_offset ?? 0) -
 			trip.stopTimes[0].scheduled_departure_date_offset}
-		{@const route = data.routes[trip._trip.route_id]}
+		{@const route = data.routes[trip.route_id]}
 		{@const serviceDates = contractSD(trip.scheduledStartServiceDates)}
 
 		<div class="result-wrapper">
 			<a
 				class="result"
-				href={`/TV/trip/gtfs/${trip._trip.trip_id}`}
-				onclick={(event) => handleTripNavigation(event, trip._trip.trip_id)}
+				href={`/TV/trip/gtfs/${trip.trip_id}`}
+				onclick={(event) => handleTripNavigation(event, trip.trip_id)}
 			>
 				<span class="headline">
 					{trip.run}
@@ -234,7 +234,7 @@
 						(+{date_offset} {date_offset == 1 ? "day" : "days"})
 					{/if}
 					<br />
-					{data.expressStrings[trip._trip.trip_id]} <br />
+					{data.expressStrings[trip.trip_id]} <br />
 
 					{#if serviceDates.length == 1}
 						Service date:

@@ -96,7 +96,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	for (const departure of departures) {
 		const trip = TRAX.getAugmentedTrips(departure.trip_id)[0];
 		if (trip) {
-			trips[trip._trip.trip_id] = trip.toSerializable();
+			trips[trip.trip_id] = trip.toSerializable();
 		}
 	}
 
@@ -104,9 +104,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		[route_id: string]: qdf.Route;
 	} = {};
 	for (const trip of Object.values(trips)) {
-		if (trip._trip.route_id && !routes[trip._trip.route_id]) {
-			const route = TRAX.getRawRoutes(trip._trip.route_id)[0];
-			if (route) routes[trip._trip.route_id] = route;
+		if (trip.route_id && !routes[trip.route_id]) {
+			const route = TRAX.getRawRoutes(trip.route_id)[0];
+			if (route) routes[trip.route_id] = route;
 		}
 	}
 

@@ -146,7 +146,7 @@
 	{#each departures as dep}
 		{#if dep.dep_type === "gtfs"}
 			{@const trip = data.trips[dep.trip_id]}
-			{@const route = routes[trip._trip.route_id || ""]}
+			{@const route = routes[trip.route_id || ""]}
 			{@const express = dep.express_string.toLowerCase() != "all stops"}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -161,7 +161,7 @@
 						: dep.passing
 							? 'passing'
 							: ''}"
-				href={`/TV/trip/gtfs/${trip._trip.trip_id}#stoptimes`}
+				href={`/TV/trip/gtfs/${trip.trip_id}#stoptimes`}
 			>
 				<span class="platform" style="background-color: #{route.route_color}">
 					{dep.actual_platform_code || "?"}
@@ -173,7 +173,7 @@
 					{/if}
 					service to
 					<br /><span class="headsign">
-						{trip._trip.trip_headsign?.replace(/station$/, "").trim()}
+						{trip.trip_headsign?.replace(/station$/, "").trim()}
 					</span>
 				</span>
 				<span

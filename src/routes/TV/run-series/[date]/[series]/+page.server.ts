@@ -28,9 +28,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			expressStrings[tripInfo.trip_id] = TRAX.express.findExpressString(trip.expressInfo, "");
 
 			// Get route information
-			if (trip._trip.route_id && !routes[trip._trip.route_id]) {
-				const route = TRAX.getRawRoutes(trip._trip.route_id)[0];
-				if (route) routes[trip._trip.route_id] = route;
+			if (trip.route_id && !routes[trip.route_id]) {
+				const route = TRAX.getRawRoutes(trip.route_id)[0];
+				if (route) routes[trip.route_id] = route;
 			}
 		}
 	}

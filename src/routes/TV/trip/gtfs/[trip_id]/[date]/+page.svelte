@@ -68,6 +68,23 @@
 			{trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
 		</h2>
 	{/if}
+	<p>
+		<i>TripInstance:</i>
+		<select
+			name="date"
+			id="date"
+			onchange={() => {
+				goto(`/TV/trip/gtfs/${trip.trip_id}/${data.params.date}`);
+			}}
+			bind:value={data.params.date}
+		>
+			{#each trip.scheduledStartServiceDates as serviceDate}
+				<option value={serviceDate} selected={serviceDate === data.params.date}>
+					{serviceDate}
+				</option>
+			{/each}
+		</select>
+	</p>
 </div>
 
 <hr />
@@ -83,7 +100,13 @@
 			<div class="info-item">
 				<span class="info-label">Service Dates:</span>
 				<span class="info-value">
-					{trip.scheduledStartServiceDates.join(", ")}
+					{#each trip.scheduledStartServiceDates as v}
+						{#if v === data.params.date}
+							<b>{v}</b>
+						{:else}
+							<a href="/TV/trip/gtfs/{trip.trip_id}/{v}">{v}</a>
+						{/if}
+					{/each}
 				</span>
 			</div>
 			{#if data.extraDetails}

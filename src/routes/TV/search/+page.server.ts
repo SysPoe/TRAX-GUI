@@ -99,13 +99,13 @@ export const load: PageServerLoad = async ({ url }) => {
 		}
 
 		// Route filtering
-		if (routePair !== "" && trip._trip.route_id.slice(0, 4) !== routePair)
+		if (routePair !== "" && trip.route_id.slice(0, 4) !== routePair)
 			return (
-				routePairReversible && trip._trip.route_id.slice(0, 4) === routePair.slice(2, 4) + routePair.slice(0, 2)
+				routePairReversible && trip.route_id.slice(0, 4) === routePair.slice(2, 4) + routePair.slice(0, 2)
 			);
-		if (route !== "" && !trip._trip.route_id.slice(0, 4).includes(route)) return false;
-		if (routeStart !== "" && trip._trip.route_id.slice(0, 2) !== routeStart) return false;
-		if (routeEnd !== "" && trip._trip.route_id.slice(2, 4) !== routeEnd) return false;
+		if (route !== "" && !trip.route_id.slice(0, 4).includes(route)) return false;
+		if (routeStart !== "" && trip.route_id.slice(0, 2) !== routeStart) return false;
+		if (routeEnd !== "" && trip.route_id.slice(2, 4) !== routeEnd) return false;
 
 		// Date filtering
 		for (const date of serviceDates) {
@@ -243,11 +243,11 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	let expressStrings: { [trip_id: string]: string } = {};
 	for (const trip of pagedTrips) {
-		const key = trip._trip.trip_id;
+		const key = trip.trip_id;
 		expressStrings[key] = TRAX.express.findExpressString(trip.expressInfo, "");
 	}
 
-	let routesToFetch = [...new Set(pagedTrips.map((t) => t._trip.route_id))];
+	let routesToFetch = [...new Set(pagedTrips.map((t) => t.route_id))];
 	let routes: { [route_id: string]: gtfs.Route } = {};
 	for (const route_id of routesToFetch) {
 		const route = TRAX.getRawRoutes(route_id)[0];
