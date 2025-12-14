@@ -2,8 +2,8 @@
 	import type { PageProps } from "./$types";
 	import "$lib/styles/trip-results.css";
 	import "$lib/styles/common.css";
-	const { data }: PageProps = $props();
-	const { services } = data;
+	let { data }: PageProps = $props();
+	let services = $derived(data.services);
 
 	const replace: { [key: string]: string } = {
 		"Townsville - Charters Towers Road": "Townsville",

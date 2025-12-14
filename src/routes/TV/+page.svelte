@@ -7,23 +7,23 @@
 	import Autocomplete from "$lib/Autocomplete.svelte";
 
 	let loading = $state(false);
-	const { data }: PageProps = $props();
-	let { stations }: { stations: SerializableAugmentedStop[] } = data;
+	let { data }: PageProps = $props();
+	let stations: SerializableAugmentedStop[] = $derived(data.stations);
 
 	// --- 1. PREPARE DATA FOR AUTOCOMPLETE ---
 
 	// Convert Stations to Autocomplete Format
-	const stationOptions = stations.map(s => ({
+	let stationOptions = $derived(stations.map((s) => ({
 		label: s.stop_name ?? "Unknown Station",
 		value: s.stop_id ?? "",
 		original: s 
-	}));
+	})));
 
 	// Convert Dates to Autocomplete Format
-	const dateOptions = data.dates.map(d => ({
+	let dateOptions = $derived(data.dates.map((d) => ({
 		label: d, // Date string (e.g., "20251201")
 		value: d  
-	}));
+	})));
 
 	// Convert Destinations to Autocomplete Format
 	// (Hardcoding your previous list here for cleaner mapping)

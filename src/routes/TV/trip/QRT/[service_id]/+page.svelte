@@ -4,17 +4,24 @@
 	import "$lib/styles/common.css";
 	import "$lib/styles/stoptimes.css";
 
-	const { data }: PageProps = $props();
-	let { service }: { service: TravelTrip } = data;
+	let { data }: PageProps = $props();
+	let service: TravelTrip = $derived(data.service);
 
 	let showPassing = $state(false);
 	let useRealtime = $state(true);
+	$effect(() => {
+		// Reset view toggles when a new service is loaded
+		void service.serviceId;
+		showPassing = false;
+		useRealtime = true;
+	});
 
-	const destination =
+	let destination = $derived(
 		service.stops
 			.at(-1)
 			?.placeName.replace(/^Brisbane -/, "")
-			.trim() || "Unknown";
+			.trim() || "Unknown",
+	);
 
 	const stopsToFilter: string[] = [
 		// "NORMANBY",
@@ -29,7 +36,7 @@
 		"TOWNSVILLE - CHARTERS TOWERS ROAD": "TOWNSVILLE STN.",
 	};
 
-	const filteredStops = (service.stopsWithPassing || service.stops).filter((st) => {
+	let filteredStops = $derived((service.stopsWithPassing || service.stops).filter((st) => {
 		const isSrtStop = "isStop" in st;
 		if (isSrtStop) {
 			const isPassing = !(st as SRTStop).isStop;
@@ -38,7 +45,7 @@
 			}
 		}
 		return true;
-	});
+	}));
 
 	function formatTime(isoString?: string | null): string {
 		if (!isoString || isoString === "0001-01-01T00:00:00") return "--:--";
