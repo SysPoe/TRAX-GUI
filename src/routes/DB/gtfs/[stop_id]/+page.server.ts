@@ -81,7 +81,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					actualTime && actualTime.match(/^\d{2}:\d{2}/)
 						? TRAX.utils.time.secTimeDiff(actualTime.slice(0, 5), nowTime)
 						: -1,
-				serviceCapacity: isTomorrow ? v.getServiceCapacity(tomorrow) : v.getServiceCapacity(today),
+				serviceCapacity: v.passing ? null : isTomorrow ? v.getServiceCapacity(tomorrow) : v.getServiceCapacity(today),
 			};
 		})
 		.sort(

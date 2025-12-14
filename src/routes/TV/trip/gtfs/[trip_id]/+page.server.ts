@@ -37,6 +37,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		if (stopTime.scheduled_parent_station)
 			stations[stopTime.scheduled_parent_station?.stop_id as any as string] =
 				stopTime.scheduled_parent_station?.toSerializable() as any;
+		if (stopTime.passing) continue;
 		serviceCapacities[stopTime.actual_stop?.stop_id ?? stopTime.scheduled_stop?.stop_id ?? ""] = stopTime.getServiceCapacity(stopTime.scheduled_departure_dates.sort((a, b) => dateDiff(a) - dateDiff(b))[0])
 	}
 
