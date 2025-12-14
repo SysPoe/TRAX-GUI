@@ -74,8 +74,8 @@
 
 <div class="container">
 	<div class="content">
-		<div class="info-section">
-			<h3>Trip Information</h3>
+		<details class="info-section">
+			<summary>Trip Information</summary>
 			<div class="info-item">
 				<span class="info-label">Express Status:</span>
 				<span class="info-value">{data.expressString}</span>
@@ -134,11 +134,11 @@
 					</span>
 				</div>
 			{/if}
-		</div>
+		</details>
 
 		{#if data.extraDetails}
-			<div class="info-section">
-				<h3>Run Series</h3>
+			<details class="info-section">
+				<summary>Run Series</summary>
 				{#each Object.entries(trip.runSeries) as [date, series]}
 					<div class="info-item">
 						<span class="info-label">{date}:</span>
@@ -164,10 +164,10 @@
 						</span>
 					</div>
 				{/each}
-			</div>
+			</details>
 
-			<div class="info-section">
-				<h3>Route Information ({route.route_id})</h3>
+			<details class="info-section">
+				<summary>Route Information ({route.route_id})</summary>
 				<div class="info-item">
 					<span class="info-label">Route Name:</span>
 					<span class="info-value">
@@ -183,11 +183,11 @@
 						{/if}
 					</span>
 				</div>
-			</div>
+			</details>
 		{/if}
 
-		<div class="info-section">
-			<h3>Stoptimes</h3>
+		<details class="info-section" open>
+			<summary>Stoptimes</summary>
 			{#if data.extraDetails}
 				<div class="stoptimes-controls">
 					<label>
@@ -338,7 +338,7 @@
 					<hr />
 				{/each}
 			</div>
-		</div>
+		</details>
 	</div>
 </div>
 
@@ -369,24 +369,26 @@
 	}
 
 	.info-section {
-		margin-bottom: 1.5rem;
-		padding: 1.2rem;
+		/* margin-bottom: 1rem; */
+		padding: 0.5rem;
 		border-radius: 6px;
 		background-color: #ffffff;
-		box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+		/* box-shadow: 0 0rem 0.4rem rgba(0, 0, 0, 0.5); */
 	}
 
-	.info-section h3 {
+	.info-section summary {
 		margin-top: 0;
 		color: #2c3e50;
 		font-size: 1.3rem;
 		font-weight: 600;
+		cursor: pointer;
 	}
 
 	.info-item {
 		display: flex;
-		margin-bottom: 0.6rem;
-		padding: 0.4rem 0;
+		padding: 0.1rem 0.5rem;
+		margin-left: 1rem;
+		border-left: solid black 0.1rem;
 	}
 
 	.info-label {
