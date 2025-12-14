@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			}
 		}
 	}
-	
+
 	// Collect all service dates
 	const serviceDates: string[] = [];
 	for (const [key, value] of url.searchParams.entries()) {
@@ -34,15 +34,15 @@ export const load: PageServerLoad = async ({ url }) => {
 			}
 		}
 	}
-	
+
 	const trainNumberType = url.searchParams.get("train-number-type") ?? "";
 	const trainNumberDestination = url.searchParams.get("train-number-destination") ?? "";
 	const trainNumber = (url.searchParams.get("train-number") ?? "").trim().toUpperCase();
 
 	if (trainNumber.length > 0 && trainNumber.length != 4)
 		throw error(400, "Train number must be exactly 4 characters long.");
-	
-	if (!/^[A-Z0-9.]{0,4}$/.test(trainNumber)) 
+
+	if (!/^[A-Z0-9.]{0,4}$/.test(trainNumber))
 		throw error(400, "Train number must be alphanumeric or '.' wildcard.");
 
 	const route = url.searchParams.get("route") ?? "";
@@ -136,7 +136,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	let serializedTrips = trips.map((v) => v.toSerializable());
 
-	if (multiDateBehaviour === "duplicate")
+	if (multiDateBehaviour === "duplicate") {
 		serializedTrips = serializedTrips
 			.map((trip) => {
 				const dates =
@@ -159,6 +159,28 @@ export const load: PageServerLoad = async ({ url }) => {
 				return expanded;
 			})
 			.flat();
+		trips = trips.map(trip => {
+			const dates =
+				dateMode === "actual_sch"
+					? trip.scheduledTripDates
+					: dateMode === "actual_rt"
+						? trip.actualTripDates
+						: trip.scheduledStartServiceDates;
+			let expanded = dates.map((v) => {
+				const newTrip = { ...trip };
+				newTrip.actualTripDates = [v];
+				newTrip.scheduledTripDates = [v];
+				newTrip.scheduledStartServiceDates = [v];
+				return newTrip;
+			});
+			expanded = expanded.filter((v) => {
+				for (const date of serviceDates)
+					if (!v.scheduledTripDates.includes(date)) return false;
+				return true;
+			});
+			return expanded;
+		}).flat();
+	}
 
 	let results = serializedTrips.length;
 
@@ -203,15 +225,21 @@ export const load: PageServerLoad = async ({ url }) => {
 	let stations: { [key: string]: SerializableAugmentedStop } = {};
 	for (const trip of unserializedPagedTrips) {
 		for (const stopTime of trip.stopTimes) {
-			if (stopTime.scheduled_stop) {
+			if (stopTime.scheduled_stop)
 				stations[stopTime.scheduled_stop.stop_id] = stopTime.scheduled_stop.toSerializable();
-			}
-			if (stopTime.scheduled_parent_station) {
+			if (stopTime.scheduled_parent_station)
 				stations[stopTime.scheduled_parent_station.stop_id] =
 					stopTime.scheduled_parent_station.toSerializable();
-			}
+			if (stopTime.actual_stop)
+				stations[stopTime.actual_stop.stop_id] = stopTime.actual_stop.toSerializable();
+			if (stopTime.actual_parent_station)
+				stations[stopTime.actual_parent_station.stop_id] =
+					stopTime.actual_parent_station.toSerializable();
 		}
 	}
+
+	for (const st of TRAX.stations.getAugmentedRailStations())
+		stations[st.stop_id] = st.toSerializable();
 
 	let expressStrings: { [trip_id: string]: string } = {};
 	for (const trip of pagedTrips) {
