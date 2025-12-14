@@ -207,7 +207,7 @@
 				</span>
 				<div class="time-container">
 					<span class="departs_in">
-						{dep.departs_in.replace(/^0h /, "").replace(/(?<=h) 0m/, "")}
+						{dep.departs_in.replace(/^0h /, "").replace(/(?<=h) 0m/, "").replace(/^0m$/, "now")}
 					</span>
 					<div class="departs-sub">
 						<span
