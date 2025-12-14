@@ -7,18 +7,19 @@
 	import "$lib/styles/stoptimes.css";
 	import UserIcon from "$lib/UserIcon.svelte";
 
-	const { data }: PageProps = $props();
-	let { trip }: { trip: SerializableAugmentedTrip } = data;
-	let {
-		stations,
-		route,
-	}: {
-		stations: { [stop_id: string]: SerializableAugmentedStop };
-		route: qdf.Route;
-	} = data;
-	let { serviceCapacities }: { serviceCapacities: { [stop_id: string]: string | null } } = data;
+	let { data }: PageProps = $props();
+	let stations = $derived(data.stations);
+	let route = $derived(data.route);
+	let trip = $derived(data.trip);
+	let serviceCapacities = $derived(data.serviceCapacities);
+	const date = $derived(data.params.date);
+	const series = $derived(data.trip.runSeries[date] ?? null);
 
-	let useRealtime = $state(true);
+	// svelte-ignore state_referenced_locally
+	let useRealtime = $state(trip.rt_start_date === date);
+	$effect(() => {
+		useRealtime = trip.rt_start_date === date;
+	});
 
 	// Borrowed from TRAX
 	function formatTimestamp(ts?: number | null, seconds: boolean = false): string {
@@ -73,13 +74,12 @@
 		<select
 			name="date"
 			id="date"
-			onchange={() => {
-				goto(`/TV/trip/gtfs/${trip.trip_id}/${data.params.date}`);
+			onchange={(e) => {
+				goto(`/TV/trip/gtfs/${trip.trip_id}/${e.currentTarget.value}`);
 			}}
-			bind:value={data.params.date}
 		>
 			{#each trip.scheduledStartServiceDates as serviceDate}
-				<option value={serviceDate} selected={serviceDate === data.params.date}>
+				<option value={serviceDate} selected={serviceDate === date}>
 					{serviceDate}
 				</option>
 			{/each}
@@ -101,7 +101,7 @@
 				<span class="info-label">Service Dates:</span>
 				<span class="info-value">
 					{#each trip.scheduledStartServiceDates as v}
-						{#if v === data.params.date}
+						{#if v === date}
 							<b>{v}</b>
 						{:else}
 							<a href="/TV/trip/gtfs/{trip.trip_id}/{v}">{v}</a>
@@ -156,39 +156,34 @@
 						{@html trip.shape_id || "<b>null</b>"}
 					</span>
 				</div>
+
+				<div class="info-item">
+					<span class="info-label">Run Series:</span>
+					<span class="info-value">
+						{#if series !== null && series !== undefined}
+							<a
+								href="/TV/run-series/{date}/{series}"
+								onclick={(ev) => {
+									if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
+										// Open in new tab if modifier key is held
+										ev.preventDefault();
+										window.open(`/TV/run-series/${date}/${series}`, "_blank");
+										return;
+									}
+									goto(`/TV/run-series/${date}/${series}`);
+								}}
+							>
+								{series}
+							</a>
+						{:else}
+							<b>null</b>
+						{/if}
+					</span>
+				</div>
 			{/if}
 		</details>
 
 		{#if data.extraDetails}
-			<details class="info-section">
-				<summary>Run Series</summary>
-				{#each Object.entries(trip.runSeries) as [date, series]}
-					<div class="info-item">
-						<span class="info-label">{date}:</span>
-						<span class="info-value">
-							{#if series !== null && series !== undefined}
-								<a
-									href={`/TV/run-series/${date}/${series}`}
-									onclick={(ev) => {
-										if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
-											// Open in new tab if modifier key is held
-											ev.preventDefault();
-											window.open(`/TV/run-series/${date}/${series}`, "_blank");
-											return;
-										}
-										goto(`/TV/run-series/${date}/${series}`);
-									}}
-								>
-									{series}
-								</a>
-							{:else}
-								<b>null</b>
-							{/if}
-						</span>
-					</div>
-				{/each}
-			</details>
-
 			<details class="info-section">
 				<summary>Route Information ({route.route_id})</summary>
 				<div class="info-item">
@@ -214,8 +209,8 @@
 			{#if data.extraDetails}
 				<div class="stoptimes-controls">
 					<label>
-						<input type="checkbox" bind:checked={useRealtime} />
-						Show Realtime Data
+						<input type="checkbox" bind:checked={useRealtime} disabled={trip.rt_start_date !== date} />
+						Show Realtime Data {#if trip.rt_start_date !== date}(Unavailable for this date){/if}
 					</label>
 				</div>
 			{/if}
