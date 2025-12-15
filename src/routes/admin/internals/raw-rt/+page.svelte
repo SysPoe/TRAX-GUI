@@ -100,15 +100,19 @@
 		),
 	);
 
+	let tripUpdates: Map<string, qdf.RealtimeTripUpdate> = $derived(
+		new Map(
+			(data.tripUpdates as qdf.RealtimeTripUpdate[])
+				.filter((v) => v.trip.trip_id)
+				.map((tu) => [`${tu.trip.trip_id}|${tu.trip.start_date}|${tu.trip.start_time}`, tu]),
+		),
+	);
+
 	let vp: qdf.RealtimeVehiclePosition[] = (data.vehiclePositions as qdf.RealtimeVehiclePosition[]).filter(
 		(v) => v.trip.trip_id && v.trip.trip_id.includes("QR "),
 	);
 
 	let vehiclePositions = $derived(vp.filter((v) => matchesSearch(v.trip)));
-
-	function or(v: any | null, str: string | null = v) {
-		return v == null ? "<b>null</b>" : str?.toString();
-	}
 </script>
 
 <div class="content">
@@ -143,7 +147,16 @@
 				<b>Is Deleted:</b>
 				{update.is_deleted.toString()} <br />
 				<b>Trip ID:</b>
-				<a href="/TV/trip/gtfs/{update.trip.trip_id}/{update.trip.start_date}">{update.trip.trip_id}</a> <br />
+				<a
+					href="/TV/trip/gtfs/{btoa(
+						JSON.stringify([
+							update.trip.trip_id,
+							update.trip.start_date,
+							update.trip.start_time,
+							update.trip.schedule_relationship,
+						]),
+					)}">{update.trip.trip_id}</a
+				> <br />
 				<b>Trip Route ID:</b>
 				{update.trip.route_id} <br />
 				<b>Trip Direction ID:</b>
@@ -197,15 +210,38 @@
 				{stu.stop_sequence} <br />
 				<b>Stop Id:</b>
 				{stu.stop_id} <br />
-				<b>Trip Id:</b> <a href="/TV/trip/gtfs/{stu.trip_id}/{stu.start_date}">{stu.trip_id}</a> <br />
+				<b>Trip Id:</b>
+				<a
+					href="/TV/trip/gtfs/{btoa(
+						JSON.stringify([
+							stu.trip_id,
+							stu.start_date,
+							stu.start_time,
+							tripUpdates.get(stu.trip_id + '|' + stu.start_date + '|' + stu.start_time)?.trip
+								.schedule_relationship ?? 0,
+						]),
+					)}">{stu.trip_id}</a
+				> <br />
 				<b>Arrival Delay:</b>
 				{stu.arrival_delay} <br />
 				<b>Arrival Time:</b>
-				{stu.arrival_time ? new Date(stu.arrival_time * 1000).toLocaleString("en-au") : "NOT_PROVIDED"} <br />
+				{stu.arrival_time
+					? new Date(stu.arrival_time * 1000 + 36000000)
+							.toISOString()
+							.replace("Z", "")
+							.replace("T", " ")
+							.replace(/\.000$/, "")
+					: "NOT_PROVIDED"} <br />
 				<b>Departure Delay:</b>
 				{stu.departure_delay} <br />
 				<b>Departure Time:</b>
-				{stu.departure_time ? new Date(stu.departure_time * 1000).toLocaleString("en-au") : "NOT_PROVIDED"}
+				{stu.departure_time
+					? new Date(stu.departure_time * 1000 + 36000000)
+							.toISOString()
+							.replace("Z", "")
+							.replace("T", " ")
+							.replace(/\.000$/, "")
+					: "NOT_PROVIDED"}
 				<br />
 				<b>Schedule Relationship:</b>
 				{stu.schedule_relationship !== null
@@ -233,7 +269,8 @@
 				{vp.update_id} <br />
 				<b>Is Deleted:</b>
 				{vp.is_deleted} <br />
-				<b>Trip ID:</b> <a href="/TV/trip/gtfs/{vp.trip.trip_id}">{vp.trip.trip_id}</a> <br />
+				<b>Trip ID:</b>
+				{vp.trip.trip_id} <br />
 				<b>Trip Route ID:</b>
 				{vp.trip.route_id} <br />
 				<b>Trip Direction ID:</b>
