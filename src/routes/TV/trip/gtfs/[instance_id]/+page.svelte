@@ -10,7 +10,6 @@
 	let stations = $derived(data.stations);
 	let route = $derived(data.route);
 	let inst = $derived(data.inst);
-	let serviceCapacities = $derived(data.serviceCapacities);
 
 	// svelte-ignore state_referenced_locally
 	let useRealtime = $state(true);
@@ -59,6 +58,7 @@
 		{/if}
 	{:else}
 		<h2>
+			{inst.serviceDate.replace(/(?<=^.{4})|(?<=^.{6})/g, "-")}
 			{formatTimestamp(inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time)}
 			{inst.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
 		</h2>
@@ -81,7 +81,36 @@
 					{inst.serviceDate}
 				</span>
 			</div>
+			<div class="info-item">
+				<span class="info-label">Headsign:</span>
+				<span class="info-value">
+					{@html inst.trip_headsign || "<b>null</b>"}
+				</span>
+			</div>
 			{#if data.extraDetails}
+				<div class="info-item">
+					<span class="info-label">Route ID:</span>
+					<span class="info-value">
+						{@html route.route_id || "<b>null</b>"}
+					</span>
+				</div>
+			{/if}
+			<div class="info-item">
+				<span class="info-label">Route Name:</span>
+				<span class="info-value">
+					{@html route.route_long_name || route.route_short_name || "<b>null</b>"}
+				</span>
+			</div>
+			{#if data.extraDetails}
+				<div class="info-item">
+					<span class="info-label">Route Color:</span>
+					<span class="info-value">
+						{@html route.route_color || "<b>null</b>"}
+						{#if route.route_color}
+							<div class="color-square" style="background-color: #{route.route_color};"></div>
+						{/if}
+					</span>
+				</div>
 				<div class="info-item">
 					<span class="info-label">TRN:</span>
 					<span class="info-value">
@@ -96,12 +125,6 @@
 						>
 							<img src="/img/trnguru.svg" alt="TRNGuru" class="trnguru-icon-inline" />
 						</a>
-					</span>
-				</div>
-				<div class="info-item">
-					<span class="info-label">Headsign:</span>
-					<span class="info-value">
-						{@html inst.trip_headsign || "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
@@ -128,39 +151,15 @@
 						{@html inst.shape_id || "<b>null</b>"}
 					</span>
 				</div>
-
 				<div class="info-item">
 					<span class="info-label">Run Series:</span>
-					<span class="info-value">
-						Not available at the moment (working on it!)
-					</span>
+					<span class="info-value"> Not available at the moment (working on it!) </span>
 				</div>
 			{/if}
 		</details>
 
-		{#if data.extraDetails}
-			<details class="info-section">
-				<summary>Route Information ({route.route_id})</summary>
-				<div class="info-item">
-					<span class="info-label">Route Name:</span>
-					<span class="info-value">
-						{@html route.route_long_name || route.route_short_name || "<b>null</b>"}
-					</span>
-				</div>
-				<div class="info-item">
-					<span class="info-label">Route Color:</span>
-					<span class="info-value">
-						{@html route.route_color || "<b>null</b>"}
-						{#if route.route_color}
-							<div class="color-square" style="background-color: #{route.route_color};"></div>
-						{/if}
-					</span>
-				</div>
-			</details>
-		{/if}
-
 		<details class="info-section" open>
-			<summary>Stoptimes</summary>
+			<summary>Stops</summary>
 			{#if data.extraDetails}
 				<div class="stoptimes-controls">
 					<label>
