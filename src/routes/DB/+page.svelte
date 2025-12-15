@@ -2,7 +2,6 @@
 	import type { PageProps } from "./$types";
 	import { goto } from "$app/navigation";
 	import "$lib/styles/common.css";
-	import type { SerializableAugmentedStop } from "translink-rail-api";
 	import { onMount } from "svelte";
 
 	const { data }: PageProps = $props();

@@ -30,8 +30,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let route = TRAX.getRawRoutes(inst.route_id)[0];
 	let expressString = TRAX.express.findExpressString(inst.expressInfo);
 
-	let serviceCapacities: { [stop_id: string]: string | null } = {};
-
 	for (const stopTime of inst.stopTimes) {
 		stations[stopTime.scheduled_stop?.stop_id as any as string] = stopTime.scheduled_stop?.toSerializable() as any;
 		if (stopTime.scheduled_parent_station)
@@ -45,5 +43,5 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!extraDetails)
 		serialized.stopTimes = serialized.stopTimes.filter((v) => !v.passing);
 
-	return { inst: serialized, stations, route, expressString, extraDetails, serviceCapacities, params };
+	return { inst: serialized, stations, route, expressString, extraDetails, params };
 };

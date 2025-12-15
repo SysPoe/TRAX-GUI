@@ -1,7 +1,6 @@
 import TRAX, {
 	formatTimestamp,
 	type SerializableAugmentedStopTime,
-	type SerializableAugmentedTrip,
 } from "translink-rail-api";
 import * as qdf from "qdf-gtfs";
 import {
@@ -89,7 +88,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				(a.actual_departure_time ?? a.actual_arrival_time ?? 0) -
 				(b.actual_departure_time ?? b.actual_arrival_time ?? 0),
 		);
-		
+
 	let instances: {
 		[trip_id: string]: SerializableAugmentedTripInstance;
 	} = {};
