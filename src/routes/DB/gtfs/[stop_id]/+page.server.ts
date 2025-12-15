@@ -13,6 +13,7 @@ import {
 } from "$lib";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
+import type { SerializableAugmentedTripInstance } from "../../../../../../TRAX/dist/utils/augmentedTrip";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isTRAXLoaded) {
@@ -46,7 +47,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		actual_departure_timestr: string;
 		departs_in: string;
 		departsInSecs: number;
-		serviceCapacity: string | null;
 	})[] = stop
 		.getDepartures(today, startTime, endTime)
 		.map((v) => {
@@ -60,18 +60,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				.getUTCMinutes()
 				.toString()
 				.padStart(2, "0")}`;
-			let isTomorrow = (v.actual_departure_time ?? v.actual_arrival_time ?? v.scheduled_departure_time ?? v.scheduled_arrival_time ?? 0) < (now.getUTCHours() * 3600 + now.getUTCMinutes() * 60);
+			const inst = TRAX.getAugmentedTripInstance(v.instance_id);
+			if (!inst) TRAX.logger.warn(`No trip instance found for instance_id: ${v.instance_id}`);
 			return {
 				...v.toSerializable(),
 				dep_type: "gtfs" as "gtfs",
 				express_string: v.express_string,
 				actual_departure_timestr: actualTime,
 				scheduled_departure_timestr: formatTimestamp(
-					v.scheduled_departure_time || v.scheduled_arrival_time,
+					v.scheduled_departure_time ?? v.scheduled_arrival_time,
 				),
 				last_stop_id:
-					TRAX.getAugmentedTrips(v.trip_id)[0].stopTimes.at(-1)?.actual_parent_station?.stop_id ||
-					TRAX.getAugmentedTrips(v.trip_id)[0].stopTimes.at(-1)?.actual_stop?.stop_id ||
+					inst?.stopTimes?.at(-1)?.actual_parent_station?.stop_id ??
+					inst?.stopTimes?.at(-1)?.actual_stop?.stop_id ??
 					"",
 				departs_in:
 					actualTime && actualTime.match(/^\d{2}:\d{2}/)
@@ -81,29 +82,27 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					actualTime && actualTime.match(/^\d{2}:\d{2}/)
 						? TRAX.utils.time.secTimeDiff(actualTime.slice(0, 5), nowTime)
 						: -1,
-				serviceCapacity: v.passing ? null : isTomorrow ? v.getServiceCapacity(tomorrow) : v.getServiceCapacity(today),
 			};
 		})
 		.sort(
 			(a, b) =>
-				(a.actual_departure_time || a.actual_arrival_time || 0) -
-				(b.actual_departure_time || b.actual_arrival_time || 0),
+				(a.actual_departure_time ?? a.actual_arrival_time ?? 0) -
+				(b.actual_departure_time ?? b.actual_arrival_time ?? 0),
 		);
-
-	let trips: {
-		[trip_id: string]: SerializableAugmentedTrip;
+		
+	let instances: {
+		[trip_id: string]: SerializableAugmentedTripInstance;
 	} = {};
 	for (const departure of departures) {
-		const trip = TRAX.getAugmentedTrips(departure.trip_id)[0];
-		if (trip) {
-			trips[trip.trip_id] = trip.toSerializable();
-		}
+		const inst = TRAX.getAugmentedTripInstance(departure.instance_id);
+		if (inst)
+			instances[inst.instance_id] = inst.toSerializable();
 	}
 
 	let routes: {
 		[route_id: string]: qdf.Route;
 	} = {};
-	for (const trip of Object.values(trips)) {
+	for (const trip of Object.values(instances)) {
 		if (trip.route_id && !routes[trip.route_id]) {
 			const route = TRAX.getRawRoutes(trip.route_id)[0];
 			if (route) routes[trip.route_id] = route;
@@ -143,5 +142,5 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		);
 	}
 
-	return { stations, stop_id, departures: mixed, trips, routes, extraDetails };
+	return { stations, stop_id, departures: mixed, instances, routes, extraDetails };
 };

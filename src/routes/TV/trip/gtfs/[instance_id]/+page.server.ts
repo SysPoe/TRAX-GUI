@@ -23,29 +23,27 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 
-	let { trip_id } = params;
-	let trip = TRAX.getAugmentedTrips(trip_id)[0];
-	if (!trip) throw error(404, `Trip "${trip_id}" not found`);
+	let { instance_id } = params;
+	let inst = TRAX.getAugmentedTripInstance(instance_id);
+	if (!inst) throw error(404, `Trip Instance"${instance_id}" not found`);
 	let stations: { [stop_id: string]: SerializableAugmentedStop } = {};
-	let route = TRAX.getRawRoutes(trip.route_id)[0];
-	let expressString = TRAX.express.findExpressString(trip.expressInfo);
+	let route = TRAX.getRawRoutes(inst.route_id)[0];
+	let expressString = TRAX.express.findExpressString(inst.expressInfo);
 
 	let serviceCapacities: { [stop_id: string]: string | null } = {};
 
-	for (const stopTime of trip.stopTimes) {
+	for (const stopTime of inst.stopTimes) {
 		stations[stopTime.scheduled_stop?.stop_id as any as string] = stopTime.scheduled_stop?.toSerializable() as any;
 		if (stopTime.scheduled_parent_station)
 			stations[stopTime.scheduled_parent_station?.stop_id as any as string] =
 				stopTime.scheduled_parent_station?.toSerializable() as any;
-		if (stopTime.passing) continue;
-		serviceCapacities[stopTime.actual_stop?.stop_id ?? stopTime.scheduled_stop?.stop_id ?? ""] = stopTime.getServiceCapacity(stopTime.scheduled_departure_dates.sort((a, b) => dateDiff(a) - dateDiff(b))[0])
 	}
 
-	let serialized = trip.toSerializable();
+	let serialized = inst.toSerializable();
 
 	const extraDetails = locals.session?.data?.extraDetails ?? false;
 	if (!extraDetails)
 		serialized.stopTimes = serialized.stopTimes.filter((v) => !v.passing);
 
-	return { trip: serialized, stations, route, expressString, extraDetails, serviceCapacities };
+	return { inst: serialized, stations, route, expressString, extraDetails, serviceCapacities, params };
 };

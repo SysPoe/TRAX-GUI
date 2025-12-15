@@ -1,7 +1,7 @@
 import TRAX, { type SerializableAugmentedStop } from "translink-rail-api";
 import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
 import type { PageServerLoad } from "./$types";
-import type * as gtfs from "qdf-gtfs";
+import type * as qdf from "qdf-gtfs";
 import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -53,8 +53,6 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	// Advanced options
 	const dateMode = url.searchParams.get("date-mode") ?? "actual_sch";
-	const rsLeaderBehaviour = url.searchParams.get("rs-leader-behaviour") ?? "include";
-	const multiDateBehaviour = url.searchParams.get("multi-date-behaviour") ?? "original";
 	const extraDetails = url.searchParams.get("extra-details") === "on";
 
 	// Pagination
@@ -67,13 +65,13 @@ export const load: PageServerLoad = async ({ url }) => {
 		trainNumberRegex = new RegExp(`^${trainNumber}$`);
 	}
 
-	let trips = TRAX.getAugmentedTrips().filter((trip) => {
+	let trips = TRAX.getAugmentedTrips().flatMap(v=>v.instances).filter((inst) => {
 		// Station filtering
 		if (
 			startStation.trim() !== "" &&
 			!(
-				trip.stopTimes[0].scheduled_parent_station?.stop_id == startStation ||
-				trip.stopTimes[0].scheduled_stop?.stop_id == startStation
+				inst.stopTimes[0].scheduled_parent_station?.stop_id == startStation ||
+				inst.stopTimes[0].scheduled_stop?.stop_id == startStation
 			)
 		)
 			return false;
@@ -81,15 +79,15 @@ export const load: PageServerLoad = async ({ url }) => {
 		if (
 			endStation.trim() !== "" &&
 			!(
-				trip.stopTimes[trip.stopTimes.length - 1].scheduled_parent_station?.stop_id == endStation ||
-				trip.stopTimes[trip.stopTimes.length - 1].scheduled_stop?.stop_id == endStation
+				inst.stopTimes[inst.stopTimes.length - 1].scheduled_parent_station?.stop_id == endStation ||
+				inst.stopTimes[inst.stopTimes.length - 1].scheduled_stop?.stop_id == endStation
 			)
 		)
 			return false;
 
 		for (const stop of intermediateStations) {
 			if (
-				!trip.stopTimes.some(
+				!inst.stopTimes.some(
 					(st) =>
 						!st.passing &&
 						(st.scheduled_parent_station?.stop_id === stop || st.scheduled_stop?.stop_id === stop),
@@ -99,88 +97,32 @@ export const load: PageServerLoad = async ({ url }) => {
 		}
 
 		// Route filtering
-		if (routePair !== "" && trip.route_id.slice(0, 4) !== routePair)
+		if (routePair !== "" && inst.route_id.slice(0, 4) !== routePair)
 			return (
-				routePairReversible && trip.route_id.slice(0, 4) === routePair.slice(2, 4) + routePair.slice(0, 2)
+				routePairReversible && inst.route_id.slice(0, 4) === routePair.slice(2, 4) + routePair.slice(0, 2)
 			);
-		if (route !== "" && !trip.route_id.slice(0, 4).includes(route)) return false;
-		if (routeStart !== "" && trip.route_id.slice(0, 2) !== routeStart) return false;
-		if (routeEnd !== "" && trip.route_id.slice(2, 4) !== routeEnd) return false;
+		if (route !== "" && !inst.route_id.slice(0, 4).includes(route)) return false;
+		if (routeStart !== "" && inst.route_id.slice(0, 2) !== routeStart) return false;
+		if (routeEnd !== "" && inst.route_id.slice(2, 4) !== routeEnd) return false;
 
 		// Date filtering
 		for (const date of serviceDates) {
 			if (dateMode === "actual_sch") {
-				if (!trip.scheduledTripDates.includes(date)) return false;
+				if (!inst.scheduledTripDates.includes(date)) return false;
 			} else if (dateMode === "actual_rt") {
-				if (!trip.actualTripDates.includes(date)) return false;
-			} else if (dateMode === "GTFS") {
-				if (!trip.scheduledStartServiceDates.includes(date)) return false;
+				if (!inst.actualTripDates.includes(date)) return false;
 			}
 		}
 
-		if (trainNumberType.trim() !== "" && trip.run[0].toLowerCase() !== trainNumberType.toLowerCase()) return false;
-		if (trainNumberDestination.trim() !== "" && trip.run[1].toLowerCase() !== trainNumberDestination.toLowerCase())
+		if (trainNumberType.trim() !== "" && inst.run[0].toLowerCase() !== trainNumberType.toLowerCase()) return false;
+		if (trainNumberDestination.trim() !== "" && inst.run[1].toLowerCase() !== trainNumberDestination.toLowerCase())
 			return false;
-		if (trainNumberRegex && !trainNumberRegex.test(trip.run.trim().toUpperCase())) return false;
-
-		if (rsLeaderBehaviour !== "include") {
-			const isLeader =
-				[...new Set(Object.values(trip.runSeries))].length == 1 &&
-				trip.runSeries[Number.parseInt(Object.keys(trip.runSeries)[0])] === trip.run;
-			if (rsLeaderBehaviour === "only" && !isLeader) return false;
-			if (rsLeaderBehaviour === "exclude" && isLeader) return false;
-		}
+		if (trainNumberRegex && !trainNumberRegex.test(inst.run.trim().toUpperCase())) return false;
 
 		return true;
 	});
 
 	let serializedTrips = trips.map((v) => v.toSerializable());
-
-	if (multiDateBehaviour === "duplicate") {
-		serializedTrips = serializedTrips
-			.map((trip) => {
-				const dates =
-					dateMode === "actual_sch"
-						? trip.scheduledTripDates
-						: dateMode === "actual_rt"
-							? trip.actualTripDates
-							: trip.scheduledStartServiceDates;
-				let expanded = dates.map((v) => ({
-					...trip,
-					actualTripDates: [v],
-					scheduledTripDates: [v],
-					scheduledStartServiceDates: [v],
-				}));
-				expanded = expanded.filter((v) => {
-					for (const date of serviceDates)
-						if (!v.scheduledTripDates.includes(date)) return false;
-					return true;
-				});
-				return expanded;
-			})
-			.flat();
-		trips = trips.map(trip => {
-			const dates =
-				dateMode === "actual_sch"
-					? trip.scheduledTripDates
-					: dateMode === "actual_rt"
-						? trip.actualTripDates
-						: trip.scheduledStartServiceDates;
-			let expanded = dates.map((v) => {
-				const newTrip = { ...trip };
-				newTrip.actualTripDates = [v];
-				newTrip.scheduledTripDates = [v];
-				newTrip.scheduledStartServiceDates = [v];
-				return newTrip;
-			});
-			expanded = expanded.filter((v) => {
-				for (const date of serviceDates)
-					if (!v.scheduledTripDates.includes(date)) return false;
-				return true;
-			});
-			return expanded;
-		}).flat();
-	}
 
 	let results = serializedTrips.length;
 
@@ -193,9 +135,6 @@ export const load: PageServerLoad = async ({ url }) => {
 		} else if (dateMode === "actual_rt") {
 			aServiceDate = a.actualTripDates.sort()[0];
 			bServiceDate = b.actualTripDates.sort()[0];
-		} else if (dateMode === "GTFS") {
-			aServiceDate = a.scheduledStartServiceDates.sort()[0];
-			bServiceDate = b.scheduledStartServiceDates.sort()[0];
 		}
 		if (aServiceDate !== bServiceDate) return aServiceDate.localeCompare(bServiceDate);
 
@@ -248,7 +187,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	}
 
 	let routesToFetch = [...new Set(pagedTrips.map((t) => t.route_id))];
-	let routes: { [route_id: string]: gtfs.Route } = {};
+	let routes: { [route_id: string]: qdf.Route } = {};
 	for (const route_id of routesToFetch) {
 		const route = TRAX.getRawRoutes(route_id)[0];
 		if (route) routes[route_id] = route;

@@ -178,39 +178,31 @@
 
 <div class="results">
 	<hr />
-	{#each data?.trips as trip}
-		{@const departure_time = formatTimestamp(trip.stopTimes[0].scheduled_departure_time)}
-		{@const arrival_time = formatTimestamp(trip.stopTimes.at(-1)?.scheduled_arrival_time)}
-		{@const startStation = data.stations[trip.stopTimes[0].scheduled_stop ?? ""]}
-		{@const endStation = data.stations[trip.stopTimes.at(-1)?.scheduled_stop ?? ""]}
-		{@const startParent = trip.stopTimes[0].scheduled_parent_station
-			? data.stations[trip.stopTimes[0].scheduled_parent_station]
+	{#each data?.trips as inst}
+		{@const departure_time = formatTimestamp(inst.stopTimes[0].scheduled_departure_time)}
+		{@const arrival_time = formatTimestamp(inst.stopTimes.at(-1)?.scheduled_arrival_time)}
+		{@const startStation = data.stations[inst.stopTimes[0].scheduled_stop ?? ""]}
+		{@const endStation = data.stations[inst.stopTimes.at(-1)?.scheduled_stop ?? ""]}
+		{@const startParent = inst.stopTimes[0].scheduled_parent_station
+			? data.stations[inst.stopTimes[0].scheduled_parent_station]
 			: null}
-		{@const endParent = trip.stopTimes.at(-1)?.scheduled_parent_station
-			? data.stations[trip.stopTimes.at(-1)?.scheduled_parent_station ?? ""]
+		{@const endParent = inst.stopTimes.at(-1)?.scheduled_parent_station
+			? data.stations[inst.stopTimes.at(-1)?.scheduled_parent_station ?? ""]
 			: null}
 		{@const date_offset =
-			(trip.stopTimes.at(-1)?.scheduled_arrival_date_offset ?? 0) -
-			trip.stopTimes[0].scheduled_departure_date_offset}
-		{@const route = data.routes[trip.route_id]}
-		{@const serviceDates = contractSD(trip.scheduledStartServiceDates)}
+			(inst.stopTimes.at(-1)?.scheduled_arrival_date_offset ?? 0) -
+			inst.stopTimes[0].scheduled_departure_date_offset}
+		{@const route = data.routes[inst.route_id]}
 
 		<div class="result-wrapper">
 			<a
 				class="result"
-				href={`/TV/trip/gtfs/${trip.trip_id}`}
-				onclick={(event) => handleTripNavigation(event, trip.trip_id)}
+				href={`/TV/trip/gtfs/${inst.instance_id}`}
+				onclick={(event) => handleTripNavigation(event, inst.instance_id)}
 			>
 				<span class="headline">
-					{trip.run}
+					{inst.run}
 					<span class="de-emphasize">
-						{#if data.extraDetails}
-							{#if [...new Set(Object.values(trip.runSeries))].length == 1}
-								({trip.runSeries[Number.parseInt(Object.keys(trip.runSeries)[0])]})
-							{:else}
-								(<i>VARS</i>)
-							{/if}
-						{/if}
 						{route?.route_short_name}
 					</span>
 					&mdash;
@@ -221,36 +213,29 @@
 					<span class="location">
 						{startParent?.stop_name?.replace(" station", "")?.trim() ??
 							startStation?.stop_name?.replace(" station", "").trim() ?? "Unknown"}
-						{trip.stopTimes[0]?.scheduled_platform_code}
+						{inst.stopTimes[0]?.scheduled_platform_code}
 					</span>
 					<span class="bigarrow">&rarr;</span>
 					{arrival_time}
 					<span class="location">
 						{endParent?.stop_name?.replace(" station", "").trim() ??
 							endStation?.stop_name?.replace(" station", "").trim() ?? "Unknown"}
-						{trip.stopTimes.at(-1)?.scheduled_platform_code}
+						{inst.stopTimes.at(-1)?.scheduled_platform_code}
 					</span>
 					{#if date_offset > 0}
 						(+{date_offset} {date_offset == 1 ? "day" : "days"})
 					{/if}
 					<br />
-					{data.expressStrings[trip.trip_id]} <br />
+					{data.expressStrings[inst.trip_id]} <br />
 
-					{#if serviceDates.length == 1}
-						Service date:
-					{:else}
-						Service dates:
-					{/if}
-					{#each serviceDates as date, i (date)}
-						{date}{i < serviceDates.length - 1 ? ", " : ""}
-					{/each}
+					Service Date: {inst.serviceDate}
 
 					{#if data.extraDetails}
 						<br />
-						{types[trip.run[0]] ?? "Unknown train type"}<br />
+						{types[inst.run[0]] ?? "Unknown train type"}<br />
 
 						{#each data.filters.intermediateStations as st}
-							{@const stoptime = trip.stopTimes.find(
+							{@const stoptime = inst.stopTimes.find(
 								data.filters.useRT
 									? (sti) => sti.actual_stop === st || sti.actual_parent_station === st
 									: (sti) => sti.scheduled_stop === st || sti.scheduled_parent_station === st,
@@ -278,8 +263,8 @@
 				<a
 					class="trn-button"
 					title="Consult TRNGuru"
-					aria-label={`Consult TRNGuru for train ${trip.run}`}
-					href={getTrainGuruUrl(trip.run)}
+					aria-label={`Consult TRNGuru for train ${inst.run}`}
+					href={getTrainGuruUrl(inst.run)}
 					target="_blank"
 					rel="noopener noreferrer"
 				>

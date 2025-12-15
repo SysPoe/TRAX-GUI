@@ -18,8 +18,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	let dates = [
 		...new Set(
 			TRAX.getAugmentedTrips()
-				.map((v) => v.scheduledTripDates)
-				.flat(),
+				.flatMap((v) => v.instances.flatMap(q => q.scheduledTripDates))
 		),
 	]
 		.sort()
@@ -35,6 +34,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 			routes[v.route_short_name?.slice(2)] = v.route_long_name?.split("-")[1]?.trim();
 		if (v.route_short_name && v.route_long_name) routePairs[v.route_short_name] = v.route_long_name;
 	}
-	
+
 	return { stations, dates, routes, routePairs, extraDetails: locals.session?.data?.extraDetails ?? false };
 };

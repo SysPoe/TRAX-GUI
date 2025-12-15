@@ -308,31 +308,6 @@
 							<select name="date-mode" id="date-mod">
 								<option value="actual_sch">Actual SCH (default)</option>
 								<option value="actual_rt">Actual RT</option>
-								<option value="GTFS">GTFS</option>
-							</select>
-						</div>
-						<div class="input-group">
-							<label for="rs-leader-behaviour">RS Confirmed Leaders</label>
-							<select
-								name="rs-leader-behaviour"
-								id="rs-leader-behaviour"
-							>
-								<option value="include">Include (default)</option>
-								<option value="exclude">Exclude</option>
-								<option value="only">Only</option>
-							</select>
-						</div>
-					</div>
-
-					<div class="grid-2">
-						<div class="input-group">
-							<label for="multi-date-behaviour">Multi-Date Behaviour</label>
-							<select
-								name="multi-date-behaviour"
-								id="multi-date-behaviour"
-							>
-								<option value="original">Original (default)</option>
-								<option value="duplicate">Duplicate</option>
 							</select>
 						</div>
 						<div class="input-group checkbox-group">

@@ -64,7 +64,9 @@
 		[
 			...new Set(
 				qrStopUpdates.map((u) =>
-					u.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "SCHEDULED",
+					u.schedule_relationship !== null
+						? qdf.StopTimeScheduleRelationship[u.schedule_relationship]
+						: "SCHEDULED",
 				),
 			),
 		].sort(),
@@ -91,7 +93,9 @@
 		qrStopUpdates.filter(
 			(u) =>
 				selectedSTURels.has(
-					u.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[u.schedule_relationship] : "SCHEDULED",
+					u.schedule_relationship !== null
+						? qdf.StopTimeScheduleRelationship[u.schedule_relationship]
+						: "SCHEDULED",
 				) && matchesSearch(u),
 		),
 	);
@@ -121,6 +125,8 @@
 			</span>
 		</summary>
 
+		<button onclick={() => console.log(qrTripUpdates)}>LogRaw</button>
+
 		<div class="filters">
 			<span class="filter-label">Relationship:</span>
 			{#each TURels as rel}
@@ -136,7 +142,8 @@
 				{update.update_id.toString()} <br />
 				<b>Is Deleted:</b>
 				{update.is_deleted.toString()} <br />
-				<b>Trip ID:</b> <a href="/TV/trip/gtfs/{update.trip.trip_id}">{update.trip.trip_id}</a> <br />
+				<b>Trip ID:</b>
+				<a href="/TV/trip/gtfs/{update.trip.trip_id}/{update.trip.start_date}">{update.trip.trip_id}</a> <br />
 				<b>Trip Route ID:</b>
 				{update.trip.route_id} <br />
 				<b>Trip Direction ID:</b>
@@ -173,6 +180,8 @@
 			</span>
 		</summary>
 
+		<button onclick={() => console.log(qrStopUpdates)}>LogRaw</button>
+
 		<div class="filters">
 			<span class="filter-label">Relationship:</span>
 			{#each STURels as rel}
@@ -188,7 +197,7 @@
 				{stu.stop_sequence} <br />
 				<b>Stop Id:</b>
 				{stu.stop_id} <br />
-				<b>Trip Id:</b> <a href="/TV/trip/gtfs/{stu.trip_id}">{stu.trip_id}</a> <br />
+				<b>Trip Id:</b> <a href="/TV/trip/gtfs/{stu.trip_id}/{stu.start_date}">{stu.trip_id}</a> <br />
 				<b>Arrival Delay:</b>
 				{stu.arrival_delay} <br />
 				<b>Arrival Time:</b>
@@ -199,7 +208,12 @@
 				{stu.departure_time ? new Date(stu.departure_time * 1000).toLocaleString("en-au") : "NOT_PROVIDED"}
 				<br />
 				<b>Schedule Relationship:</b>
-				{stu.schedule_relationship !== null ? qdf.StopTimeScheduleRelationship[stu.schedule_relationship] : "SCHEDULED"}
+				{stu.schedule_relationship !== null
+					? qdf.StopTimeScheduleRelationship[stu.schedule_relationship]
+					: "SCHEDULED"}
+				<br />
+				<b>Start Date:</b>
+				{stu.start_date}
 				<br />
 			</div>
 			<hr />
@@ -210,6 +224,8 @@
 		<summary>
 			<span style="font-size: 1.5em; font-weight: bold;"> Vehicle Positions ({vehiclePositions.length})</span>
 		</summary>
+
+		<button onclick={() => console.log(vehiclePositions)}>LogRaw</button>
 
 		{#each vehiclePositions as vp}
 			<div class="trip-update">

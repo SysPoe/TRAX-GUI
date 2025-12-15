@@ -17,7 +17,6 @@
 				actual_departure_time: string;
 				departs_in: string;
 				departsInSecs: number;
-				serviceCapacity: string | null;
 		  })
 		| UpcomingQRTravelDeparture;
 
@@ -145,14 +144,14 @@
 <div class="departures">
 	{#each departures as dep}
 		{#if dep.dep_type === "gtfs"}
-			{@const trip = data.trips[dep.trip_id]}
-			{@const route = routes[trip.route_id || ""]}
+			{@const instance = data.instances[dep.instance_id]}
+			{@const route = routes[instance.route_id || ""]}
 			{@const express = dep.express_string.toLowerCase() != "all stops"}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<a
 				class="departure gtfs {(dep as SerializableAugmentedStopTime).realtime &&
-				(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+				(instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
 					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
 						qdf.StopTimeScheduleRelationship.SKIPPED)
 					? 'canceled'
@@ -161,7 +160,7 @@
 						: dep.passing
 							? 'passing'
 							: ''}"
-				href={`/TV/trip/gtfs/${trip.trip_id}#stoptimes`}
+				href={`/TV/trip/gtfs/${dep.instance_id}#stoptimes`}
 			>
 				<span class="platform" style="background-color: #{route.route_color}">
 					{dep.actual_platform_code || "?"}
@@ -169,16 +168,16 @@
 				<span class="smalltext">
 					<span class="time">Sch. {qdf.formatTimestamp(dep.scheduled_departure_time)}</span>
 					{#if data.extraDetails}
-						<span class="run">{trip.run}</span>
+						<span class="run">{instance.run}</span>
 					{/if}
 					service to
 					<br /><span class="headsign">
-						{trip.trip_headsign?.replace(/station$/, "").trim()}
+						{instance.trip_headsign?.replace(/station$/, "").trim()}
 					</span>
 				</span>
 				<span
 					class="service-type {(dep as SerializableAugmentedStopTime).realtime &&
-					(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+					(instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
 						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
 							qdf.StopTimeScheduleRelationship.SKIPPED)
 						? 'canceled'
@@ -191,7 +190,7 @@
 									: 'all-stops'}"
 				>
 					{(dep as SerializableAugmentedStopTime).realtime &&
-					trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
+					instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
 						? "C"
 						: (dep as SerializableAugmentedStopTime).realtime &&
 							  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
@@ -212,7 +211,7 @@
 					<div class="departs-sub">
 						<span
 							class="delay {(dep as SerializableAugmentedStopTime).realtime &&
-							(trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
+							(instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
 								(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
 									qdf.StopTimeScheduleRelationship.SKIPPED)
 								? 'canceled'
@@ -221,7 +220,7 @@
 									: 'scheduled'}"
 						>
 							{(dep as SerializableAugmentedStopTime).realtime &&
-							trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
+							instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
 								? "canceled"
 								: (dep as SerializableAugmentedStopTime).realtime &&
 									  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
@@ -231,17 +230,17 @@
 										? dep.realtime_info?.delay_string || "scheduled"
 										: "scheduled"}
 						</span>
-						{#if dep.serviceCapacity != null}
+						{#if dep.service_capacity != null}
 							<span class="serviceCapacity">
-								{#if dep.serviceCapacity.toLowerCase().trim() === "space available"}
+								{#if dep.service_capacity.toLowerCase().trim() === "space available"}
 									<UserIcon fill="black" />
 									<UserIcon fill="#DDD" />
 									<UserIcon fill="#DDD" />
-								{:else if dep.serviceCapacity.toLowerCase().trim() === "some space available"}
+								{:else if dep.service_capacity.toLowerCase().trim() === "some space available"}
 									<UserIcon fill="black" />
 									<UserIcon fill="black" />
 									<UserIcon fill="#DDD" />
-								{:else if dep.serviceCapacity.toLowerCase().trim() === "limited space available"}
+								{:else if dep.service_capacity.toLowerCase().trim() === "limited space available"}
 									<UserIcon fill="black" />
 									<UserIcon fill="black" />
 									<UserIcon fill="black" />

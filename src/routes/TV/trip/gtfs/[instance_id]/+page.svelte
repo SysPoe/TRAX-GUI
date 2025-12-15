@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import type { SerializableAugmentedStop, SerializableAugmentedTrip } from "translink-rail-api";
 	import * as qdf from "qdf-gtfs/types";
 	import type { PageProps } from "./$types";
 	import "$lib/styles/common.css";
@@ -10,16 +9,11 @@
 	let { data }: PageProps = $props();
 	let stations = $derived(data.stations);
 	let route = $derived(data.route);
-	let trip = $derived(data.trip);
+	let inst = $derived(data.inst);
 	let serviceCapacities = $derived(data.serviceCapacities);
-	const date = $derived(data.params.date);
-	const series = $derived(data.trip.runSeries[date] ?? null);
 
 	// svelte-ignore state_referenced_locally
-	let useRealtime = $state(trip.rt_start_date === date);
-	$effect(() => {
-		useRealtime = trip.rt_start_date === date;
-	});
+	let useRealtime = $state(true);
 
 	// Borrowed from TRAX
 	function formatTimestamp(ts?: number | null, seconds: boolean = false): string {
@@ -37,9 +31,9 @@
 
 <svelte:head>
 	<title>
-		{formatTimestamp(trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time)}
-		{trip.run}
-		{trip.trip_headsign?.replace("station", "").trim() || "Unknown"} service - TRAX TripViewer
+		{formatTimestamp(inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time)}
+		{inst.run}
+		{inst.trip_headsign.replace("station", "").trim() || "Unknown"} service - TRAX TripViewer
 	</title>
 	<style>
 		:root {
@@ -53,38 +47,22 @@
 	<h1>TRAX <i>TripViewer</i></h1>
 	{#if data.extraDetails}
 		<h2>
-			{trip.run} - {trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+			{inst.run} - {inst.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
 		</h2>
 		<p>
 			Departing: {formatTimestamp(
-				trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time,
-			)} | Trip ID: {trip.trip_id}
+				inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time,
+			)} | Trip ID: {inst.trip_id}
 		</p>
 		{#if data.admin}
 			<button onclick={() => console.log(data)}>LogRaw</button>
 		{/if}
 	{:else}
 		<h2>
-			{formatTimestamp(trip.stopTimes[0].scheduled_departure_time || trip.stopTimes[0].scheduled_arrival_time)}
-			{trip.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+			{formatTimestamp(inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time)}
+			{inst.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
 		</h2>
 	{/if}
-	<p>
-		<i>TripInstance:</i>
-		<select
-			name="date"
-			id="date"
-			onchange={(e) => {
-				goto(`/TV/trip/gtfs/${trip.trip_id}/${e.currentTarget.value}`);
-			}}
-		>
-			{#each trip.scheduledStartServiceDates as serviceDate}
-				<option value={serviceDate} selected={serviceDate === date}>
-					{serviceDate}
-				</option>
-			{/each}
-		</select>
-	</p>
 </div>
 
 <hr />
@@ -98,27 +76,21 @@
 				<span class="info-value">{data.expressString}</span>
 			</div>
 			<div class="info-item">
-				<span class="info-label">Service Dates:</span>
+				<span class="info-label">Service Date</span>
 				<span class="info-value">
-					{#each trip.scheduledStartServiceDates as v}
-						{#if v === date}
-							<b>{v}</b>
-						{:else}
-							<a href="/TV/trip/gtfs/{trip.trip_id}/{v}">{v}</a>
-						{/if}
-					{/each}
+					{inst.serviceDate}
 				</span>
 			</div>
 			{#if data.extraDetails}
 				<div class="info-item">
 					<span class="info-label">TRN:</span>
 					<span class="info-value">
-						{trip.run}
+						{inst.run}
 						<a
 							class="trnguru-link-inline"
 							title="Consult TRNGuru"
-							aria-label={`Consult TRNGuru for train ${trip.run}`}
-							href={getTrainGuruUrl(trip.run)}
+							aria-label={`Consult TRNGuru for train ${inst.run}`}
+							href={getTrainGuruUrl(inst.run)}
 							target="_blank"
 							rel="noopener noreferrer"
 						>
@@ -129,55 +101,38 @@
 				<div class="info-item">
 					<span class="info-label">Headsign:</span>
 					<span class="info-value">
-						{@html trip.trip_headsign || "<b>null</b>"}
+						{@html inst.trip_headsign || "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
 					<span class="info-label">Trip Short Name:</span>
 					<span class="info-value">
-						{@html trip.trip_short_name || "<b>null</b>"}
+						{@html inst.trip_short_name || "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
 					<span class="info-label">Direction ID:</span>
 					<span class="info-value">
-						{@html trip.direction_id || "<b>null</b>"}
+						{@html inst.direction_id || "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
 					<span class="info-label">Block ID:</span>
 					<span class="info-value">
-						{@html trip.block_id || "<b>null</b>"}
+						{@html inst.block_id || "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
 					<span class="info-label">Shape ID:</span>
 					<span class="info-value">
-						{@html trip.shape_id || "<b>null</b>"}
+						{@html inst.shape_id || "<b>null</b>"}
 					</span>
 				</div>
 
 				<div class="info-item">
 					<span class="info-label">Run Series:</span>
 					<span class="info-value">
-						{#if series !== null && series !== undefined}
-							<a
-								href="/TV/run-series/{date}/{series}"
-								onclick={(ev) => {
-									if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
-										// Open in new tab if modifier key is held
-										ev.preventDefault();
-										window.open(`/TV/run-series/${date}/${series}`, "_blank");
-										return;
-									}
-									goto(`/TV/run-series/${date}/${series}`);
-								}}
-							>
-								{series}
-							</a>
-						{:else}
-							<b>null</b>
-						{/if}
+						Not available at the moment (working on it!)
 					</span>
 				</div>
 			{/if}
@@ -209,17 +164,17 @@
 			{#if data.extraDetails}
 				<div class="stoptimes-controls">
 					<label>
-						<input type="checkbox" bind:checked={useRealtime} disabled={trip.rt_start_date !== date} />
-						Show Realtime Data {#if trip.rt_start_date !== date}(Unavailable for this date){/if}
+						<input type="checkbox" bind:checked={useRealtime} />
+						Show Realtime Data
 					</label>
 				</div>
 			{/if}
 			<div class="tv-stoptimes">
-				{#each trip.stopTimes as st}
+				{#each inst.stopTimes as st}
 					<a
 						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
 						st.realtime &&
-						trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
+						inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 							? 'cancelled'
 							: ''} {useRealtime &&
 						st.realtime &&
@@ -261,7 +216,7 @@
 							<span
 								class="tv-delay {useRealtime &&
 								st.realtime &&
-								trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
+								inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 									? 'cancelled'
 									: useRealtime &&
 										  st.realtime &&
@@ -276,7 +231,7 @@
 							>
 								({useRealtime &&
 								st.realtime &&
-								trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
+								inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 									? "cancelled"
 									: useRealtime &&
 										  st.realtime &&
@@ -289,8 +244,8 @@
 												? st.realtime_info?.delay_string
 												: "scheduled"})
 							</span>
-							{#if serviceCapacities[st.actual_stop ?? st.scheduled_stop ?? ""] != null}
-								{@const sc = serviceCapacities[st.actual_stop ?? st.scheduled_stop ?? ""] ?? ""}
+							{#if st.service_capacity != null}
+								{@const sc = st.service_capacity ?? ""}
 								<span class="serviceCapacity">
 									{#if sc.toLowerCase().trim() === "space available"}
 										<UserIcon fill="black" />
@@ -347,7 +302,7 @@
 						</span>
 						{#if st.passing}
 							<span class="tv-service-type passing">P</span>
-						{:else if useRealtime && st.realtime && trip.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED}
+						{:else if useRealtime && st.realtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED}
 							<span class="tv-service-type cancelled">C</span>
 						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED}
 							<span class="tv-service-type cancelled">S</span>
