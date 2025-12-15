@@ -172,11 +172,9 @@
 				{#each inst.stopTimes as st}
 					<a
 						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
-						st.realtime &&
 						inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 							? 'cancelled'
 							: ''} {useRealtime &&
-						st.realtime &&
 						st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 							? 'cancelled'
 							: ''}"
@@ -214,11 +212,9 @@
 							</span>
 							<span
 								class="tv-delay {useRealtime &&
-								st.realtime &&
 								inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 									? 'cancelled'
 									: useRealtime &&
-										  st.realtime &&
 										  st.realtime_info?.schedule_relationship ===
 												qdf.StopTimeScheduleRelationship.SKIPPED
 										? 'cancelled'
@@ -228,12 +224,9 @@
 												? (st.realtime_info?.delay_class ?? 'scheduled')
 												: 'scheduled'}"
 							>
-								({useRealtime &&
-								st.realtime &&
-								inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
+								({useRealtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 									? "cancelled"
 									: useRealtime &&
-										  st.realtime &&
 										  st.realtime_info?.schedule_relationship ===
 												qdf.StopTimeScheduleRelationship.SKIPPED
 										? "skipped"
@@ -301,9 +294,9 @@
 						</span>
 						{#if st.passing}
 							<span class="tv-service-type passing">P</span>
-						{:else if useRealtime && st.realtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED}
+						{:else if useRealtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED}
 							<span class="tv-service-type cancelled">C</span>
-						{:else if useRealtime && st.realtime && st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED}
+						{:else if useRealtime && st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED}
 							<span class="tv-service-type cancelled">S</span>
 						{/if}
 					</a>

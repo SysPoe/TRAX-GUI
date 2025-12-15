@@ -150,10 +150,8 @@
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<a
-				class="departure gtfs {(dep as SerializableAugmentedStopTime).realtime &&
-				(instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
-					(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-						qdf.StopTimeScheduleRelationship.SKIPPED)
+				class="departure gtfs {instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED ||
+				dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 					? 'canceled'
 					: dep.last_stop_id == params.stop_id.toLowerCase()
 						? 'term'
@@ -176,10 +174,8 @@
 					</span>
 				</span>
 				<span
-					class="service-type {(dep as SerializableAugmentedStopTime).realtime &&
-					(instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
-						(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-							qdf.StopTimeScheduleRelationship.SKIPPED)
+					class="service-type {instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED ||
+					dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 						? 'canceled'
 						: dep.last_stop_id == params.stop_id.toLowerCase()
 							? 'term'
@@ -189,12 +185,9 @@
 									? 'express'
 									: 'all-stops'}"
 				>
-					{(dep as SerializableAugmentedStopTime).realtime &&
-					instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
+					{instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 						? "C"
-						: (dep as SerializableAugmentedStopTime).realtime &&
-							  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-									qdf.StopTimeScheduleRelationship.SKIPPED
+						: dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 							? "S"
 							: dep.last_stop_id == params.stop_id.toLowerCase()
 								? "T"
@@ -206,29 +199,23 @@
 				</span>
 				<div class="time-container">
 					<span class="departs_in">
-						{dep.departs_in.replace(/^0h /, "").replace(/(?<=h) 0m/, "").replace(/^0m$/, "now")}
+						{dep.departs_in
+							.replace(/^0h /, "")
+							.replace(/(?<=h) 0m/, "")
+							.replace(/^0m$/, "now")}
 					</span>
 					<div class="departs-sub">
 						<span
-							class="delay {(dep as SerializableAugmentedStopTime).realtime &&
-							(instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED ||
-								(dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-									qdf.StopTimeScheduleRelationship.SKIPPED)
+							class="delay {instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED ||
+							dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 								? 'canceled'
-								: dep.realtime
-									? dep.realtime_info?.delay_class || 'scheduled'
-									: 'scheduled'}"
+								: (dep.realtime_info?.delay_class ?? 'scheduled')}"
 						>
-							{(dep as SerializableAugmentedStopTime).realtime &&
-							instance.scheduleRelationship === qdf.TripScheduleRelationship.CANCELED
+							{instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 								? "canceled"
-								: (dep as SerializableAugmentedStopTime).realtime &&
-									  (dep as SerializableAugmentedStopTime).realtime_info?.schedule_relationship ===
-											qdf.StopTimeScheduleRelationship.SKIPPED
+								: dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 									? "skipped"
-									: dep.realtime
-										? dep.realtime_info?.delay_string || "scheduled"
-										: "scheduled"}
+									: (dep.realtime_info?.delay_string ?? "scheduled")}
 						</span>
 						{#if dep.service_capacity != null}
 							<span class="serviceCapacity">
