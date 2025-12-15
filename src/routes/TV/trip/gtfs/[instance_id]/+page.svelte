@@ -52,6 +52,9 @@
 			Departing: {formatTimestamp(
 				inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time,
 			)} | Trip ID: {inst.trip_id}
+			{#if inst.schedule_relationship == qdf.TripScheduleRelationship.CANCELED}
+				<span class="delay canceled">(canceled)</span>
+			{/if}
 		</p>
 		{#if data.admin}
 			<button onclick={() => console.log(data)}>LogRaw</button>
@@ -61,6 +64,9 @@
 			{inst.serviceDate.replace(/(?<=^.{4})|(?<=^.{6})/g, "-")}
 			{formatTimestamp(inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time)}
 			{inst.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+			{#if inst.schedule_relationship == qdf.TripScheduleRelationship.CANCELED}
+				<span class="delay canceled">(canceled)</span>
+			{/if}
 		</h2>
 	{/if}
 </div>
@@ -173,10 +179,10 @@
 					<a
 						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
 						inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
-							? 'cancelled'
+							? 'canceled'
 							: ''} {useRealtime &&
 						st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
-							? 'cancelled'
+							? 'canceled'
 							: ''}"
 						href={`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`}
 						onclick={(ev) => {
@@ -213,11 +219,11 @@
 							<span
 								class="tv-delay {useRealtime &&
 								inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
-									? 'cancelled'
+									? 'canceled'
 									: useRealtime &&
 										  st.realtime_info?.schedule_relationship ===
 												qdf.StopTimeScheduleRelationship.SKIPPED
-										? 'cancelled'
+										? 'canceled'
 										: st.passing
 											? 'estimated'
 											: useRealtime && st.realtime
@@ -225,7 +231,7 @@
 												: 'scheduled'}"
 							>
 								({useRealtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
-									? "cancelled"
+									? "canceled"
 									: useRealtime &&
 										  st.realtime_info?.schedule_relationship ===
 												qdf.StopTimeScheduleRelationship.SKIPPED
@@ -295,9 +301,9 @@
 						{#if st.passing}
 							<span class="tv-service-type passing">P</span>
 						{:else if useRealtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED}
-							<span class="tv-service-type cancelled">C</span>
+							<span class="tv-service-type canceled">C</span>
 						{:else if useRealtime && st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED}
-							<span class="tv-service-type cancelled">S</span>
+							<span class="tv-service-type canceled">S</span>
 						{/if}
 					</a>
 					<hr />

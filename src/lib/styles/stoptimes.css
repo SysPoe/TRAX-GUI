@@ -31,12 +31,12 @@ a.tv-stop-time:hover {
 	box-shadow: 0 0 1rem #c5d5f0;
 }
 
-a.tv-stop-time.cancelled:hover {
+a.tv-stop-time.canceled:hover {
 	background-color: #fceaea;
 	box-shadow: 0 0 1rem #d6b3b3;
 }
 
-.tv-stop-time.cancelled {
+.tv-stop-time.canceled {
 	background-color: #fceaea;
 }
 
@@ -44,11 +44,11 @@ a.tv-stop-time.cancelled:hover {
 	background-color: #ccc;
 }
 
-.tv-stop-time.cancelled {
+.tv-stop-time.canceled {
 	background-color: #c48989;
 }
 
-a.tv-stop-time.cancelled:hover {
+a.tv-stop-time.canceled:hover {
 	background-color: #c48989;
 	box-shadow: 0 0 1rem #8c4141;
 }
@@ -102,12 +102,12 @@ a.tv-stop-time.cancelled:hover {
 	color: white;
 }
 
-.tv-service-type.cancelled {
+.tv-service-type.canceled {
 	background-color: #c62828;
 	color: white;
 }
 
-.delay.cancelled,.tv-delay.cancelled {
+.delay.canceled,.tv-delay.canceled {
 	color: #fff;
 	background-color: #b22222;
 	padding: 0 0.3em;
