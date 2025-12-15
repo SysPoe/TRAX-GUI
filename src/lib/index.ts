@@ -111,7 +111,7 @@ export function getUpcomingQRTravelDepartures(
 							? stop?.actualArrival === "0001-01-01T00:00:00" || !stop?.actualArrival
 								? stop?.estimatedPassingTime
 								: stop?.actualArrival
-							: stop?.actualDeparture) || "0001-01-01T00:00:00",
+							: stop?.actualDeparture) + "+10:00" || "0001-01-01T00:00:00+10:00",
 					).getTime() - Date.now(),
 				) / 1000;
 			departsInSecs = Math.round(departsInSecs / 60) * 60;
