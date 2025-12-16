@@ -26,6 +26,11 @@
 	function getTrainGuruUrl(run: string) {
 		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
 	}
+
+	function getStopId(stop?: { stop_id?: string } | string | null): string {
+		if (!stop) return "";
+		return typeof stop === "string" ? stop : stop.stop_id ?? "";
+	}
 </script>
 
 <svelte:head>
@@ -176,6 +181,7 @@
 			{/if}
 			<div class="tv-stoptimes">
 				{#each inst.stopTimes as st}
+					{@const stopId = getStopId(st.scheduled_parent_station) || getStopId(st.scheduled_stop)}
 					<a
 						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
 						inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
@@ -184,15 +190,15 @@
 						st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 							? 'canceled'
 							: ''}"
-						href={`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`}
+						href={`/DB/gtfs/${stopId}`}
 						onclick={(ev) => {
 							if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
 								// Open in new tab if modifier key is held
 								ev.preventDefault();
-								window.open(`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`, "_blank");
+								window.open(`/DB/gtfs/${stopId}`, "_blank");
 								return;
 							}
-							goto(`/DB/gtfs/${st.scheduled_parent_station || st.scheduled_stop}`);
+							goto(`/DB/gtfs/${stopId}`);
 						}}
 					>
 						<span class="tv-platform" style="background-color: #{route.route_color ?? '000000'}">
@@ -289,8 +295,8 @@
 												: ""
 										: ""}
 								{(
-									stations[st.scheduled_parent_station || ""]?.stop_name ||
-									stations[st.scheduled_stop || ""]?.stop_name ||
+									stations[getStopId(st.scheduled_parent_station)]?.stop_name ||
+									stations[getStopId(st.scheduled_stop)]?.stop_name ||
 									"Unknown"
 								)
 									.replace(/station/i, "")

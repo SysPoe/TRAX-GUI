@@ -12,7 +12,9 @@ declare module "svelte-kit-sessions" {
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			session: Session;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}

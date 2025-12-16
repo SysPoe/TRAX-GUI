@@ -1,9 +1,14 @@
 <script lang="ts">
     import type { PageData } from './$types';
 
-    let { data }: { data: PageData } = $props();
-    let extraDetails = $state(data.user?.extraDetails ?? false);
-    let status = $state(data.status);
+    const props = $props<{ data: PageData }>();
+    const data: PageData = $derived(props.data);
+    let extraDetails = $state(false);
+    const status = $derived(data.status);
+
+    $effect(() => {
+        extraDetails = data.user?.extraDetails ?? false;
+    });
 
 	async function toggleExtraDetails() {
 		let res = await fetch("/api/toggleextradetails");

@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 
 	let stations = TRAX.getStations()
-		.map((v) => v.toSerializable())
+		.slice()
 		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
 	let today = Number.parseInt(new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", ""));
 	let dates = [

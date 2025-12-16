@@ -58,7 +58,7 @@ export const load: PageServerLoad = async ({ url }) => {
 				data = TRAX.getRawTrips();
 				break;
 			case "augmentedTrips":
-				data = TRAX.getAugmentedTrips().map(v => v.toSerializable());
+				data = TRAX.getAugmentedTrips();
 				break;
 			case "stops":
 				data = TRAX.getRawStops();

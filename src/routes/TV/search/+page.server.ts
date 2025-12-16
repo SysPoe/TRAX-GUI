@@ -1,4 +1,4 @@
-import TRAX, { type SerializableAugmentedStop } from "translink-rail-api";
+import TRAX, { type AugmentedStop } from "translink-rail-api";
 import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
 import type { PageServerLoad } from "./$types";
 import type * as qdf from "qdf-gtfs";
@@ -65,7 +65,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		trainNumberRegex = new RegExp(`^${trainNumber}$`);
 	}
 
-	let trips = TRAX.getAugmentedTrips().flatMap(v=>v.instances).filter((inst) => {
+	let trips = TRAX.getAugmentedTrips().flatMap((v) => v.instances).filter((inst) => {
 		// Station filtering
 		if (
 			startStation.trim() !== "" &&
@@ -122,11 +122,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		return true;
 	});
 
-	let serializedTrips = trips.map((v) => v.toSerializable());
+	let results = trips.length;
 
-	let results = serializedTrips.length;
-
-	serializedTrips = serializedTrips.sort((a, b) => {
+	const sortedTrips = [...trips].sort((a, b) => {
 		let aServiceDate = "0",
 			bServiceDate = "0";
 		if (dateMode === "actual_sch") {
@@ -148,10 +146,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		return 0;
 	});
 
-	const totalPages = Math.ceil(serializedTrips.length / perPage);
-	const pagedTrips = serializedTrips.slice((page - 1) * perPage, page * perPage);
-	const unserializedPagedTrips = trips.slice((page - 1) * perPage, page * perPage);
-	let concatenated = serializedTrips.length > perPage;
+	const totalPages = Math.ceil(sortedTrips.length / perPage);
+	const pagedTrips = sortedTrips.slice((page - 1) * perPage, page * perPage);
+	let concatenated = sortedTrips.length > perPage;
 
 	const originalParams: Record<string, string[]> = {};
 	for (const [key, value] of url.searchParams.entries()) {
@@ -161,24 +158,20 @@ export const load: PageServerLoad = async ({ url }) => {
 		}
 	}
 
-	let stations: { [key: string]: SerializableAugmentedStop } = {};
-	for (const trip of unserializedPagedTrips) {
+	let stations: Record<string, AugmentedStop> = {};
+	for (const trip of pagedTrips) {
 		for (const stopTime of trip.stopTimes) {
 			if (stopTime.scheduled_stop)
-				stations[stopTime.scheduled_stop.stop_id] = stopTime.scheduled_stop.toSerializable();
+				stations[stopTime.scheduled_stop.stop_id] = stopTime.scheduled_stop as AugmentedStop;
 			if (stopTime.scheduled_parent_station)
-				stations[stopTime.scheduled_parent_station.stop_id] =
-					stopTime.scheduled_parent_station.toSerializable();
-			if (stopTime.actual_stop)
-				stations[stopTime.actual_stop.stop_id] = stopTime.actual_stop.toSerializable();
+				stations[stopTime.scheduled_parent_station.stop_id] = stopTime.scheduled_parent_station as AugmentedStop;
+			if (stopTime.actual_stop) stations[stopTime.actual_stop.stop_id] = stopTime.actual_stop as AugmentedStop;
 			if (stopTime.actual_parent_station)
-				stations[stopTime.actual_parent_station.stop_id] =
-					stopTime.actual_parent_station.toSerializable();
+				stations[stopTime.actual_parent_station.stop_id] = stopTime.actual_parent_station as AugmentedStop;
 		}
 	}
 
-	for (const st of TRAX.stations.getAugmentedRailStations())
-		stations[st.stop_id] = st.toSerializable();
+	for (const st of TRAX.stations.getAugmentedRailStations()) stations[st.stop_id] = st as AugmentedStop;
 
 	let expressStrings: { [trip_id: string]: string } = {};
 	for (const trip of pagedTrips) {

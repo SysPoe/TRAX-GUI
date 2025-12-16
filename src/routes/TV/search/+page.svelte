@@ -55,6 +55,16 @@
 		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
 	}
 
+	function getStopId(stop?: { stop_id?: string } | string | null): string {
+		if (!stop) return "";
+		return typeof stop === "string" ? stop : stop.stop_id ?? "";
+	}
+
+	function matchesStopId(target: string, stop?: { stop_id?: string } | string | null): boolean {
+		if (!stop) return false;
+		return typeof stop === "string" ? stop === target : stop.stop_id === target;
+	}
+
 	function handleTripNavigation(event: MouseEvent, tripId: string) {
 		if (
 			event.defaultPrevented ||
@@ -181,14 +191,14 @@
 	{#each data?.trips as inst}
 		{@const departure_time = formatTimestamp(inst.stopTimes[0].scheduled_departure_time)}
 		{@const arrival_time = formatTimestamp(inst.stopTimes.at(-1)?.scheduled_arrival_time)}
-		{@const startStation = data.stations[inst.stopTimes[0].scheduled_stop ?? ""]}
-		{@const endStation = data.stations[inst.stopTimes.at(-1)?.scheduled_stop ?? ""]}
-		{@const startParent = inst.stopTimes[0].scheduled_parent_station
-			? data.stations[inst.stopTimes[0].scheduled_parent_station]
-			: null}
-		{@const endParent = inst.stopTimes.at(-1)?.scheduled_parent_station
-			? data.stations[inst.stopTimes.at(-1)?.scheduled_parent_station ?? ""]
-			: null}
+		{@const startStopId = getStopId(inst.stopTimes[0].scheduled_stop)}
+		{@const endStopId = getStopId(inst.stopTimes.at(-1)?.scheduled_stop)}
+		{@const startParentId = getStopId(inst.stopTimes[0].scheduled_parent_station)}
+		{@const endParentId = getStopId(inst.stopTimes.at(-1)?.scheduled_parent_station)}
+		{@const startStation = data.stations[startStopId]}
+		{@const endStation = data.stations[endStopId]}
+		{@const startParent = startParentId ? data.stations[startParentId] : null}
+		{@const endParent = endParentId ? data.stations[endParentId] : null}
 		{@const date_offset =
 			(inst.stopTimes.at(-1)?.scheduled_arrival_date_offset ?? 0) -
 			inst.stopTimes[0].scheduled_departure_date_offset}
@@ -237,8 +247,8 @@
 						{#each data.filters.intermediateStations as st}
 							{@const stoptime = inst.stopTimes.find(
 								data.filters.useRT
-									? (sti) => sti.actual_stop === st || sti.actual_parent_station === st
-									: (sti) => sti.scheduled_stop === st || sti.scheduled_parent_station === st,
+									? (sti) => matchesStopId(st, sti.actual_stop) || matchesStopId(st, sti.actual_parent_station)
+									: (sti) => matchesStopId(st, sti.scheduled_stop) || matchesStopId(st, sti.scheduled_parent_station),
 							)}
 							{data.stations[st]?.stop_name ?? st}
 							arr {formatTimestamp(

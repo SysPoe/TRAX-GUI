@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
 	import * as qdf from "qdf-gtfs/types";
-	const { data }: PageProps = $props();
+	const props: PageProps = $props();
+	const data: PageProps["data"] = $derived(props.data);
 
 	let searchQuery = $state("");
 
@@ -108,8 +109,10 @@
 		),
 	);
 
-	let vp: qdf.RealtimeVehiclePosition[] = (data.vehiclePositions as qdf.RealtimeVehiclePosition[]).filter(
-		(v) => v.trip.trip_id && v.trip.trip_id.includes("QR "),
+	let vp: qdf.RealtimeVehiclePosition[] = $derived(
+		(data.vehiclePositions as qdf.RealtimeVehiclePosition[]).filter(
+			(v) => v.trip.trip_id && v.trip.trip_id.includes("QR "),
+		),
 	);
 
 	let vehiclePositions = $derived(vp.filter((v) => matchesSearch(v.trip)));

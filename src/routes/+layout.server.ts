@@ -1,7 +1,7 @@
-import type { PageServerLoad } from "./$types";
+import type { LayoutServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ locals }) => {
-    return {
-        admin: locals.session?.data?.admin ?? false
-    }
+export const load: LayoutServerLoad = async ({ locals }) => {
+	return {
+		admin: locals.session?.data?.admin ?? false
+	};
 };

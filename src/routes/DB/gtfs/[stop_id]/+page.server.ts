@@ -1,7 +1,4 @@
-import TRAX, {
-	formatTimestamp,
-	type SerializableAugmentedStopTime,
-} from "translink-rail-api";
+import TRAX, { formatTimestamp, type AugmentedStopTime } from "translink-rail-api";
 import * as qdf from "qdf-gtfs";
 import {
 	getUpcomingQRTravelDepartures,
@@ -12,7 +9,8 @@ import {
 } from "$lib";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import type { SerializableAugmentedTripInstance } from "../../../../../../TRAX/dist/utils/augmentedTrip";
+
+type AugmentedTripInstance = NonNullable<ReturnType<typeof TRAX.getAugmentedTripInstance>>;
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isTRAXLoaded) {
@@ -38,7 +36,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	let stop = TRAX.getAugmentedStops(stop_id)[0];
 	if (stop === undefined || stop === null) throw error(404, `Stop with ID "${stop_id}" not found.`);
-	let departures: (SerializableAugmentedStopTime & {
+	let departures: (AugmentedStopTime & {
 		dep_type: "gtfs";
 		express_string: string;
 		last_stop_id: string;
@@ -46,8 +44,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		actual_departure_timestr: string;
 		departs_in: string;
 		departsInSecs: number;
-	})[] = stop
-		.getDepartures(today, startTime, endTime)
+	})[] = TRAX.utils.departures.getDeparturesForStop(stop,today, startTime, endTime)
 		.map((v) => {
 			const actualTime = formatTimestamp(
 				v.actual_departure_time ?? v.actual_arrival_time
@@ -62,7 +59,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			const inst = TRAX.getAugmentedTripInstance(v.instance_id);
 			if (!inst) TRAX.logger.warn(`No trip instance found for instance_id: ${v.instance_id}`);
 			return {
-				...v.toSerializable(),
+				...v,
 				dep_type: "gtfs" as "gtfs",
 				express_string: v.express_string,
 				actual_departure_timestr: actualTime,
@@ -90,12 +87,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		);
 
 	let instances: {
-		[trip_id: string]: SerializableAugmentedTripInstance;
+		[trip_id: string]: AugmentedTripInstance;
 	} = {};
 	for (const departure of departures) {
 		const inst = TRAX.getAugmentedTripInstance(departure.instance_id);
-		if (inst)
-			instances[inst.instance_id] = inst.toSerializable();
+		if (inst) instances[inst.instance_id] = inst;
 	}
 
 	let routes: {
@@ -111,7 +107,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let qrtDepartures: UpcomingQRTravelDeparture[] = getUpcomingQRTravelDepartures(stop_id);
 
 	let mixed: (
-		| (SerializableAugmentedStopTime & {
+		| (AugmentedStopTime & {
 			dep_type: "gtfs";
 			express_string: string;
 			last_stop_id: string;
@@ -126,7 +122,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	});
 
 	let stations = TRAX.getStations()
-		.map((v) => v.toSerializable())
+		.slice()
 		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
 
 	const extraDetails = locals.session?.data?.extraDetails ?? false;

@@ -1,6 +1,10 @@
 <script lang="ts">
 	let { data } = $props();
+	// svelte-ignore state_referenced_locally
 	let extraDetails = $state(data.extraDetails ?? false);
+	$effect(() => {
+		extraDetails = data.extraDetails ?? false;
+	});
 	async function toggleExtraDetails() {
 		let res = await fetch("/api/toggleextradetails");
 		let { extraDetails: newValue } = await res.json();
