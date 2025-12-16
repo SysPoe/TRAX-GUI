@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
-	import type { SerializableAugmentedStop } from "translink-rail-api";
+	import type { AugmentedStop } from "translink-rail-api";
 	import "$lib/styles/common.css";
 	
 	// Import the NEW generic component
@@ -8,7 +8,7 @@
 
 	let loading = $state(false);
 	let { data }: PageProps = $props();
-	let stations: SerializableAugmentedStop[] = $derived(data.stations);
+	let stations: AugmentedStop[] = $derived(data.stations);
 
 	// --- 1. PREPARE DATA FOR AUTOCOMPLETE ---
 

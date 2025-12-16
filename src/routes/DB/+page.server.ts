@@ -13,6 +13,6 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	let stations = TRAX.getStations()
 		.slice()
-		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
+		.sort((a, b) => (a.stop_name ?? "").localeCompare(b.stop_name ?? ""));
 	return { stations };
 };

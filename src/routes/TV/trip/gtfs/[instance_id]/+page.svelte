@@ -30,9 +30,9 @@
 
 <svelte:head>
 	<title>
-		{formatTimestamp(inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time)}
+		{formatTimestamp(inst.stopTimes[0].scheduled_departure_time ?? inst.stopTimes[0].scheduled_arrival_time)}
 		{inst.run}
-		{inst.trip_headsign.replace("station", "").trim() || "Unknown"} service - TRAX TripViewer
+		{inst.trip_headsign?.replace("station", "")?.trim() ?? "Unknown"} service - TRAX TripViewer
 	</title>
 	<style>
 		:root {
@@ -46,11 +46,11 @@
 	<h1>TRAX <i>TripViewer</i></h1>
 	{#if data.extraDetails}
 		<h2>
-			{inst.run} - {inst.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+			{inst.run} - {inst.trip_headsign?.replace("station", "").trim() ?? "Unknown"} Service
 		</h2>
 		<p>
 			Departing: {formatTimestamp(
-				inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time,
+				inst.stopTimes[0].scheduled_departure_time ?? inst.stopTimes[0].scheduled_arrival_time,
 			)} | Trip ID: {inst.trip_id}
 			{#if inst.schedule_relationship == qdf.TripScheduleRelationship.CANCELED}
 				<span class="delay canceled">(canceled)</span>
@@ -62,8 +62,8 @@
 	{:else}
 		<h2>
 			{inst.serviceDate.replace(/(?<=^.{4})|(?<=^.{6})/g, "-")}
-			{formatTimestamp(inst.stopTimes[0].scheduled_departure_time || inst.stopTimes[0].scheduled_arrival_time)}
-			{inst.trip_headsign?.replace("station", "").trim() || "Unknown"} Service
+			{formatTimestamp(inst.stopTimes[0].scheduled_departure_time ?? inst.stopTimes[0].scheduled_arrival_time)}
+			{inst.trip_headsign?.replace("station", "").trim() ?? "Unknown"} Service
 			{#if inst.schedule_relationship == qdf.TripScheduleRelationship.CANCELED}
 				<span class="delay canceled">(canceled)</span>
 			{/if}
@@ -90,28 +90,28 @@
 			<div class="info-item">
 				<span class="info-label">Headsign:</span>
 				<span class="info-value">
-					{@html inst.trip_headsign || "<b>null</b>"}
+					{@html inst.trip_headsign ?? "<b>null</b>"}
 				</span>
 			</div>
 			{#if data.extraDetails}
 				<div class="info-item">
 					<span class="info-label">Route ID:</span>
 					<span class="info-value">
-						{@html route.route_id || "<b>null</b>"}
+					{@html route.route_id ?? "<b>null</b>"}
 					</span>
 				</div>
 			{/if}
 			<div class="info-item">
 				<span class="info-label">Route Name:</span>
 				<span class="info-value">
-					{@html route.route_long_name || route.route_short_name || "<b>null</b>"}
+				{@html route.route_long_name ?? route.route_short_name ?? "<b>null</b>"}
 				</span>
 			</div>
 			{#if data.extraDetails}
 				<div class="info-item">
 					<span class="info-label">Route Color:</span>
 					<span class="info-value">
-						{@html route.route_color || "<b>null</b>"}
+					{@html route.route_color ?? "<b>null</b>"}
 						{#if route.route_color}
 							<div class="color-square" style="background-color: #{route.route_color};"></div>
 						{/if}
@@ -136,25 +136,25 @@
 				<div class="info-item">
 					<span class="info-label">Trip Short Name:</span>
 					<span class="info-value">
-						{@html inst.trip_short_name || "<b>null</b>"}
+					{@html inst.trip_short_name ?? "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
 					<span class="info-label">Direction ID:</span>
 					<span class="info-value">
-						{@html inst.direction_id || "<b>null</b>"}
+					{@html inst.direction_id ?? "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
 					<span class="info-label">Block ID:</span>
 					<span class="info-value">
-						{@html inst.block_id || "<b>null</b>"}
+					{@html inst.block_id ?? "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
 					<span class="info-label">Shape ID:</span>
 					<span class="info-value">
-						{@html inst.shape_id || "<b>null</b>"}
+					{@html inst.shape_id ?? "<b>null</b>"}
 					</span>
 				</div>
 				<div class="info-item">
@@ -290,8 +290,8 @@
 												: ""
 										: ""}
 								{(
-									stations[st.scheduled_parent_station_id ?? ""]?.stop_name ||
-									stations[st.scheduled_stop_id ?? ""]?.stop_name ||
+									stations[st.scheduled_parent_station_id ?? ""]?.stop_name ??
+									stations[st.scheduled_stop_id ?? ""]?.stop_name ??
 									"Unknown"
 								)
 									.replace(/station/i, "")

@@ -13,7 +13,7 @@ export function loadTRAX() {
 		isTRAXLoading = true;
 
 		TRAX.clearIntervals();
-		
+
 		TRAX.loadGTFS(true, 60_000).finally(() => {
 			isTRAXLoading = false;
 			isTRAXLoaded = true;
@@ -107,11 +107,11 @@ export function getUpcomingQRTravelDepartures(
 			let departsInSecs =
 				Math.round(
 					new Date(
-						(stop?.actualDeparture === "0001-01-01T00:00:00" || !stop?.actualDeparture
+						((stop?.actualDeparture === "0001-01-01T00:00:00" || !stop?.actualDeparture
 							? stop?.actualArrival === "0001-01-01T00:00:00" || !stop?.actualArrival
 								? stop?.estimatedPassingTime
 								: stop?.actualArrival
-							: stop?.actualDeparture) + "+10:00" || "0001-01-01T00:00:00+10:00",
+							: stop?.actualDeparture) ?? "0001-01-01T00:00:00") + "+10:00",
 					).getTime() - Date.now(),
 				) / 1000;
 			departsInSecs = Math.round(departsInSecs / 60) * 60;

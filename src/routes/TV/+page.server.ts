@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	let stations = TRAX.getStations()
 		.slice()
-		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
+		.sort((a, b) => (a.stop_name ?? "").localeCompare(b.stop_name ?? ""));
 	let today = Number.parseInt(new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", ""));
 	let dates = [
 		...new Set(

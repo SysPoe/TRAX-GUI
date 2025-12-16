@@ -118,12 +118,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		})
 		| UpcomingQRTravelDeparture
 	)[] = [...departures, ...qrtDepartures].sort((a, b) => {
-		return (a.departsInSecs || 0) - (b.departsInSecs || 0);
+		return (a.departsInSecs ?? 0) - (b.departsInSecs ?? 0);
 	});
 
 	let stations = TRAX.getStations()
 		.slice()
-		.sort((a, b) => (a.stop_name || "").localeCompare(b.stop_name || ""));
+		.sort((a, b) => (a.stop_name ?? "").localeCompare(b.stop_name ?? ""));
 
 	const extraDetails = locals.session?.data?.extraDetails ?? false;
 	if (!extraDetails) {

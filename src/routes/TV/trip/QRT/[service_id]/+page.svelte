@@ -20,7 +20,7 @@
 		service.stops
 			.at(-1)
 			?.placeName.replace(/^Brisbane -/, "")
-			.trim() || "Unknown",
+			.trim() ?? "Unknown",
 	);
 
 	const stopsToFilter: string[] = [
@@ -37,7 +37,7 @@
 	};
 
 	let filteredStops = $derived(
-		(service.stopsWithPassing || service.stops).filter((st) => {
+		(service.stopsWithPassing ?? service.stops).filter((st) => {
 			const isQRTSrtStop = "isStop" in st;
 			if (isQRTSrtStop) {
 				const isPassing = !(st as QRTSRTStop).isStop;

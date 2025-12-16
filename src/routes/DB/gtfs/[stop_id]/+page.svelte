@@ -4,12 +4,12 @@
 	import type { UpcomingQRTravelDeparture } from "$lib";
 	import * as qdf from "qdf-gtfs/types";
 	import { onMount } from "svelte";
-	import { type SerializableAugmentedStopTime } from "translink-rail-api";
+	import { type AugmentedStopTime } from "translink-rail-api";
 	import type { PageProps } from "./$types";
 	import UserIcon from "$lib/UserIcon.svelte";
 
 	type Departure =
-		| (SerializableAugmentedStopTime & {
+		| (AugmentedStopTime & {
 				dep_type: "gtfs";
 				express_string: string;
 				last_stop_id: string;
@@ -95,7 +95,7 @@
 
 <svelte:head>
 	<title>
-		TRAX Departure Board - {station?.stop_name || "Unknown Station"}
+		TRAX Departure Board - {station?.stop_name ?? "Unknown Station"}
 	</title>
 
 	<style>
@@ -110,7 +110,7 @@
 <div class="header">
 	<h1>TRAX <i>DepartureBoard</i></h1>
 	<h2>
-		Departures from {station?.stop_name || "Unknown Station"} in the next 4 hours
+		Departures from {station?.stop_name ?? "Unknown Station"} in the next 4 hours
 	</h2>
 
 	{#if data.admin && data.extraDetails}
@@ -145,7 +145,7 @@
 	{#each departures as dep}
 		{#if dep.dep_type === "gtfs"}
 			{@const instance = data.instances[dep.instance_id]}
-			{@const route = routes[instance.route_id || ""]}
+			{@const route = routes[instance.route_id ?? ""]}
 			{@const express = dep.express_string.toLowerCase() != "all stops"}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -153,7 +153,7 @@
 				class="departure gtfs {instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED ||
 				dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 					? 'canceled'
-					: dep.last_stop_id == params.stop_id.toLowerCase()
+					: dep.last_stop_id == params.stop_id
 						? 'term'
 						: dep.passing
 							? 'passing'
@@ -161,7 +161,7 @@
 				href={`/TV/trip/gtfs/${dep.instance_id}#stoptimes`}
 			>
 				<span class="platform" style="background-color: #{route.route_color}">
-					{dep.actual_platform_code || "?"}
+					{dep.actual_platform_code ?? "?"}
 				</span>
 				<span class="smalltext">
 					<span class="time">Sch. {qdf.formatTimestamp(dep.scheduled_departure_time)}</span>
@@ -177,7 +177,7 @@
 					class="service-type {instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED ||
 					dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 						? 'canceled'
-						: dep.last_stop_id == params.stop_id.toLowerCase()
+						: dep.last_stop_id == params.stop_id
 							? 'term'
 							: dep.passing
 								? 'passing'
@@ -189,7 +189,7 @@
 						? "C"
 						: dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 							? "S"
-							: dep.last_stop_id == params.stop_id.toLowerCase()
+							: dep.last_stop_id == params.stop_id
 								? "T"
 								: dep.passing
 									? "P"
@@ -248,20 +248,13 @@
       </span> -->
 				<span class="platform qr-travel"> ? </span>
 				<span class="smalltext">
-					<span class="time"
-						>Sch. {(
-							dep.stop?.estimatedPassingTime ||
-							(dep.stop?.plannedDeparture === "0001-01-01T00:00:00"
-								? dep.stop?.plannedArrival
-								: dep.stop?.plannedDeparture)
-						)?.slice(11, 16)}</span
-					>
+					<span class="time">Sch. {(dep.stop?.estimatedPassingTime ?? (dep.stop?.plannedDeparture === "0001-01-01T00:00:00" ? dep.stop?.plannedArrival : dep.stop?.plannedDeparture))?.slice(11, 16)}</span>
 					<span class="run">{dep.run}</span> service to <br />
 					<span class="headsign">
 						{dep.service.stops
 							.at(-1)
 							?.placeName.replace(/^Brisbane -/, "")
-							.trim() || "Unknown"}
+							.trim() ?? "Unknown"}
 					</span>
 				</span>
 				<span class="service-type {dep.passing ? 'passing' : 'qr-travel'}">

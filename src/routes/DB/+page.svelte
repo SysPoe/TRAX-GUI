@@ -17,8 +17,8 @@
 			const filter = filterText.toLowerCase().trim();
 			if (!filter) return true;
 
-			const name = station.stop_name?.toLowerCase() || "";
-			const id = station.stop_id?.toLowerCase() || "";
+		const name = station.stop_name?.toLowerCase() ?? "";
+		const id = station.stop_id?.toLowerCase() ?? "";
 			return name.includes(filter) || id.includes(filter);
 		}),
 	);
@@ -88,7 +88,6 @@
 				},
 				(error) => {
 					console.error(`GEO ERROR(${error.code}): ${error.message}`);
-					// No need to reset sortedStations, it will just stay as filteredStations
 				}
 			);
 		}
