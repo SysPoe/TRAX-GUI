@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
-	import type { TravelTrip, SRTStop, TravelStopTime } from "translink-rail-api";
+	import type { QRTTravelTrip, QRTSRTStop } from "translink-rail-api";
 	import "$lib/styles/common.css";
 	import "$lib/styles/stoptimes.css";
 
 	let { data }: PageProps = $props();
-	let service: TravelTrip = $derived(data.service);
+	let service: QRTTravelTrip = $derived(data.service);
 
 	let showPassing = $state(false);
 	let useRealtime = $state(true);
@@ -36,16 +36,18 @@
 		"TOWNSVILLE - CHARTERS TOWERS ROAD": "TOWNSVILLE STN.",
 	};
 
-	let filteredStops = $derived((service.stopsWithPassing || service.stops).filter((st) => {
-		const isSrtStop = "isStop" in st;
-		if (isSrtStop) {
-			const isPassing = !(st as SRTStop).isStop;
-			if (isPassing) {
-				return !stopsToFilter.some((filterName) => st.placeName.toUpperCase().includes(filterName));
+	let filteredStops = $derived(
+		(service.stopsWithPassing || service.stops).filter((st) => {
+			const isQRTSrtStop = "isStop" in st;
+			if (isQRTSrtStop) {
+				const isPassing = !(st as QRTSRTStop).isStop;
+				if (isPassing) {
+					return !stopsToFilter.some((filterName) => st.placeName.toUpperCase().includes(filterName));
+				}
 			}
-		}
-		return true;
-	}));
+			return true;
+		}),
+	);
 
 	function formatTime(isoString?: string | null): string {
 		if (!isoString || isoString === "0001-01-01T00:00:00") return "--:--";
@@ -186,19 +188,19 @@
 						<label>
 							<input type="checkbox" bind:checked={useRealtime} />
 							Use Realtime Data
-						</label><br>
+						</label><br />
 						(*Passing stops use realtime data)
 					</div>
 				{/if}
 				<hr />
 				{#each filteredStops as st}
-					{@const isSrtStop = "isStop" in st}
+					{@const isQRTSrtStop = "isStop" in st}
 					{@const delay = {
 						delayClass: st.departureDelayClass ?? st.arrivalDelayClass,
 						delayString: st.departureDelayString ?? st.arrivalDelayString,
 					}}
-					{@const passing = isSrtStop && !(st as SRTStop).isStop}
-					{#if ((isSrtStop && st.isStop) || !isSrtStop) && st.gtfsStopId && ((showPassing && useRealtime) || !passing)}
+					{@const passing = isQRTSrtStop && !(st as QRTSRTStop).isStop}
+					{#if ((isQRTSrtStop && st.isStop) || !isQRTSrtStop) && st.gtfsStopId && ((showPassing && useRealtime) || !passing)}
 						<a class="tv-stop-time {passing ? 'passing' : ''}" href={`/DB/gtfs/${st.gtfsStopId}`}>
 							<span class="tv-platform" style="background-color: #ff8400"> ? </span>
 							<span class="tv-smalltext">
@@ -207,15 +209,15 @@
 										useRealtime
 											? st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
 												? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
-													? isSrtStop
-														? (st as SRTStop).estimatedPassingTime
+													? isQRTSrtStop
+														? (st as QRTSRTStop).estimatedPassingTime
 														: st.plannedDeparture
 													: st.actualArrival
 												: st.actualDeparture
-											: isSrtStop &&
-												  (st as SRTStop).estimatedPassingTime !== "0001-01-01T00:00:00" &&
-												  (st as SRTStop).estimatedPassingTime
-												? (st as SRTStop).estimatedPassingTime
+											: isQRTSrtStop &&
+												  (st as QRTSRTStop).estimatedPassingTime !== "0001-01-01T00:00:00" &&
+												  (st as QRTSRTStop).estimatedPassingTime
+												? (st as QRTSRTStop).estimatedPassingTime
 												: st.plannedDeparture === "0001-01-01T00:00:00" || !st.plannedDeparture
 													? st.plannedArrival
 													: st.plannedDeparture,
@@ -264,15 +266,15 @@
 										useRealtime
 											? st.actualDeparture === "0001-01-01T00:00:00" || !st.actualDeparture
 												? st.actualArrival === "0001-01-01T00:00:00" || !st.actualArrival
-													? isSrtStop
-														? (st as SRTStop).estimatedPassingTime
+													? isQRTSrtStop
+														? (st as QRTSRTStop).estimatedPassingTime
 														: st.plannedDeparture
 													: st.actualArrival
 												: st.actualDeparture
-											: isSrtStop &&
-												  (st as SRTStop).estimatedPassingTime !== "0001-01-01T00:00:00" &&
-												  (st as SRTStop).estimatedPassingTime
-												? (st as SRTStop).estimatedPassingTime
+											: isQRTSrtStop &&
+												  (st as QRTSRTStop).estimatedPassingTime !== "0001-01-01T00:00:00" &&
+												  (st as QRTSRTStop).estimatedPassingTime
+												? (st as QRTSRTStop).estimatedPassingTime
 												: st.plannedDeparture === "0001-01-01T00:00:00" || !st.plannedDeparture
 													? st.plannedArrival
 													: st.plannedDeparture,

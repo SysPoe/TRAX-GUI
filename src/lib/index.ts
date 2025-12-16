@@ -1,4 +1,4 @@
-import TRAX, { type TravelTrip, type SRTStop } from "translink-rail-api";
+import TRAX, { type QRTTravelTrip, type QRTSRTStop } from "translink-rail-api";
 
 export let isTRAXLoaded = false;
 export let isTRAXLoading = false;
@@ -80,8 +80,8 @@ function safeCount(getter: () => any[]): number {
 
 export type UpcomingQRTravelDeparture = {
 	dep_type: "qrt";
-	service: TravelTrip;
-	stop: SRTStop | undefined;
+	service: QRTTravelTrip;
+	stop: QRTSRTStop | undefined;
 	passing: boolean;
 	departsInSecs: number;
 	departureString: string;
@@ -94,7 +94,7 @@ export function getUpcomingQRTravelDepartures(
 	gtfs_station_id: string,
 	max_hours: number = 4,
 ): UpcomingQRTravelDeparture[] {
-	const travelTrains: TravelTrip[] = TRAX.getQRTTrains();
+	const travelTrains: QRTTravelTrip[] = TRAX.regionSpecific.SEQ.getQRTTrains();
 
 	const trains: UpcomingQRTravelDeparture[] = travelTrains
 		.filter(

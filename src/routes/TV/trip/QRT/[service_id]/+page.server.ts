@@ -1,7 +1,7 @@
 import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import TRAX, { type TravelTrip } from "translink-rail-api";
+import TRAX, { type QRTTravelTrip } from "translink-rail-api";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isTRAXLoaded) {
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	let { service_id } = params;
 
-	let service: TravelTrip | undefined = TRAX.getQRTTrains().find((v) => v.serviceId == service_id);
+	let service: QRTTravelTrip | undefined = TRAX.regionSpecific.SEQ.getQRTTrains().find((v) => v.serviceId == service_id);
 	if (!service) throw error(404, `Service '${service_id}' not found`);
 
 	const extraDetails = locals.session?.data?.extraDetails ?? false;
