@@ -26,11 +26,6 @@
 	function getTrainGuruUrl(run: string) {
 		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
 	}
-
-	function getStopId(stop?: { stop_id?: string } | string | null): string {
-		if (!stop) return "";
-		return typeof stop === "string" ? stop : stop.stop_id ?? "";
-	}
 </script>
 
 <svelte:head>
@@ -181,7 +176,7 @@
 			{/if}
 			<div class="tv-stoptimes">
 				{#each inst.stopTimes as st}
-					{@const stopId = getStopId(st.scheduled_parent_station) || getStopId(st.scheduled_stop)}
+					{@const stopId = st.scheduled_parent_station_id ?? st.scheduled_stop_id ?? ""}
 					<a
 						class="tv-stop-time {st.passing ? 'passing' : ''} {useRealtime &&
 						inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
@@ -295,8 +290,8 @@
 												: ""
 										: ""}
 								{(
-									stations[getStopId(st.scheduled_parent_station)]?.stop_name ||
-									stations[getStopId(st.scheduled_stop)]?.stop_name ||
+									stations[st.scheduled_parent_station_id ?? ""]?.stop_name ||
+									stations[st.scheduled_stop_id ?? ""]?.stop_name ||
 									"Unknown"
 								)
 									.replace(/station/i, "")

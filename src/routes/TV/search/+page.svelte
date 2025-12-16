@@ -55,16 +55,6 @@
 		return `${TRAIN_GURU_URL_PREFIX}${encodeURIComponent(run)}`;
 	}
 
-	function getStopId(stop?: { stop_id?: string } | string | null): string {
-		if (!stop) return "";
-		return typeof stop === "string" ? stop : stop.stop_id ?? "";
-	}
-
-	function matchesStopId(target: string, stop?: { stop_id?: string } | string | null): boolean {
-		if (!stop) return false;
-		return typeof stop === "string" ? stop === target : stop.stop_id === target;
-	}
-
 	function handleTripNavigation(event: MouseEvent, tripId: string) {
 		if (
 			event.defaultPrevented ||
@@ -78,69 +68,6 @@
 		}
 		event.preventDefault();
 		goto(`/TV/trip/gtfs/${tripId}`);
-	}
-
-	function contractSD(dateStrings: string[]): string[] {
-		if (dateStrings.length === 0) return [];
-
-		// 1. Parse strings into Date objects and sort them
-		// We use UTC to avoid Daylight Savings Time issues affecting day difference calculations
-		const sortedDates = [...new Set(dateStrings)] // Remove duplicates first
-			.map((ds) => {
-				const year = parseInt(ds.substring(0, 4), 10);
-				const month = parseInt(ds.substring(4, 6), 10) - 1; // Months are 0-indexed in JS
-				const day = parseInt(ds.substring(6, 8), 10);
-				return new Date(Date.UTC(year, month, day));
-			})
-			.sort((a, b) => a.getTime() - b.getTime());
-
-		const ranges: string[] = [];
-
-		if (sortedDates.length === 0) return [];
-
-		// Initialize the start and end of the current range
-		let rangeStart = sortedDates[0];
-		let rangeEnd = sortedDates[0];
-
-		// Helper to format Date back to YYYYMMDD string
-		const formatDate = (date: Date): string => {
-			const y = date.getUTCFullYear();
-			const m = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-			const d = date.getUTCDate().toString().padStart(2, "0");
-			return `${y}${m}${d}`;
-		};
-
-		for (let i = 1; i < sortedDates.length; i++) {
-			const currentDate = sortedDates[i];
-
-			// Calculate difference in days
-			// 86400000 ms = 1 day
-			const diffTime = currentDate.getTime() - rangeEnd.getTime();
-			const diffDays = diffTime / (1000 * 3600 * 24);
-
-			if (diffDays === 1) {
-				// It is consecutive, extend the current range
-				rangeEnd = currentDate;
-			} else {
-				// Gap found, push the previous range and start a new one
-				if (rangeStart.getTime() === rangeEnd.getTime()) {
-					ranges.push(formatDate(rangeStart));
-				} else {
-					ranges.push(`${formatDate(rangeStart)}-${formatDate(rangeEnd)}`);
-				}
-				rangeStart = currentDate;
-				rangeEnd = currentDate;
-			}
-		}
-
-		// Push the final range remaining after the loop finishes
-		if (rangeStart.getTime() === rangeEnd.getTime()) {
-			ranges.push(formatDate(rangeStart));
-		} else {
-			ranges.push(`${formatDate(rangeStart)}-${formatDate(rangeEnd)}`);
-		}
-
-		return ranges;
 	}
 </script>
 
@@ -191,12 +118,12 @@
 	{#each data?.trips as inst}
 		{@const departure_time = formatTimestamp(inst.stopTimes[0].scheduled_departure_time)}
 		{@const arrival_time = formatTimestamp(inst.stopTimes.at(-1)?.scheduled_arrival_time)}
-		{@const startStopId = getStopId(inst.stopTimes[0].scheduled_stop)}
-		{@const endStopId = getStopId(inst.stopTimes.at(-1)?.scheduled_stop)}
-		{@const startParentId = getStopId(inst.stopTimes[0].scheduled_parent_station)}
-		{@const endParentId = getStopId(inst.stopTimes.at(-1)?.scheduled_parent_station)}
-		{@const startStation = data.stations[startStopId]}
-		{@const endStation = data.stations[endStopId]}
+		{@const startStopId = inst.stopTimes[0].scheduled_stop_id}
+		{@const endStopId = inst.stopTimes.at(-1)?.scheduled_stop_id}
+		{@const startParentId = inst.stopTimes[0].scheduled_parent_station_id}
+		{@const endParentId = inst.stopTimes.at(-1)?.scheduled_parent_station_id}
+		{@const startStation = data.stations[startStopId ?? ""] ?? null}
+		{@const endStation = data.stations[endStopId ?? ""] ?? null}
 		{@const startParent = startParentId ? data.stations[startParentId] : null}
 		{@const endParent = endParentId ? data.stations[endParentId] : null}
 		{@const date_offset =
@@ -222,14 +149,16 @@
 					{departure_time}
 					<span class="location">
 						{startParent?.stop_name?.replace(" station", "")?.trim() ??
-							startStation?.stop_name?.replace(" station", "").trim() ?? "Unknown"}
+							startStation?.stop_name?.replace(" station", "").trim() ??
+							"Unknown"}
 						{inst.stopTimes[0]?.scheduled_platform_code}
 					</span>
 					<span class="bigarrow">&rarr;</span>
 					{arrival_time}
 					<span class="location">
 						{endParent?.stop_name?.replace(" station", "").trim() ??
-							endStation?.stop_name?.replace(" station", "").trim() ?? "Unknown"}
+							endStation?.stop_name?.replace(" station", "").trim() ??
+							"Unknown"}
 						{inst.stopTimes.at(-1)?.scheduled_platform_code}
 					</span>
 					{#if date_offset > 0}
@@ -244,13 +173,19 @@
 						<br />
 						{types[inst.run[0]] ?? "Unknown train type"}<br />
 
+						{#if data.filters.intermediateStations.length > 0}
+							<hr style="width: 8rem; margin: 0.3rem 0;">
+						{/if}
+
 						{#each data.filters.intermediateStations as st}
 							{@const stoptime = inst.stopTimes.find(
 								data.filters.useRT
-									? (sti) => matchesStopId(st, sti.actual_stop) || matchesStopId(st, sti.actual_parent_station)
-									: (sti) => matchesStopId(st, sti.scheduled_stop) || matchesStopId(st, sti.scheduled_parent_station),
+									? (sti) => st === sti.actual_stop_id || st === sti.actual_parent_station_id
+									: (sti) => st === sti.scheduled_stop_id || st === sti.scheduled_parent_station_id,
 							)}
-							{data.stations[st]?.stop_name ?? st}
+							<span style="min-width: 10rem; display: inline-block;"
+								>{data.stations[st]?.stop_name.replace(/station$/, "").trim() ?? st}</span
+							>
 							arr {formatTimestamp(
 								data.filters.useRT
 									? (stoptime?.actual_arrival_time ?? stoptime?.scheduled_arrival_time)
@@ -263,8 +198,7 @@
 									: stoptime?.scheduled_departure_time,
 								true,
 							)}
-							{#if st != data.filters.intermediateStations.at(-1)},
-							{/if}
+							<br />
 						{/each}
 					{/if}
 				</span>
