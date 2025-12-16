@@ -28,6 +28,64 @@
 	let routes = $derived(data.routes as { [route_id: string]: qdf.Route });
 	let station = $derived(data.stations.find((v) => v.stop_id === data.stop_id));
 
+	// --- Departure type filtering ---
+	function getDepType(dep: Departure) {
+		if (dep.dep_type === "gtfs") {
+			const instance = data.instances[dep.instance_id];
+			if (instance?.schedule_relationship === qdf.TripScheduleRelationship.CANCELED) return "canceled";
+			if (dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED) return "skipped";
+			if (dep.last_stop_id === params.stop_id) return "term";
+			if (dep.passing) return "passing";
+			return "scheduled";
+		}
+
+		// For QRT departures, classify as passing or scheduled
+		if (dep.dep_type === "qrt") {
+			return dep.passing ? "passing" : "scheduled";
+		}
+
+		return "scheduled";
+	}
+
+	let depTypes = $derived([
+		...new Set(
+			(departures as Departure[]).map((d) => getDepType(d))
+		),
+	].sort());
+
+	let selectedDepTypes = $state(new Set<string>());
+	let isDepTypesInit = $state(false);
+
+	$effect(() => {
+		// Initialize selection once we have types available
+		if (!isDepTypesInit && depTypes.length > 0) {
+			if (data.extraDetails) {
+				// extra details => show all types by default
+				selectedDepTypes = new Set(depTypes);
+			} else {
+				// default to only scheduled
+				selectedDepTypes = new Set(["scheduled"]);
+			}
+			isDepTypesInit = true;
+		}
+
+		// If extraDetails becomes enabled after init, expand selection to include all
+		if (isDepTypesInit && data.extraDetails) {
+			selectedDepTypes = new Set(depTypes);
+		}
+	});
+
+	function toggleDepType(type: string) {
+		const next = new Set(selectedDepTypes);
+		next.has(type) ? next.delete(type) : next.add(type);
+		selectedDepTypes = next;
+	}
+
+	let filteredDepartures = $derived(
+		(departures as Departure[]).filter((d) => selectedDepTypes.has(getDepType(d))),
+	);
+
+
 	let isRefreshing = $state(false);
 	let refreshError: string | null = $state(null);
 	let lastUpdated: Date | null = $state(null);
@@ -141,8 +199,19 @@
 	</span>
 </div>
 
+{#if depTypes.length > 0}
+	<div class="filters">
+		<span class="filter-label">Type:</span>
+		{#each depTypes.filter(t => t !== 'passing' || data.extraDetails) as t}
+			<button class:active={selectedDepTypes.has(t)} onclick={() => toggleDepType(t)}>
+				{t === 'scheduled' ? 'Scheduled' : t === 'canceled' ? 'Canceled' : t === 'skipped' ? 'Skipped' : t === 'term' ? 'Terminating' : t === 'passing' ? 'Passing' : t}
+			</button>
+		{/each}
+	</div>
+{/if}
+
 <div class="departures">
-	{#each departures as dep}
+	{#each filteredDepartures as dep}
 		{#if dep.dep_type === "gtfs"}
 			{@const instance = data.instances[dep.instance_id]}
 			{@const route = routes[instance.route_id ?? ""]}
@@ -525,5 +594,43 @@
 	}
 	.serviceCapacity {
 		font-size: 1rem;
+	}
+
+	/* Filters (similar to raw-rt) */
+	.filters {
+		margin: 1rem auto;
+		display: flex;
+		gap: 8px;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		background: #f8f8f8;
+		padding: 8px;
+		border-radius: 6px;
+	}
+
+	.filter-label {
+		font-weight: 700;
+		margin-right: 6px;
+	}
+
+	.filters button {
+		padding: 6px 10px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background: #fff;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.filters button.active {
+		background: #007bff;
+		color: #fff;
+		border-color: #0056b3;
+		font-weight: 700;
+	}
+
+	.filters button:hover:not(.active) {
+		background: #f0f0f0;
 	}
 </style>
