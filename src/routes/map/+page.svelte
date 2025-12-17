@@ -8,6 +8,7 @@
     let biggest = $derived(data.biggest);
     let stops = $derived(data.stops);
     let routes = $derived(data.routes);
+    let extraDetails = $derived(data.extraDetails);
 
     onMount(async () => {
         // The import only happens in the browser, preventing the server crash
@@ -18,7 +19,7 @@
 </script>
 
 {#if MapComponent}
-    <svelte:component this={MapComponent} {vps} {shapes} {biggest} {stops} {routes} />
+    <MapComponent {vps} {shapes} {biggest} {stops} {routes} {extraDetails} />
 {:else}
     <p>Loading map...</p>
 {/if}

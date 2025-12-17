@@ -159,9 +159,17 @@
 
 		<details class="info-section" open>
 			<summary>Stops</summary>
+			{#if data.extraDetails}
+				<div class="stoptimes-controls">
+					<label>
+						<input type="checkbox" bind:checked={useRealtime} />
+						Show Realtime Data
+					</label>
+				</div>
+			{/if}
 			<StopTimes
 				{inst}
-				bind:useRealtime
+				{useRealtime}
 				{stations}
 				{route}
 				extraDetails={data.extraDetails}

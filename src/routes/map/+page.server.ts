@@ -2,7 +2,7 @@ import { TRAX, isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import type { AugmentedTripInstance } from "translink-rail-api";
-import type { RealtimeVehiclePosition, Route, Shape } from "qdf-gtfs";
+import { formatTimestamp, type RealtimeVehiclePosition, type Route, type Shape } from "qdf-gtfs";
 
 export const load: PageServerLoad = async ({ locals }) => {
     if (!isTRAXLoaded) {
@@ -55,6 +55,22 @@ export const load: PageServerLoad = async ({ locals }) => {
         if (shape) shapes[shapeId.shape_id!] = shape.map(v => ({ ...v, color: route?.route_color ? `#${route.route_color}` : '#0000FF' }));
     }
 
+    let now = new Date(Date.now() + 10 * 3_600_000);
+    const nowTime = `${now.getUTCHours().toString().padStart(2, "0")}:${now
+        .getUTCMinutes()
+        .toString()
+        .padStart(2, "0")}`;
 
-    return { vps, shapes, biggest, stops, routes: routesMap }
+    vps = vps.filter(v => v.tripInstance).filter(v => {
+        let st = v.tripInstance?.stopTimes.at(-1);
+        if (!st) return false;
+        let actualTime = formatTimestamp(st.actual_departure_time ?? st.actual_arrival_time);
+        return st.actual_departure_time ?? st.actual_arrival_time ? TRAX.utils.time.secTimeDiff(actualTime.slice(0, 5), nowTime) >= -300 : true;
+    })
+
+
+    return {
+        vps, shapes, biggest, stops, routes: routesMap, extraDetails:
+            locals.session?.data.extraDetails ?? false
+    }
 };

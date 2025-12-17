@@ -4,10 +4,12 @@
 	import { formatTimestamp } from "$lib";
 	import UserIcon from "$lib/UserIcon.svelte";
 	import type { AugmentedTripInstance, AugmentedStop } from "translink-rail-api";
+	import "./styles/stoptimes.css";
+	import "./styles/common.css";
 
 	let {
 		inst,
-		useRealtime = $bindable(true),
+		useRealtime = true,
 		stations,
 		route,
 		extraDetails,
@@ -20,14 +22,6 @@
 	} = $props();
 </script>
 
-{#if extraDetails}
-	<div class="stoptimes-controls">
-		<label>
-			<input type="checkbox" bind:checked={useRealtime} />
-			Show Realtime Data
-		</label>
-	</div>
-{/if}
 <div class="tv-stoptimes">
 	{#each inst.stopTimes as st}
 		{@const stopId = st.scheduled_parent_station_id ?? st.scheduled_stop_id ?? ""}
@@ -171,6 +165,11 @@
 </div>
 
 <style>
+	:global(.tv-stoptimes) {
+		margin-left: 0;
+		margin-right: 0;
+	}
+
 	.stoptimes-controls {
 		margin-bottom: 1rem;
 		text-align: center;

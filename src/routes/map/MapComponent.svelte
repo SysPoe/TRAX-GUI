@@ -1,21 +1,25 @@
 <script lang="ts">
 	import { Map, TileLayer, Marker, Polyline } from "sveaflet";
-	import L from "leaflet"; // Import Leaflet for custom icons
+	import L from "leaflet";
 	import "leaflet/dist/leaflet.css";
 	import type { AugmentedStop, AugmentedTripInstance } from "translink-rail-api";
 	import type { RealtimeVehiclePosition, Route, Shape } from "qdf-gtfs/types";
 	import { onMount } from "svelte";
+	import StopTimes from "$lib/StopTimes.svelte";
 
-	export let vps: (RealtimeVehiclePosition & {
-		tripInstance: AugmentedTripInstance | null;
-	})[];
-	export let shapes: { [key: string]: (Shape & { color: string })[] };
-	export let biggest: AugmentedStop;
-	export let stops: AugmentedStop[];
-	export let routes: { [key: string]: Route };
+	let { vps, shapes, biggest, stops, routes, extraDetails } = $props();
 
-	// Define the custom IPBR icon
-	// Replace 'path/to/your/logo.png' with the actual path to your image
+	let mapInstance = $state<L.Map | null>(null);
+	let selectedTrip = $state<AugmentedTripInstance | null>(null);
+	let useRealtime = $state(true);
+
+	let stationMap = $derived.by(() => {
+		const map: Record<string, AugmentedStop> = {};
+		stops.forEach((s) => (map[s.stop_id] = s));
+		return map;
+	});
+
+	// Custom Icon Generator matches your IPBR logo design
 	const ipbrIcon = (label: string, route: Route) =>
 		L.divIcon({
 			className: "custom-ipbr-marker",
@@ -25,30 +29,76 @@
                     <span class="logo-text">${route.route_short_name}</span>
                 </div>
                 <div class="run-label">${label}</div>
-            </div>
-        `,
+            </div>`,
 			iconSize: [40, 40],
 			iconAnchor: [20, 20],
 		});
 
+	// EFFECT: Map-wide click listener to detect markers reliably in Svelte 5
+	$effect(() => {
+		if (mapInstance) {
+			const handleMapClick = (e: L.LeafletMouseEvent) => {
+				const clickedElement = e.originalEvent.target as HTMLElement;
+				const markerContainer = clickedElement.closest(".custom-ipbr-marker");
+
+				if (markerContainer) {
+					const labelDiv = markerContainer.querySelector(".run-label");
+					const runValue = labelDiv?.textContent;
+
+					const foundVp = vps.find((v) => v.tripInstance?.run?.toString() === runValue);
+					if (foundVp?.tripInstance) {
+						selectedTrip = foundVp.tripInstance;
+						mapInstance?.flyTo(e.latlng, 15);
+					}
+				}
+			};
+
+			mapInstance.on("click", handleMapClick);
+			return () => mapInstance?.off("click", handleMapClick);
+		}
+	});
+
 	let resize = () => {
-		document.querySelector("#mapContainer")?.setAttribute(
-			"style",
-			`
-            width: 100%;
-            height: calc(calc(100vh - 2rem) - ${document.querySelector("nav")?.getBoundingClientRect()?.height ?? 0}px);
-        `,
-		);
+		const navHeight = document.querySelector("nav")?.getBoundingClientRect()?.height ?? 0;
+		document
+			.querySelector("#mapContainer")
+			?.setAttribute("style", `width: 100%; height: calc(100vh - ${navHeight}px - 2rem);`);
 	};
 
 	onMount(() => {
 		resize();
 		window.addEventListener("resize", resize);
+		return () => window.removeEventListener("resize", resize);
 	});
 </script>
 
-<div style="width:100%;height:100vh;" id="mapContainer">
-	<Map options={{ center: [biggest.stop_lat ?? 0, biggest.stop_lon ?? 0], zoom: 13 }}>
+<div id="mapContainer" style="width:100%; height:100vh; display:flex; position:relative;">
+	{#if selectedTrip}
+		<div class="sidebar">
+			<div class="sidebar-header">
+				<h3>
+					Trip {selectedTrip.run}
+					{#if selectedTrip.route_id && routes[selectedTrip.route_id]}
+						{@const route = routes[selectedTrip.route_id]}
+						- {route.route_short_name}
+						({route.route_long_name})
+					{/if}
+				</h3>
+				<button class="close-btn" onclick={() => (selectedTrip = null)}>&times;</button>
+			</div>
+			<div class="sidebar-content">
+				<StopTimes
+					inst={selectedTrip}
+					{useRealtime}
+					stations={stationMap}
+					route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
+					{extraDetails}
+				/>
+			</div>
+		</div>
+	{/if}
+
+	<Map options={{ center: [biggest.stop_lat ?? 0, biggest.stop_lon ?? 0], zoom: 13 }} bind:instance={mapInstance}>
 		<TileLayer url={"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} />
 
 		{#each Object.keys(shapes) as shapeId}
@@ -64,9 +114,13 @@
 			<Marker
 				latLng={[vp.position.latitude, vp.position.longitude]}
 				options={{
-					icon: ipbrIcon(runLabel, vp.tripInstance?.route_id ? routes[vp.tripInstance.route_id] : { route_short_name: "?", route_color: "000000" } as Route),
-					rotationAngle: vp.position.bearing ?? 0,
-					rotationOrigin: "center center",
+					icon: ipbrIcon(
+						runLabel,
+						vp.tripInstance?.route_id
+							? routes[vp.tripInstance.route_id]
+							: ({ route_short_name: "?", route_color: "000000" } as Route),
+					),
+					interactive: true,
 				}}
 			/>
 		{/each}
@@ -74,10 +128,74 @@
 </div>
 
 <style>
-	/* Styling to match the uploaded logo design */
+	/* 1. RELOCATE MAP CONTROLS */
+	/* Moves the + and - buttons to the right so the sidebar doesn't block them */
+	:global(.leaflet-left) {
+		left: auto !important;
+		right: 10px !important;
+	}
+
+	/* 2. SIDEBAR STYLING */
+	.sidebar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 25rem;
+		height: 100%;
+		background: white;
+		z-index: 1100; /* Higher than Leaflet's 1000 */
+		box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+		display: flex;
+		flex-direction: column;
+		overflow: hidden; /* Header stays fixed, content scrolls */
+	}
+
+	.sidebar-header {
+		padding: 15px;
+		background: #f8f8f8;
+		border-bottom: 1px solid #ddd;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.sidebar-header h3 {
+		margin: 0;
+		font-family: sans-serif;
+	}
+
+	.sidebar-content {
+		flex: 1;
+		overflow-y: auto;
+		padding: 1rem;
+	}
+
+	.sidebar-controls {
+		padding: 12px 15px;
+		background: #fff;
+		border-bottom: 1px solid #eee;
+		font-family: sans-serif;
+		font-size: 0.9rem;
+	}
+
+	.close-btn {
+		background: none;
+		border: none;
+		font-size: 24px;
+		cursor: pointer;
+		color: #666;
+	}
+
+	.close-btn:hover {
+		color: #000;
+	}
+
+	/* 3. MARKER STYLING */
 	:global(.custom-ipbr-marker) {
 		background: transparent;
 		border: none;
+		cursor: pointer !important;
+		pointer-events: auto !important;
 	}
 
 	:global(.marker-container) {
@@ -85,6 +203,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		pointer-events: none;
 	}
 
 	:global(.logo-circle) {
@@ -112,5 +231,7 @@
 		font-size: 11px;
 		font-weight: bold;
 		border: 1px solid #ccc;
+		margin-top: 2px;
+		font-family: sans-serif;
 	}
 </style>
