@@ -1,8 +1,9 @@
-import TRAX_CLASS from "translink-rail-api";
+import TRAX_CLASS, { logger, LogLevel } from "translink-rail-api";
 import { safeCount } from "../utils";
 import type { SystemStatus, UpcomingQRTravelDeparture } from "../types";
 
 export const TRAX = new TRAX_CLASS();
+logger.setLevel(LogLevel.DEBUG);
 
 export let isTRAXLoaded = false;
 export let isTRAXLoading = false;

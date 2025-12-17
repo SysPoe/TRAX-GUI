@@ -12,65 +12,51 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     if (isTRAXLoading) throw error(503, "Loading TRAX data... Please retry in a few minutes.");
 
-    let vps: (RealtimeVehiclePosition & { tripInstance: AugmentedTripInstance | null })[] = TRAX.getVehiclePositions()
+    let vps = TRAX.getVehiclePositions()
         .filter(v => TRAX.utils.isConsideredTripId(v.trip.trip_id))
-        .map(v => ({
-            ...v,
-            tripInstance: TRAX.getVehicleTripInstance(v)
-        }));
+        .map(v => {
+            const inst = TRAX.getVehicleTripInstance(v);
+            if (!inst) return null;
+            return {
+                trip: v.trip,
+                position: v.position,
+                vehicle: v.vehicle,
+                instance_id: inst.instance_id,
+                run: inst.run,
+                route_id: inst.route_id,
+                shape_id: inst.shape_id
+            };
+        }).filter((v): v is any => v !== null);
 
-    let stationCount: { [key: string]: number } = {};
+    // Filter out vehicles that have finished their trip
+    const now = new Date(Date.now() + 10 * 3_600_000);
+    const nowSecs = now.getUTCHours() * 3600 + now.getUTCMinutes() * 60;
 
-    vps.forEach(v => v.tripInstance?.stopTimes.forEach(st => {
-        if (st.actual_stop_id) {
-            if (!stationCount[st.actual_stop_id]) stationCount[st.actual_stop_id] = 0;
-            stationCount[st.actual_stop_id]++;
-        }
-        if (st.actual_parent_station_id) {
-            if (!stationCount[st.actual_parent_station_id]) stationCount[st.actual_parent_station_id] = 0;
-            stationCount[st.actual_parent_station_id]++;
-        }
-    }));
+    vps = vps.filter(v => {
+        const fullInst = TRAX.getAugmentedTripInstance(v.instance_id);
+        let st = fullInst?.stopTimes.at(-1);
+        if (!st) return false;
+        const depTime = st.actual_departure_time ?? st.actual_arrival_time;
+        if (depTime === null) return true;
+        // Keep if it hasn't passed the last stop by more than 5 minutes
+        let diff = depTime - nowSecs;
+        if (diff < -43200) diff += 86400; // Handle midnight wrap
+        return diff >= -300;
+    });
 
-    let biggest = TRAX.getAugmentedStops(Object.keys(stationCount).reduce((a, b) => stationCount[a] > stationCount[b] ? a : b))[0];
+    let biggest = { stop_lat: -27.4661, stop_lon: 153.0244, stop_id: "CENTRAL", stop_name: "Central Station" };
 
-    let routes = [...new Set(vps.map(v => v.tripInstance?.route_id).filter(r => r).map(v => TRAX.gtfs.getRoute(v ?? "")).filter(v => v))];
     let routesMap: { [key: string]: Route } = {};
-    routes.forEach(r => {
-        if (r) routesMap[r.route_id] = r;
+    const uniqueRouteIds = [...new Set(vps.map(v => v.route_id))];
+    uniqueRouteIds.forEach(id => {
+        const r = TRAX.gtfs.getRoute(id);
+        if (r) routesMap[id] = r;
     });
 
     let stops = TRAX.getStations();
 
-    let shapesIds: { shape_id: string, route_id: string }[] = []; // TODO loom
-    vps.map(v => ({ shape_id: v.tripInstance?.shape_id, route_id: v.tripInstance?.route_id })).filter(v => v.shape_id && v.route_id).forEach(s => {
-        if (shapesIds.some(q => q.shape_id === s.shape_id)) return;
-        shapesIds.push({ shape_id: s.shape_id!, route_id: s.route_id! });
-    })
-    let shapes: { [key: string]: (Shape & { color: string })[] } = {};
-
-    for (const shapeId of shapesIds) {
-        let shape = (TRAX.gtfs.getShape(shapeId.shape_id!) ?? []);
-        let route = TRAX.gtfs.getRoute(shapeId.route_id!);
-        if (shape) shapes[shapeId.shape_id!] = shape.map(v => ({ ...v, color: route?.route_color ? `#${route.route_color}` : '#0000FF' }));
-    }
-
-    let now = new Date(Date.now() + 10 * 3_600_000);
-    const nowTime = `${now.getUTCHours().toString().padStart(2, "0")}:${now
-        .getUTCMinutes()
-        .toString()
-        .padStart(2, "0")}`;
-
-    vps = vps.filter(v => v.tripInstance).filter(v => {
-        let st = v.tripInstance?.stopTimes.at(-1);
-        if (!st) return false;
-        let actualTime = formatTimestamp(st.actual_departure_time ?? st.actual_arrival_time);
-        return st.actual_departure_time ?? st.actual_arrival_time ? TRAX.utils.time.secTimeDiff(actualTime.slice(0, 5), nowTime) >= -300 : true;
-    })
-
-
     return {
-        vps, shapes, biggest, stops, routes: routesMap, extraDetails:
+        vps, biggest, stops, routes: routesMap, extraDetails:
             locals.session?.data.extraDetails ?? false
     }
-};
+}
