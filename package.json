@@ -23,7 +23,9 @@
 	},
 	"dependencies": {
 		"gtfs": "^4.17.5",
+		"leaflet": "^1.9.4",
 		"qdf-gtfs": "github:SysPoe/QDF-GTFS",
+		"sveaflet": "^0.1.4",
 		"svelte-kit-sessions": "^0.4.0",
 		"translink-rail-api": "github:SysPoe/TRAX#staging"
 	}
