@@ -47,38 +47,92 @@
 		return "scheduled";
 	}
 
-	let depTypes = $derived([
-		...new Set(
-			(departures as Departure[]).map((d) => getDepType(d))
-		),
-	].sort());
+	function sortDepTypes(arr: string[]) {
+		const order = ["scheduled", "skipped", "canceled", "term", "passing"];
+		return arr.sort((a, b) => {
+			const ia = order.indexOf(a);
+			const ib = order.indexOf(b);
+			if (ia === -1 && ib === -1) return a.localeCompare(b);
+			if (ia === -1) return 1; // unknowns go after known order
+			if (ib === -1) return -1;
+			return ia - ib;
+		});
+	}
+
+	let depTypes = $derived(sortDepTypes([
+		...new Set((departures as Departure[]).map((d) => getDepType(d))),
+	]));
 
 	let selectedDepTypes = $state(new Set<string>());
-	let isDepTypesInit = $state(false);
+	let hasInit = false;
+	let hasAppliedExtra = false;
+
+	function storageKey() {
+		return `depTypes:${params.stop_id}`;
+	}
+
+	
+
+	function writeSelectedTypesToStorage() {
+		if (typeof window === "undefined") return;
+		if (selectedDepTypes.size === 0) {
+			localStorage.removeItem(storageKey());
+		} else {
+			localStorage.setItem(storageKey(), Array.from(selectedDepTypes).join(","));
+		}
+	}
+
+	function readSelectedTypesFromStorage() {
+		if (typeof window === "undefined") return null as string[] | null;
+		const raw = localStorage.getItem(storageKey());
+		if (!raw) return null;
+		const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
+		const valid = parts.filter((p) => depTypes.includes(p as any));
+		return valid.length > 0 ? valid : null;
+	}
 
 	$effect(() => {
 		// Initialize selection once we have types available
-		if (!isDepTypesInit && depTypes.length > 0) {
-			if (data.extraDetails) {
+		if (!hasInit && depTypes.length > 0) {
+			// Prefer localStorage; ignore URL parameters
+			const stored = readSelectedTypesFromStorage();
+			if (stored && stored.length > 0) {
+				selectedDepTypes = new Set(stored);
+			} else if (data.extraDetails) {
 				// extra details => show all types by default
 				selectedDepTypes = new Set(depTypes);
 			} else {
 				// default to only scheduled
 				selectedDepTypes = new Set(["scheduled"]);
 			}
-			isDepTypesInit = true;
+
+			hasInit = true;
+			// reflect initial selection in storage
+			writeSelectedTypesToStorage();
 		}
 
-		// If extraDetails becomes enabled after init, expand selection to include all
-		if (isDepTypesInit && data.extraDetails) {
+		// If extraDetails becomes enabled after init, expand selection to include all once
+		if (hasInit && data.extraDetails && !hasAppliedExtra) {
 			selectedDepTypes = new Set(depTypes);
+			hasAppliedExtra = true;
+			writeSelectedTypesToStorage();
+		}
+
+		// Reset the extraDetails-applied flag when extraDetails is turned off
+		if (hasInit && !data.extraDetails) {
+			hasAppliedExtra = false;
 		}
 	});
 
 	function toggleDepType(type: string) {
 		const next = new Set(selectedDepTypes);
 		next.has(type) ? next.delete(type) : next.add(type);
+		if (next.size === 0) {
+			// Prevent empty selection; default to scheduled
+			next.add("scheduled");
+		}
 		selectedDepTypes = next;
+		writeSelectedTypesToStorage();
 	}
 
 	let filteredDepartures = $derived(
