@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import * as qdf from "qdf-gtfs/types";
+	import { formatTimestamp } from "$lib";
 	import type { PageProps } from "./$types";
 	import "$lib/styles/common.css";
 	import "$lib/styles/stoptimes.css";
@@ -13,13 +14,6 @@
 
 	// svelte-ignore state_referenced_locally
 	let useRealtime = $state(true);
-
-	// Borrowed from TRAX
-	function formatTimestamp(ts?: number | null, seconds: boolean = false): string {
-		if (ts === null || ts === undefined) return "--:--";
-		const d = new Date(ts * 1000);
-		return seconds ? d.toISOString().slice(11, 19) : d.toISOString().slice(11, 16);
-	}
 
 	const TRAIN_GURU_URL_PREFIX = "https://syspoe.github.io/train-wiki/#Other/Resources/TRNGuru/?trainNumber=";
 

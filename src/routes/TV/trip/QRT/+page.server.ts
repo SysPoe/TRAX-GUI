@@ -1,7 +1,7 @@
-import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
+import { TRAX, isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import TRAX, { type QRTTravelTrip } from "translink-rail-api";
+import { type QRTTravelTrip } from "translink-rail-api";
 
 export const load: PageServerLoad = async ({ params }) => {
 	if (!isTRAXLoaded) {

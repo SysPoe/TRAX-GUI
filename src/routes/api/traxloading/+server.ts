@@ -1,4 +1,4 @@
-import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
+import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import { json } from "@sveltejs/kit";
 
 export function GET() {

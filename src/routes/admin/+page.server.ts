@@ -1,4 +1,4 @@
-import { getSystemStatus } from "$lib";
+import { getSystemStatus } from "$lib/server/trax";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {

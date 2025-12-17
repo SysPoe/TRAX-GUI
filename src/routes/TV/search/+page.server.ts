@@ -1,5 +1,5 @@
-import TRAX, { type AugmentedStop } from "translink-rail-api";
-import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
+import { TRAX, isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
+import { type AugmentedStop } from "translink-rail-api";
 import type { PageServerLoad } from "./$types";
 import type * as qdf from "qdf-gtfs";
 import { error } from "@sveltejs/kit";
@@ -171,7 +171,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		}
 	}
 
-	for (const st of TRAX.stations.getAugmentedRailStations()) stations[st.stop_id] = st as AugmentedStop;
+	for (const st of TRAX.getStations()) stations[st.stop_id] = st as AugmentedStop;
 
 	let expressStrings: { [trip_id: string]: string } = {};
 	for (const trip of pagedTrips) {

@@ -1,12 +1,13 @@
-import TRAX, { formatTimestamp, type AugmentedStopTime } from "translink-rail-api";
-import * as qdf from "qdf-gtfs";
 import {
+	TRAX,
 	getUpcomingQRTravelDepartures,
 	isTRAXLoaded,
 	isTRAXLoading,
 	loadTRAX,
-	type UpcomingQRTravelDeparture,
-} from "$lib";
+} from "$lib/server/trax";
+import { formatTimestamp, type UpcomingQRTravelDeparture } from "$lib";
+import type { AugmentedStopTime } from "translink-rail-api";
+import * as qdf from "qdf-gtfs";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
@@ -57,7 +58,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				.toString()
 				.padStart(2, "0")}`;
 			const inst = TRAX.getAugmentedTripInstance(v.instance_id);
-			if (!inst) TRAX.logger.warn(`No trip instance found for instance_id: ${v.instance_id}`);
+			if (!inst) console.warn(`No trip instance found for instance_id: ${v.instance_id}`);
 			return {
 				...v,
 				dep_type: "gtfs" as "gtfs",

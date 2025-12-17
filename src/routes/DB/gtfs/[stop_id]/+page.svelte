@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { invalidateAll } from "$app/navigation";
 	import "$lib/styles/common.css";
-	import type { UpcomingQRTravelDeparture } from "$lib";
 	import * as qdf from "qdf-gtfs/types";
 	import { onMount } from "svelte";
-	import { type AugmentedStopTime } from "translink-rail-api";
+	import { formatTimestamp, type UpcomingQRTravelDeparture } from "$lib";
+	import type { AugmentedStopTime } from "translink-rail-api";
 	import type { PageProps } from "./$types";
 	import UserIcon from "$lib/UserIcon.svelte";
 
@@ -13,8 +13,8 @@
 				dep_type: "gtfs";
 				express_string: string;
 				last_stop_id: string;
-				scheduled_departure_time: string;
-				actual_departure_time: string;
+				scheduled_departure_timestr: string;
+				actual_departure_timestr: string;
 				departs_in: string;
 				departsInSecs: number;
 		  })
@@ -293,7 +293,7 @@
 					{dep.actual_platform_code ?? "?"}
 				</span>
 				<span class="smalltext">
-					<span class="time">Sch. {qdf.formatTimestamp(dep.scheduled_departure_time)}</span>
+					<span class="time">Sch. {dep.scheduled_departure_timestr}</span>
 					{#if data.extraDetails}
 						<span class="run">{instance.run}</span>
 					{/if}

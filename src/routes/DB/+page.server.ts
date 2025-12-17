@@ -1,5 +1,4 @@
-import TRAX from "translink-rail-api";
-import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
+import { TRAX, isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 

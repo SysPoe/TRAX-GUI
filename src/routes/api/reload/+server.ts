@@ -1,6 +1,5 @@
-import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
+import { TRAX, isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import { error } from "@sveltejs/kit";
-import TRAX from "translink-rail-api";
 
 export function GET({ locals }) {
 	if(!locals.session?.data?.admin) throw error(403, "Forbidden.");

@@ -1,4 +1,4 @@
-import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib";
+import { isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 

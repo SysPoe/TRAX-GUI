@@ -1,4 +1,4 @@
-import { loadTRAX } from "$lib";
+import { loadTRAX } from "$lib/server/trax";
 import type { ServerInit } from "@sveltejs/kit";
 import { sveltekitSessionHandle } from "svelte-kit-sessions";
 
