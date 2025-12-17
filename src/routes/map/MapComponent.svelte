@@ -15,6 +15,8 @@
 	let useRealtime = $state(true);
 	let isFollowing = $state(false);
 	let isProgrammaticMove = false;
+	let isAnimating = $state(false);
+	let animationTimer: ReturnType<typeof setTimeout> | null = null;
 
 	let shapeCache = $state<Record<string, { points: any[]; color: string }>>({});
 	let fetchController: AbortController | null = null;
@@ -45,13 +47,28 @@
 	// EFFECT: Handle following state on user move
 	$effect(() => {
 		if (mapInstance) {
-			const handleUserMove = () => {
+			const handleMoveStart = () => {
+				// Disable animation immediately when map starts moving (user or programmatic)
+				isAnimating = false;
+				if (animationTimer) clearTimeout(animationTimer);
+
 				if (!isProgrammaticMove) {
 					isFollowing = false;
 				}
 			};
-			mapInstance.on("movestart", handleUserMove);
-			return () => mapInstance?.off("movestart", handleUserMove);
+			mapInstance.on("movestart", handleMoveStart);
+			return () => mapInstance?.off("movestart", handleMoveStart);
+		}
+	});
+
+	// EFFECT: Invalidate map size when sidebar toggles
+	$effect(() => {
+		// Run this when selectedInstanceId changes
+		void selectedInstanceId;
+		if (mapInstance) {
+			setTimeout(() => {
+				mapInstance?.invalidateSize({ animate: true });
+			}, 100);
 		}
 	});
 
@@ -60,6 +77,13 @@
 		// Dependency on vps and selectedInstanceId
 		const currentVps = vps;
 		const id = selectedInstanceId;
+
+		// Trigger animation flag for markers
+		isAnimating = true;
+		if (animationTimer) clearTimeout(animationTimer);
+		animationTimer = setTimeout(() => {
+			isAnimating = false;
+		}, 1000);
 
 		if (id && currentVps) {
 			const foundVp = currentVps.find((v: any) => v.instance_id === id);
@@ -178,9 +202,10 @@
 
 	let resize = () => {
 		const navHeight = document.querySelector("nav")?.getBoundingClientRect()?.height ?? 0;
-		document
-			.querySelector("#mapContainer")
-			?.setAttribute("style", `width: 100%; height: calc(100vh - ${navHeight}px - 2rem);`);
+		const container = document.querySelector("#mapContainer") as HTMLElement;
+		if (container) {
+			container.style.height = `calc(100vh - ${navHeight}px - 2rem)`;
+		}
 	};
 
 	onMount(() => {
@@ -190,7 +215,7 @@
 	});
 </script>
 
-<div id="mapContainer" style="width:100%; height:100vh; display:flex; position:relative;">
+<div id="mapContainer" class:animating={isAnimating}>
 	{#if selectedTrip}
 		<div class="sidebar">
 			<div class="sidebar-header">
@@ -199,14 +224,16 @@
 					{#if selectedTrip.route_id && routes[selectedTrip.route_id]}
 						{@const route = routes[selectedTrip.route_id]}
 						- {route.route_short_name}
-						({route.route_long_name})
 					{/if}
 				</h3>
-				<button class="close-btn" onclick={() => {
-					selectedInstanceId = null;
-					selectedTrip = null;
-					isFollowing = false;
-				}}>&times;</button>
+				<button
+					class="close-btn"
+					onclick={() => {
+						selectedInstanceId = null;
+						selectedTrip = null;
+						isFollowing = false;
+					}}>&times;</button
+				>
 			</div>
 			<div class="sidebar-content">
 				{#if extraDetails}
@@ -228,36 +255,38 @@
 		</div>
 	{/if}
 
-	<Map options={{ center: [biggest.stop_lat ?? 0, biggest.stop_lon ?? 0], zoom: 13 }} bind:instance={mapInstance}>
-		<TileLayer url={"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} />
+	<div class="map-wrapper">
+		<Map options={{ center: [biggest.stop_lat ?? 0, biggest.stop_lon ?? 0], zoom: 13 }} bind:instance={mapInstance}>
+			<TileLayer url={"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} />
 
-		{#each Object.keys(shapeCache) as shapeId}
-			{@const shape = shapeCache[shapeId]}
-			{#if shape.points.length > 0}
-				<Polyline
-					latLngs={shape.points.map((p: any) => [p.shape_pt_lat, p.shape_pt_lon])}
-					options={{ color: shape.color, weight: 3, opacity: 0.7 }}
+			{#each Object.keys(shapeCache) as shapeId}
+				{@const shape = shapeCache[shapeId]}
+				{#if shape.points.length > 0}
+					<Polyline
+						latLngs={shape.points.map((p: any) => [p.shape_pt_lat, p.shape_pt_lon])}
+						options={{ color: shape.color, weight: 3, opacity: 0.7 }}
+					/>
+				{/if}
+			{/each}
+
+			{#each vps as vp}
+				{@const runLabel = vp.run ?? "???"}
+				<Marker
+					latLng={[vp.position.latitude, vp.position.longitude]}
+					options={{
+						icon: ipbrIcon(
+							runLabel,
+							vp.route_id
+								? routes[vp.route_id]
+								: ({ route_short_name: "?", route_color: "000000" } as Route),
+							vp.instance_id,
+						),
+						interactive: true,
+					}}
 				/>
-			{/if}
-		{/each}
-
-		{#each vps as vp}
-			{@const runLabel = vp.run ?? "???"}
-			<Marker
-				latLng={[vp.position.latitude, vp.position.longitude]}
-				options={{
-					icon: ipbrIcon(
-						runLabel,
-						vp.route_id
-							? routes[vp.route_id]
-							: ({ route_short_name: "?", route_color: "000000" } as Route),
-						vp.instance_id,
-					),
-					interactive: true,
-				}}
-			/>
-		{/each}
-	</Map>
+			{/each}
+		</Map>
+	</div>
 </div>
 
 <style>
@@ -268,19 +297,32 @@
 		right: 10px !important;
 	}
 
-	/* 2. SIDEBAR STYLING */
+	/* 2. LAYOUT */
+	#mapContainer {
+		width: 100%;
+		display: flex;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.map-wrapper {
+		flex: 1;
+		height: 100%;
+		position: relative;
+	}
+
+	/* 3. SIDEBAR STYLING */
 	.sidebar {
-		position: absolute;
-		top: 0;
-		left: 0;
 		width: 25rem;
 		height: 100%;
 		background: white;
-		z-index: 1100; /* Higher than Leaflet's 1000 */
-		box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+		z-index: 1100;
+		box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 		display: flex;
 		flex-direction: column;
-		overflow: hidden; /* Header stays fixed, content scrolls */
+		overflow: hidden;
+		flex-shrink: 0;
+		border-right: 1px solid #ddd;
 	}
 
 	.sidebar-header {
@@ -295,6 +337,7 @@
 	.sidebar-header h3 {
 		margin: 0;
 		font-family: sans-serif;
+		font-size: 1.1rem;
 	}
 
 	.sidebar-content {
@@ -309,6 +352,7 @@
 		border-bottom: 1px solid #eee;
 		font-family: sans-serif;
 		font-size: 0.9rem;
+		text-align: center;
 	}
 
 	.close-btn {
@@ -323,13 +367,21 @@
 		color: #000;
 	}
 
-	/* 3. MARKER STYLING */
+	/* 4. MARKER STYLING & ANIMATION */
 	:global(.custom-ipbr-marker) {
 		background: transparent;
 		border: none;
 		cursor: pointer !important;
 		pointer-events: auto !important;
 	}
+
+	/* Smooth movement animation ONLY during refresh */
+	:global(.animating .custom-ipbr-marker) {
+		transition: transform 1s linear;
+	}
+
+	/* Disable transition during map panning/zooming to prevent lag */
+
 
 	:global(.marker-container) {
 		display: flex;
