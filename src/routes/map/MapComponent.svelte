@@ -9,17 +9,17 @@
 
 	let { vps, shapes, biggest, stops, routes, extraDetails } = $props();
 
-	let mapInstance = $state<L.Map | null>(null);
+	let mapInstance = $state<L.Map | undefined>(undefined);
 	let selectedTrip = $state<AugmentedTripInstance | null>(null);
 	let useRealtime = $state(true);
 
 	let stationMap = $derived.by(() => {
 		const map: Record<string, AugmentedStop> = {};
-		stops.forEach((s) => (map[s.stop_id] = s));
+		stops.forEach((s: AugmentedStop) => (map[s.stop_id] = s));
 		return map;
 	});
 
-	function getContrastYIQ(hexcolor) {
+	function getContrastYIQ(hexcolor: string) {
 		// Remove leading #
 		hexcolor = hexcolor.replace("#", "");
 
@@ -27,7 +27,7 @@
 		if (hexcolor.length === 3) {
 			hexcolor = hexcolor
 				.split("")
-				.map((c) => c + c)
+				.map((c: string) => c + c)
 				.join("");
 		}
 
@@ -69,7 +69,7 @@
 					const labelDiv = markerContainer.querySelector(".run-label");
 					const runValue = labelDiv?.textContent;
 
-					const foundVp = vps.find((v) => v.tripInstance?.run?.toString() === runValue);
+					const foundVp = vps.find((v: any) => v.tripInstance?.run?.toString() === runValue);
 					if (foundVp?.tripInstance) {
 						selectedTrip = foundVp.tripInstance;
 						mapInstance?.flyTo(e.latlng, 15);
@@ -111,6 +111,14 @@
 				<button class="close-btn" onclick={() => (selectedTrip = null)}>&times;</button>
 			</div>
 			<div class="sidebar-content">
+				{#if extraDetails}
+					<div class="sidebar-controls">
+						<label>
+							<input type="checkbox" bind:checked={useRealtime} />
+							Show Realtime Data
+						</label>
+					</div>
+				{/if}
 				<StopTimes
 					inst={selectedTrip}
 					{useRealtime}
@@ -128,7 +136,7 @@
 		{#each Object.keys(shapes) as shapeId}
 			{@const shapePoints = shapes[shapeId]}
 			<Polyline
-				latLngs={shapePoints.map((p) => [p.shape_pt_lat, p.shape_pt_lon])}
+				latLngs={shapePoints.map((p: any) => [p.shape_pt_lat, p.shape_pt_lon])}
 				options={{ color: shapePoints[0].color, weight: 3, opacity: 0.7 }}
 			/>
 		{/each}

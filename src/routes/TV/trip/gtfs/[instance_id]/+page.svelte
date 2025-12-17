@@ -258,20 +258,6 @@
 		transform: scale(1.2);
 	}
 
-	.run-series-item {
-		display: flex;
-		margin: 0.2rem 0;
-	}
-
-	.route-link {
-		color: #2980b9;
-		text-decoration: none;
-	}
-
-	.route-link:hover {
-		text-decoration: underline;
-	}
-
 	.color-square {
 		width: 1rem;
 		height: 1rem;

@@ -169,13 +169,4 @@
 		margin-left: 0;
 		margin-right: 0;
 	}
-
-	.stoptimes-controls {
-		margin-bottom: 1rem;
-		text-align: center;
-	}
-	.stoptimes-controls label {
-		font-size: 1rem;
-		cursor: pointer;
-	}
 </style>
