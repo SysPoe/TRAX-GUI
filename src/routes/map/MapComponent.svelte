@@ -3,7 +3,7 @@
 	import L from "leaflet";
 	import "leaflet/dist/leaflet.css";
 	import type { AugmentedStop, AugmentedTripInstance } from "translink-rail-api";
-	import type { RealtimeVehiclePosition, Route, Shape } from "qdf-gtfs/types";
+	import type { Route } from "qdf-gtfs/types";
 	import { onMount } from "svelte";
 	import StopTimes from "$lib/StopTimes.svelte";
 
@@ -19,6 +19,30 @@
 		return map;
 	});
 
+	function getContrastYIQ(hexcolor) {
+		// Remove leading #
+		hexcolor = hexcolor.replace("#", "");
+
+		// Convert 3-digit hex to 6-digit
+		if (hexcolor.length === 3) {
+			hexcolor = hexcolor
+				.split("")
+				.map((c) => c + c)
+				.join("");
+		}
+
+		// Convert to RGB
+		const r = parseInt(hexcolor.substring(0, 2), 16);
+		const g = parseInt(hexcolor.substring(2, 4), 16);
+		const b = parseInt(hexcolor.substring(4, 6), 16);
+
+		// Calculate YIQ ratio
+		const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+		// Return black for light backgrounds, white for dark backgrounds
+		return yiq >= 128 ? "#000000" : "#FFFFFF";
+	}
+
 	// Custom Icon Generator matches your IPBR logo design
 	const ipbrIcon = (label: string, route: Route) =>
 		L.divIcon({
@@ -26,9 +50,9 @@
 			html: `
             <div class="marker-container">
                 <div class="logo-circle" style="background-color: ${route.route_color ? `#${route.route_color}` : "#000"};">
-                    <span class="logo-text">${route.route_short_name}</span>
+                    <span class="logo-text" style="color: ${getContrastYIQ(route.route_color ? `#${route.route_color}` : "#000")}">${route.route_short_name}</span>
                 </div>
-                <div class="run-label">${label}</div>
+				${extraDetails ? `<span class="run-label">${label}</span>` : ""}
             </div>`,
 			iconSize: [40, 40],
 			iconAnchor: [20, 20],
@@ -218,10 +242,11 @@
 	}
 
 	:global(.logo-text) {
-		color: white;
 		font-weight: bold;
 		font-family: sans-serif;
+		line-height: 0.8;
 		font-size: 10px;
+		text-align: center;
 	}
 
 	:global(.run-label) {
