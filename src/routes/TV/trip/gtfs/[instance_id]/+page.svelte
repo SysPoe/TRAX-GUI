@@ -243,18 +243,20 @@
 												? st.realtime_info?.delay_string
 												: "scheduled"})
 							</span>
-							{#if st.service_capacity != null}
-								{@const sc = st.service_capacity ?? ""}
+							{#if st.service_capacity >= 0}
 								<span class="serviceCapacity">
-									{#if sc.toLowerCase().trim() === "space available"}
+									{#if st.service_capacity <= 1}
+										<!-- Many seats available -->
 										<UserIcon fill="black" />
 										<UserIcon fill="#DDD" />
 										<UserIcon fill="#DDD" />
-									{:else if sc.toLowerCase().trim() === "some space available"}
+									{:else if st.service_capacity <= 3}
+										<!-- Standing room only -->
 										<UserIcon fill="black" />
 										<UserIcon fill="black" />
 										<UserIcon fill="#DDD" />
-									{:else if sc.toLowerCase().trim() === "limited space available"}
+									{:else}
+										<!-- Full -->
 										<UserIcon fill="black" />
 										<UserIcon fill="black" />
 										<UserIcon fill="black" />

@@ -59,9 +59,7 @@
 		});
 	}
 
-	let depTypes = $derived(sortDepTypes([
-		...new Set((departures as Departure[]).map((d) => getDepType(d))),
-	]));
+	let depTypes = $derived(sortDepTypes([...new Set((departures as Departure[]).map((d) => getDepType(d)))]));
 
 	let selectedDepTypes = $state(new Set<string>());
 	let hasInit = false;
@@ -70,8 +68,6 @@
 	function storageKey() {
 		return `depTypes:${params.stop_id}`;
 	}
-
-	
 
 	function writeSelectedTypesToStorage() {
 		if (typeof window === "undefined") return;
@@ -86,7 +82,10 @@
 		if (typeof window === "undefined") return null as string[] | null;
 		const raw = localStorage.getItem(storageKey());
 		if (!raw) return null;
-		const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
+		const parts = raw
+			.split(",")
+			.map((s) => s.trim())
+			.filter(Boolean);
 		const valid = parts.filter((p) => depTypes.includes(p as any));
 		return valid.length > 0 ? valid : null;
 	}
@@ -135,10 +134,7 @@
 		writeSelectedTypesToStorage();
 	}
 
-	let filteredDepartures = $derived(
-		(departures as Departure[]).filter((d) => selectedDepTypes.has(getDepType(d))),
-	);
-
+	let filteredDepartures = $derived((departures as Departure[]).filter((d) => selectedDepTypes.has(getDepType(d))));
 
 	let isRefreshing = $state(false);
 	let refreshError: string | null = $state(null);
@@ -256,9 +252,19 @@
 {#if depTypes.length > 0}
 	<div class="filters">
 		<span class="filter-label">Type:</span>
-		{#each depTypes.filter(t => t !== 'passing' || data.extraDetails) as t}
+		{#each depTypes.filter((t) => t !== "passing" || data.extraDetails) as t}
 			<button class:active={selectedDepTypes.has(t)} onclick={() => toggleDepType(t)}>
-				{t === 'scheduled' ? 'Scheduled' : t === 'canceled' ? 'Canceled' : t === 'skipped' ? 'Skipped' : t === 'term' ? 'Terminating' : t === 'passing' ? 'Passing' : t}
+				{t === "scheduled"
+					? "Scheduled"
+					: t === "canceled"
+						? "Canceled"
+						: t === "skipped"
+							? "Skipped"
+							: t === "term"
+								? "Terminating"
+								: t === "passing"
+									? "Passing"
+									: t}
 			</button>
 		{/each}
 	</div>
@@ -340,17 +346,20 @@
 									? "skipped"
 									: (dep.realtime_info?.delay_string ?? "scheduled")}
 						</span>
-						{#if dep.service_capacity != null}
+						{#if dep.service_capacity >= 0}
 							<span class="serviceCapacity">
-								{#if dep.service_capacity.toLowerCase().trim() === "space available"}
+								{#if dep.service_capacity <= 1}
+									<!-- Many seats available -->
 									<UserIcon fill="black" />
 									<UserIcon fill="#DDD" />
 									<UserIcon fill="#DDD" />
-								{:else if dep.service_capacity.toLowerCase().trim() === "some space available"}
+								{:else if dep.service_capacity <= 3}
+									<!-- Standing room only -->
 									<UserIcon fill="black" />
 									<UserIcon fill="black" />
 									<UserIcon fill="#DDD" />
-								{:else if dep.service_capacity.toLowerCase().trim() === "limited space available"}
+								{:else}
+									<!-- Full -->
 									<UserIcon fill="black" />
 									<UserIcon fill="black" />
 									<UserIcon fill="black" />
@@ -371,7 +380,14 @@
       </span> -->
 				<span class="platform qr-travel"> ? </span>
 				<span class="smalltext">
-					<span class="time">Sch. {(dep.stop?.estimatedPassingTime ?? (dep.stop?.plannedDeparture === "0001-01-01T00:00:00" ? dep.stop?.plannedArrival : dep.stop?.plannedDeparture))?.slice(11, 16)}</span>
+					<span class="time"
+						>Sch. {(
+							dep.stop?.estimatedPassingTime ??
+							(dep.stop?.plannedDeparture === "0001-01-01T00:00:00"
+								? dep.stop?.plannedArrival
+								: dep.stop?.plannedDeparture)
+						)?.slice(11, 16)}</span
+					>
 					<span class="run">{dep.run}</span> service to <br />
 					<span class="headsign">
 						{dep.service.stops
