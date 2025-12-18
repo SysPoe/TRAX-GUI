@@ -28,12 +28,6 @@
 
 <svelte:head>
     <title>TRAX Map View</title>
-
-    <style>
-        :root {
-            font-size: min(4vw, 1em);
-        }
-    </style>
 </svelte:head>
 
 {#if MapComponent}

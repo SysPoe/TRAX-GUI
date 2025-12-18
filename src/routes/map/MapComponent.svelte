@@ -26,6 +26,33 @@
 	const VEHICLE_ZOOM = $derived(vps.length > 100 ? 12 : vps.length > 50 ? 11 : vps.length > 20 ? 10 : 9);
 
 	let initialViewDone = $state(false);
+	let userLocationZoomDone = $state(false);
+
+	$effect(() => {
+		if (
+			mapInstance &&
+			userLocation &&
+			bounds &&
+			!selectedStopId &&
+			!selectedInstanceId &&
+			!userLocationZoomDone &&
+			!hasUserMovedMap
+		) {
+			const [lat, lon] = userLocation;
+			const isInBounds =
+				lat >= bounds.min_lat && lat <= bounds.max_lat && lon >= bounds.min_lon && lon <= bounds.max_lon;
+
+			if (isInBounds) {
+				isProgrammaticMove = true;
+				mapInstance.setView(userLocation, 15);
+				userLocationZoomDone = true;
+				setTimeout(() => {
+					isProgrammaticMove = false;
+				}, 500);
+			}
+		}
+	});
+
 	$effect(() => {
 		if (mapInstance && !initialViewDone) {
 			// Initialize zoom level immediately
@@ -48,6 +75,11 @@
 					mapInstance.setView([vp.position.latitude, vp.position.longitude], 15);
 					hasView = true;
 				}
+			}
+
+			if (!hasView && userLocation) {
+				mapInstance.setView(userLocation, 15);
+				hasView = true;
 			}
 
 			if (!hasView && bounds) {
@@ -98,6 +130,7 @@
 
 	let useRealtime = $state(true);
 	let isFollowing = $state(!!params?.get("trip"));
+	let hasUserMovedMap = $state(false);
 	let isProgrammaticMove = false;
 	let isAnimating = $state(false);
 	let isDragging = false;
@@ -106,6 +139,14 @@
 
 	let currentTimeSecs = $state(0);
 	let currentZoom = $state(13);
+	let userLocation = $state<[number, number] | null>(null);
+
+	let userLocationIcon = L.divIcon({
+		className: "user-location-marker",
+		html: '<div class="user-dot"></div>',
+		iconSize: [20, 20],
+		iconAnchor: [10, 10],
+	});
 
 	let highlightedStopId = $derived.by(() => {
 		if (selectedStopId) return selectedStopId;
@@ -254,6 +295,7 @@
 				if (animationTimer) clearTimeout(animationTimer);
 				if (!isProgrammaticMove) {
 					isFollowing = false;
+					hasUserMovedMap = true;
 				}
 			};
 
@@ -325,8 +367,18 @@
 		fetchTripDetails(instanceId);
 	}
 
-	let sidebarContentElement = $state<HTMLElement | null>(null);
+	function locateUser() {
+		if (userLocation && mapInstance) {
+			isFollowing = false;
+			isProgrammaticMove = true;
+			mapInstance.flyTo(userLocation, 15);
+			setTimeout(() => {
+				isProgrammaticMove = false;
+			}, 500);
+		}
+	}
 
+	let sidebarContentElement = $state<HTMLElement | null>(null);
 	$effect(() => {
 		void selectedStopId;
 		if (selectedStopId && sidebarContentElement) {
@@ -404,6 +456,16 @@
 		};
 		updateTime();
 		const timeInterval = setInterval(updateTime, 10000);
+
+		if ("geolocation" in navigator) {
+			navigator.geolocation.watchPosition(
+				(pos) => {
+					userLocation = [pos.coords.latitude, pos.coords.longitude];
+				},
+				(err) => console.warn("Geolocation error:", err),
+				{ enableHighAccuracy: true },
+			);
+		}
 
 		resize();
 		window.addEventListener("resize", resize);
@@ -503,7 +565,7 @@
 				{/if}
 			{/each}
 
-			{#if currentZoom >= VEHICLE_ZOOM}
+			{#if currentZoom >= 11}
 				{#each vps as vp}
 					{@const icon = markerIcons[vp.instance_id]}
 					{#if icon}
@@ -517,7 +579,26 @@
 					{/if}
 				{/each}
 			{/if}
+
+			{#if userLocation}
+				<Marker latLng={userLocation} options={{ icon: userLocationIcon, zIndexOffset: 1000 }} />
+			{/if}
 		</Map>
+
+		<button
+			class="locate-btn"
+			onclick={locateUser}
+			title="Locate Me"
+			class:disabled={!userLocation}
+			disabled={!userLocation}
+		>
+			<svg viewBox="0 0 24 24" width="20" height="20">
+				<path
+					fill="currentColor"
+					d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M3.05,13H1V11H3.05C3.5,6.83 6.83,3.5 11,3.05V1H13V3.05C17.17,3.5 20.5,6.83 20.95,11H23V13H20.95C20.5,17.17 17.17,20.5 13,20.95V23H11V20.95C6.83,20.5 3.5,17.17 3.05,13Z"
+				/>
+			</svg>
+		</button>
 	</div>
 </div>
 
@@ -557,6 +638,9 @@
 	}
 
 	@media (max-width: 768px) {
+		:global(:root) {
+			font-size: min(2.65vw, 1em);
+		}
 		#mapContainer {
 			flex-direction: column-reverse;
 		}
@@ -571,6 +655,22 @@
 
 		.map-wrapper {
 			flex: 1;
+		}
+
+		.sidebar-content :global(.tv-stoptimes) {
+			transform: scale(1.6);
+			transform-origin: top center;
+			height: 130%;
+		}
+	}
+
+	@media (min-width: 769px) {
+		.scaled-departures {
+			transform: scale(0.7);
+			margin-top: -1.5rem;
+			margin-left: -2rem;
+			transform-origin: top left;
+			width: 170%;
 		}
 	}
 
@@ -599,15 +699,13 @@
 
 	.sidebar-content :global(.tv-stoptimes) {
 		align-items: flex-start;
-		margin: 0;
+		margin-left: auto;
+		margin-right: auto;
 	}
 
-	.scaled-departures {
-		transform: scale(0.7);
-		margin-top: -1.5rem;
-		margin-left: -2rem;
-		transform-origin: top left;
-		width: 170%; /* Compensate for scale to fill width */
+	.sidebar-content :global(.tv-stop-time) {
+		margin-top: -0.2rem;
+		margin-bottom: -0.2rem;
 	}
 
 	.close-btn {
@@ -694,5 +792,49 @@
 		border-radius: 50%;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 		pointer-events: auto !important;
+	}
+
+	:global(.user-location-marker) {
+		background: none;
+		border: none;
+	}
+
+	:global(.user-dot) {
+		width: 14px;
+		height: 14px;
+		background: #4285f4;
+		border: 3px solid white;
+		border-radius: 50%;
+		box-shadow: 0 0 10px rgba(66, 133, 244, 0.6);
+	}
+
+	.locate-btn {
+		position: absolute;
+		bottom: 25px;
+		right: 10px;
+		z-index: 2000;
+		background: white;
+		border: 2px solid rgba(0, 0, 0, 0.2);
+		border-radius: 4px;
+		width: 34px;
+		height: 34px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		color: #444;
+		box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+		padding: 0;
+	}
+
+	.locate-btn:hover:not(.disabled) {
+		background-color: #f4f4f4;
+		color: #000;
+	}
+
+	.locate-btn.disabled {
+		color: #ccc;
+		cursor: not-allowed;
+		opacity: 0.7;
 	}
 </style>
