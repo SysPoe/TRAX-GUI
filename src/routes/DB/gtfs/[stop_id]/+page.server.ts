@@ -5,7 +5,7 @@ import {
 	isTRAXLoading,
 	loadTRAX,
 } from "$lib/server/trax";
-import { formatTimestamp, type UpcomingQRTravelDeparture } from "$lib";
+import { formatTimestamp, type Departure, type UpcomingGTFSDeparture, type UpcomingQRTravelDeparture } from "$lib";
 import type { AugmentedStopTime } from "translink-rail-api";
 import * as qdf from "qdf-gtfs";
 import type { PageServerLoad } from "./$types";
@@ -37,15 +37,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	let stop = TRAX.getAugmentedStops(stop_id)[0];
 	if (stop === undefined || stop === null) throw error(404, `Stop with ID "${stop_id}" not found.`);
-	let departures: (AugmentedStopTime & {
-		dep_type: "gtfs";
-		express_string: string;
-		last_stop_id: string;
-		scheduled_departure_timestr: string;
-		actual_departure_timestr: string;
-		departs_in: string;
-		departsInSecs: number;
-	})[] = TRAX.utils.departures.getDeparturesForStop(stop,today, startTime, endTime)
+	let departures: UpcomingGTFSDeparture[] = TRAX.utils.departures.getDeparturesForStop(stop,today, startTime, endTime)
 		.map((v) => {
 			const actualTime = formatTimestamp(
 				v.actual_departure_time ?? v.actual_arrival_time
@@ -107,18 +99,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	let qrtDepartures: UpcomingQRTravelDeparture[] = getUpcomingQRTravelDepartures(stop_id);
 
-	let mixed: (
-		| (AugmentedStopTime & {
-			dep_type: "gtfs";
-			express_string: string;
-			last_stop_id: string;
-			scheduled_departure_timestr: string;
-			actual_departure_timestr: string;
-			departs_in: string;
-			departsInSecs: number;
-		})
-		| UpcomingQRTravelDeparture
-	)[] = [...departures, ...qrtDepartures].sort((a, b) => {
+	let mixed: Departure[] = [...departures, ...qrtDepartures].sort((a, b) => {
 		return (a.departsInSecs ?? 0) - (b.departsInSecs ?? 0);
 	});
 

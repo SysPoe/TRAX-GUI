@@ -1,4 +1,4 @@
-import type { QRTTravelTrip, QRTSRTStop } from "translink-rail-api";
+import type { QRTTravelTrip, QRTSRTStop, AugmentedStopTime } from "translink-rail-api";
 
 export type SystemStatus = {
 	uptime: number;
@@ -14,6 +14,16 @@ export type SystemStatus = {
 	};
 };
 
+export type UpcomingGTFSDeparture = AugmentedStopTime & {
+	dep_type: "gtfs";
+	express_string: string;
+	last_stop_id: string;
+	scheduled_departure_timestr: string;
+	actual_departure_timestr: string;
+	departs_in: string;
+	departsInSecs: number;
+};
+
 export type UpcomingQRTravelDeparture = {
 	dep_type: "qrt";
 	service: QRTTravelTrip;
@@ -25,3 +35,5 @@ export type UpcomingQRTravelDeparture = {
 	delayClass: "very-late" | "late" | "early" | "on-time" | "scheduled";
 	run: string | null;
 };
+
+export type Departure = UpcomingGTFSDeparture | UpcomingQRTravelDeparture;
