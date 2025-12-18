@@ -255,19 +255,7 @@
 
 				if (markerContainer && markerContainer.dataset.instanceId) {
 					const id = markerContainer.dataset.instanceId;
-					const foundVp = vps.find((v: any) => v.instance_id === id);
-					if (foundVp) {
-						selectedInstanceId = id;
-						selectedStopId = null;
-						if (departureRefreshTimer) clearInterval(departureRefreshTimer);
-						isFollowing = true;
-						isProgrammaticMove = true;
-						mapInstance?.flyTo([foundVp.position.latitude, foundVp.position.longitude], 15);
-						setTimeout(() => {
-							isProgrammaticMove = false;
-						}, 500);
-						fetchTripDetails(id);
-					}
+					handleTripClick(id);
 				}
 			};
 
@@ -295,6 +283,34 @@
 		isFollowing = false;
 		startDepartureRefresh(stopId);
 	}
+
+	function handleTripClick(instanceId: string) {
+		const foundVp = vps.find((v: any) => v.instance_id === instanceId);
+		selectedInstanceId = instanceId;
+		selectedStopId = null;
+		if (departureRefreshTimer) clearInterval(departureRefreshTimer);
+		
+		if (foundVp) {
+			isFollowing = true;
+			isProgrammaticMove = true;
+			mapInstance?.flyTo([foundVp.position.latitude, foundVp.position.longitude], 15);
+			setTimeout(() => {
+				isProgrammaticMove = false;
+			}, 500);
+		} else {
+			isFollowing = false;
+		}
+		fetchTripDetails(instanceId);
+	}
+
+	let sidebarContentElement = $state<HTMLElement | null>(null);
+
+	$effect(() => {
+		void selectedStopId;
+		if (selectedStopId && sidebarContentElement) {
+			sidebarContentElement.scrollTo(0, 0);
+		}
+	});
 
 	// EFFECT: Invalidate map size when sidebar toggles
 	$effect(() => {
@@ -425,7 +441,7 @@
 					}}>&times;</button
 				>
 			</div>
-			<div class="sidebar-content">
+			<div class="sidebar-content" bind:this={sidebarContentElement}>
 				{#if selectedTrip}
 					<StopTimes
 						inst={selectedTrip}
@@ -434,6 +450,7 @@
 						route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
 						{extraDetails}
 						{highlightedStopId}
+						onStopClick={handleStationClick}
 					/>
 				{:else if selectedStopId}
 					{#if isRefreshingDepartures && selectedStopDepartures.length === 0}
@@ -446,6 +463,7 @@
 								routes={selectedStopRoutes}
 								stop_id={selectedStopId}
 								{extraDetails}
+								onTripClick={handleTripClick}
 							/>
 						</div>
 					{/if}

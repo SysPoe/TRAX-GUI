@@ -14,6 +14,7 @@
 		route,
 		extraDetails,
 		highlightedStopId = null,
+		onStopClick,
 	}: {
 		inst: AugmentedTripInstance;
 		useRealtime: boolean;
@@ -21,17 +22,21 @@
 		route: { route_color?: string | null };
 		extraDetails: boolean;
 		highlightedStopId?: string | null;
+		onStopClick?: (stopId: string) => void;
 	} = $props();
 
 	let containerElement = $state<HTMLElement | null>(null);
 
 	$effect(() => {
 		if (highlightedStopId && containerElement) {
-			// Find the element with the data-stop-id
-			const element = containerElement.querySelector(`[data-stop-id="${highlightedStopId}"]`);
-			if (element) {
-				element.scrollIntoView({ behavior: "smooth", block: "center" });
-			}
+			// Small timeout to ensure sidebar layout is settled
+			const timer = setTimeout(() => {
+				const element = containerElement?.querySelector(`[data-stop-id="${highlightedStopId}"]`);
+				if (element) {
+					element.scrollIntoView({ behavior: "smooth", block: "center" });
+				}
+			}, 100);
+			return () => clearTimeout(timer);
 		}
 	});
 </script>
@@ -60,7 +65,11 @@
 					return;
 				}
 				ev.preventDefault();
-				goto(`/DB/gtfs/${stopId}`);
+				if (onStopClick) {
+					onStopClick(stopId);
+				} else {
+					goto(`/DB/gtfs/${stopId}`);
+				}
 			}}
 		>
 			<span class="tv-platform" style="background-color: #{route.route_color ?? '000000'}">

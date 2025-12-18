@@ -11,12 +11,14 @@
 		routes,
 		stop_id,
 		extraDetails,
+		onTripClick,
 	}: {
 		departures: Departure[];
 		instances: Record<string, AugmentedTripInstance>;
 		routes: Record<string, qdf.Route>;
 		stop_id: string;
 		extraDetails: boolean;
+		onTripClick?: (instanceId: string) => void;
 	} = $props();
 
 	// --- Departure type filtering ---
@@ -167,6 +169,13 @@
 							? 'passing'
 							: ''}"
 				href={`/TV/trip/gtfs/${dep.instance_id}#stoptimes`}
+				onclick={(ev) => {
+					if (onTripClick) {
+						if (ev.shiftKey || ev.ctrlKey || ev.metaKey) return;
+						ev.preventDefault();
+						onTripClick(dep.instance_id);
+					}
+				}}
 			>
 				<span class="platform" style="background-color: #{route.route_color}">
 					{dep.actual_platform_code ?? "?"}
@@ -253,6 +262,13 @@
 			<a
 				class="departure {dep.passing ? 'passing' : 'qr-travel'} qrt"
 				href={`/TV/trip/QRT/${dep.service.serviceId}#stoptimes`}
+				onclick={(ev) => {
+					if (onTripClick) {
+						if (ev.shiftKey || ev.ctrlKey || ev.metaKey) return;
+						ev.preventDefault();
+						onTripClick(dep.service.serviceId); // QRT use serviceId
+					}
+				}}
 			>
 				<span class="platform qr-travel"> ? </span>
 				<span class="smalltext">
