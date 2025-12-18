@@ -12,7 +12,6 @@
 	let mapInstance = $state<L.Map | undefined>(undefined);
 	let selectedInstanceId = $state<string | null>(null);
 	let selectedTrip = $state<AugmentedTripInstance | null>(null);
-	let useRealtime = $state(true);
 	let isFollowing = $state(false);
 	let isProgrammaticMove = false;
 	let isAnimating = $state(false);
@@ -182,11 +181,13 @@
 
 				if (container && container.dataset.instanceId) {
 					const id = container.dataset.instanceId;
-					if (id !== selectedInstanceId) {
+					const foundVp = vps.find((v: any) => v.instance_id === id);
+					if (foundVp) {
 						selectedInstanceId = id;
 						isFollowing = true;
 						isProgrammaticMove = true;
-						mapInstance?.flyTo(e.latlng, 15);
+						// Fly to the actual vehicle position
+						mapInstance?.flyTo([foundVp.position.latitude, foundVp.position.longitude], 15);
 						setTimeout(() => {
 							isProgrammaticMove = false;
 						}, 500);
@@ -225,6 +226,14 @@
 						{@const route = routes[selectedTrip.route_id]}
 						- {route.route_short_name}
 					{/if}
+					<a
+						href="/TV/trip/gtfs/{selectedTrip.instance_id}"
+						target="_blank"
+						title="View in TripViewer"
+						style="font-size: 0.8rem; margin-left: 0.5rem; text-decoration: none;"
+					>
+						🔗
+					</a>
 				</h3>
 				<button
 					class="close-btn"
@@ -236,17 +245,9 @@
 				>
 			</div>
 			<div class="sidebar-content">
-				{#if extraDetails}
-					<div class="sidebar-controls">
-						<label>
-							<input type="checkbox" bind:checked={useRealtime} />
-							Show Realtime Data
-						</label>
-					</div>
-				{/if}
 				<StopTimes
 					inst={selectedTrip}
-					{useRealtime}
+					useRealtime={true}
 					stations={stationMap}
 					route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
 					{extraDetails}
@@ -313,7 +314,7 @@
 
 	/* 3. SIDEBAR STYLING */
 	.sidebar {
-		width: 25rem;
+		width: fit-content;
 		height: 100%;
 		background: white;
 		z-index: 1100;
@@ -343,16 +344,13 @@
 	.sidebar-content {
 		flex: 1;
 		overflow-y: auto;
-		padding: 1rem;
+		margin-left: auto;
+		margin-right: auto;
 	}
 
-	.sidebar-controls {
-		padding: 12px 15px;
-		background: #fff;
-		border-bottom: 1px solid #eee;
-		font-family: sans-serif;
-		font-size: 0.9rem;
-		text-align: center;
+	.sidebar-content :global(.tv-stoptimes) {
+		align-items: flex-start;
+		margin: 0;
 	}
 
 	.close-btn {
@@ -389,6 +387,8 @@
 		align-items: center;
 		justify-content: center;
 		pointer-events: auto; /* Enable clicks */
+		width: 40px;
+		height: fit-content;
 	}
 
 	:global(.logo-circle) {

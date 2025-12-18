@@ -19,6 +19,7 @@
 <h1>SysPoe's Projects</h1>
 <a href="DB">TRAX <i>DepartureBoard</i></a><br />
 <a href="TV">TRAX <i>TripViewer</i></a><br />
+<a href="map">TRAX <i>Map</i></a><br />
 {#if data.admin}
 	<a href="admin">Admin Dashboard</a><br />
 {:else}

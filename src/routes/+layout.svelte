@@ -6,9 +6,11 @@
 
 <nav>
 	<a href="/">Home</a>
-	<a href="/DB">DepartureBoard</a>
-	<a href="/TV">TripViewer</a>
-	{#if data.admin}
+	        <a href="/DB">DepartureBoard</a>
+	        <a href="/TV">TripViewer</a>
+	        <a href="/map">Map</a>
+	        {#if data.admin}
+	
 		|
 		<a href="/admin">Dashboard</a>
 		<a href="/admin/logout">Logout</a>

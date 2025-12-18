@@ -3,7 +3,6 @@
 	import StopTimes from "$lib/StopTimes.svelte";
 	import type { PageProps } from "./$types";
 	import "$lib/styles/common.css";
-	import "$lib/styles/stoptimes.css";
 	import * as qdf from "qdf-gtfs/types";
 
 	let { data }: PageProps = $props();

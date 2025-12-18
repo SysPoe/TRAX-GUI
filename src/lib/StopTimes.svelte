@@ -69,12 +69,10 @@
 					{/if}
 				</span>
 				<span
-					class="tv-delay {useRealtime &&
-					inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
+					class="tv-delay {useRealtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 						? 'canceled'
 						: useRealtime &&
-								st.realtime_info?.schedule_relationship ===
-									qdf.StopTimeScheduleRelationship.SKIPPED
+							  st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 							? 'canceled'
 							: st.passing
 								? 'estimated'
@@ -85,8 +83,7 @@
 					({useRealtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 						? "canceled"
 						: useRealtime &&
-								st.realtime_info?.schedule_relationship ===
-									qdf.StopTimeScheduleRelationship.SKIPPED
+							  st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 							? "skipped"
 							: st.passing
 								? "estimated"
@@ -163,10 +160,3 @@
 		<hr />
 	{/each}
 </div>
-
-<style>
-	:global(.tv-stoptimes) {
-		margin-left: 0;
-		margin-right: 0;
-	}
-</style>
