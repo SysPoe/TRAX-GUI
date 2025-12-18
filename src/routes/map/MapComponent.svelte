@@ -7,7 +7,7 @@
 	import { onMount, untrack } from "svelte";
 	import StopTimes from "$lib/StopTimes.svelte";
 
-	let { vps, biggest, stops, routes, extraDetails } = $props();
+	let { vps, shapes, biggest, stops, routes, extraDetails } = $props();
 
 	let mapInstance = $state<L.Map | undefined>(undefined);
 	let selectedInstanceId = $state<string | null>(null);
@@ -31,7 +31,6 @@
 		return nextStop ? (nextStop.scheduled_parent_station_id ?? nextStop.scheduled_stop_id) : null;
 	});
 
-	let shapeCache = $state<Record<string, { points: any[]; color: string }>>({});
 	let fetchController: AbortController | null = null;
 
 	let stationMap = $derived.by(() => {
@@ -188,29 +187,6 @@
 		}
 	});
 
-	// EFFECT: Fetch shapes
-	$effect(() => {
-		if (vps) {
-			vps.forEach((vp: any) => {
-				if (vp.shape_id && !shapeCache[vp.shape_id]) {
-					const route = routes[vp.route_id];
-					const color = route?.route_color ? `#${route.route_color}` : "#0000FF";
-					shapeCache[vp.shape_id] = { points: [], color };
-
-					fetch(`/api/shape/${vp.shape_id}`)
-						.then((r) => r.json())
-						.then((points) => {
-							shapeCache[vp.shape_id] = { points, color };
-						})
-						.catch((err) => {
-							console.error(`Failed to fetch shape ${vp.shape_id}`, err);
-							delete shapeCache[vp.shape_id];
-						});
-				}
-			});
-		}
-	});
-
 	function getContrastYIQ(hexcolor: string) {
 		hexcolor = hexcolor.replace("#", "");
 		if (hexcolor.length === 3) {
@@ -280,14 +256,6 @@
 				>
 			</div>
 			<div class="sidebar-content">
-				{#if extraDetails}
-					<div class="sidebar-controls">
-						<label>
-							<input type="checkbox" bind:checked={useRealtime} />
-							Show Realtime Data
-						</label>
-					</div>
-				{/if}
 				<StopTimes
 					inst={selectedTrip}
 					{useRealtime}
@@ -320,8 +288,8 @@
 				{/if}
 			{/each}
 
-			{#each Object.keys(shapeCache) as shapeId}
-				{@const shape = shapeCache[shapeId]}
+			{#each Object.keys(shapes) as shapeId}
+				{@const shape = shapes[shapeId]}
 				{#if shape.points.length > 0}
 					<Polyline
 						latLngs={shape.points.map((p: any) => [p.shape_pt_lat, p.shape_pt_lon])}

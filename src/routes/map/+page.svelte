@@ -5,6 +5,7 @@
 
     let { data } = $props();
     let vps = $derived(data.vps);
+    let shapes = $derived(data.shapes);
     let biggest = $derived(data.biggest);
     let stops = $derived(data.stops);
     let routes = $derived(data.routes);
@@ -25,11 +26,16 @@
     });
 </script>
 
+<svelte:head>
+    <title>TRAX Map View</title>
+</svelte:head>
+
 {#if MapComponent}
-    <MapComponent {vps} {biggest} {stops} {routes} {extraDetails} />
+    <MapComponent {vps} {shapes} {biggest} {stops} {routes} {extraDetails} />
 {:else}
-    <p>Loading map...</p>
+    <p>Loading...</p>
 {/if}
+
 
 <style>
     :global(body) {
