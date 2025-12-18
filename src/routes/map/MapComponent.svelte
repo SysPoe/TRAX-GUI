@@ -10,18 +10,78 @@
 
 	let { vps, shapes, bounds, stops, routes, extraDetails } = $props();
 
+	const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+
 	let mapInstance = $state<L.Map | undefined>(undefined);
-	let selectedInstanceId = $state<string | null>(null);
+	let selectedInstanceId = $state<string | null>(params?.get("trip") ?? null);
 	let selectedTrip = $state<AugmentedTripInstance | null>(null);
 
-	let selectedStopId = $state<string | null>(null);
+	let selectedStopId = $state<string | null>(params?.get("stop") ?? null);
 	let selectedStopDepartures = $state<Departure[]>([]);
 	let selectedStopInstances = $state<Record<string, AugmentedTripInstance>>({});
 	let selectedStopRoutes = $state<Record<string, any>>({});
 	let isRefreshingDepartures = $state(false);
 
+	let initialViewDone = $state(false);
+	$effect(() => {
+		if (mapInstance && !initialViewDone) {
+			// Initialize zoom level immediately
+			currentZoom = mapInstance.getZoom();
+
+			if (selectedStopId) {
+				const stop = stops.find((s: any) => s.stop_id === selectedStopId);
+				if (stop && stop.stop_lat && stop.stop_lon) {
+					mapInstance.setView([stop.stop_lat, stop.stop_lon], 15);
+					startDepartureRefresh(selectedStopId);
+				}
+			} else if (selectedInstanceId) {
+				const vp = vps.find((v: any) => v.instance_id === selectedInstanceId);
+				if (vp) {
+					mapInstance.setView([vp.position.latitude, vp.position.longitude], 15);
+					fetchTripDetails(selectedInstanceId);
+				}
+			} else if (bounds) {
+				mapInstance.fitBounds([
+					[bounds.min_lat, bounds.min_lon],
+					[bounds.max_lat, bounds.max_lon],
+				]);
+			}
+			
+			// Ensure zoom state is captured after setView/fitBounds
+			currentZoom = mapInstance.getZoom();
+			initialViewDone = true;
+		}
+	});
+
+	$effect(() => {
+		const instId = selectedInstanceId;
+		const stopId = selectedStopId;
+
+		untrack(() => {
+			if (!initialViewDone) return;
+			const url = new URL(window.location.href);
+			const oldTrip = url.searchParams.get("trip");
+			const oldStop = url.searchParams.get("stop");
+
+			if (instId) {
+				url.searchParams.set("trip", instId);
+				url.searchParams.delete("stop");
+			} else if (stopId) {
+				url.searchParams.set("stop", stopId);
+				url.searchParams.delete("trip");
+			} else {
+				url.searchParams.delete("trip");
+				url.searchParams.delete("stop");
+			}
+
+			if (url.search !== window.location.search) {
+				window.history.replaceState({}, "", url);
+			}
+		});
+	});
+
 	let useRealtime = $state(true);
-	let isFollowing = $state(false);
+	let isFollowing = $state(!!(params?.get("trip")));
 	let isProgrammaticMove = false;
 	let isAnimating = $state(false);
 	let isDragging = false;
@@ -303,17 +363,6 @@
 			container.style.height = `calc(100vh - ${navHeight}px - 2rem)`;
 		}
 	};
-
-	let initialFitDone = false;
-	$effect(() => {
-		if (mapInstance && bounds && !initialFitDone) {
-			mapInstance.fitBounds([
-				[bounds.min_lat, bounds.min_lon],
-				[bounds.max_lat, bounds.max_lon],
-			]);
-			initialFitDone = true;
-		}
-	});
 
 	onMount(() => {
 		const updateTime = () => {
