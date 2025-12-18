@@ -6,22 +6,32 @@
 	import type { Route } from "qdf-gtfs/types";
 	import { onMount, untrack } from "svelte";
 	import StopTimes from "$lib/StopTimes.svelte";
+	import { DepartureBoard, type Departure } from "$lib";
 
 	let { vps, shapes, biggest, stops, routes, extraDetails } = $props();
 
 	let mapInstance = $state<L.Map | undefined>(undefined);
 	let selectedInstanceId = $state<string | null>(null);
 	let selectedTrip = $state<AugmentedTripInstance | null>(null);
+
+	let selectedStopId = $state<string | null>(null);
+	let selectedStopDepartures = $state<Departure[]>([]);
+	let selectedStopInstances = $state<Record<string, AugmentedTripInstance>>({});
+	let selectedStopRoutes = $state<Record<string, any>>({});
+	let isRefreshingDepartures = $state(false);
+
 	let useRealtime = $state(true);
 	let isFollowing = $state(false);
 	let isProgrammaticMove = false;
 	let isAnimating = $state(false);
 	let isDragging = false;
 	let animationTimer: ReturnType<typeof setTimeout> | null = null;
+	let departureRefreshTimer: ReturnType<typeof setInterval> | null = null;
 
 	let currentTimeSecs = $state(0);
 
 	let highlightedStopId = $derived.by(() => {
+		if (selectedStopId) return selectedStopId;
 		if (!selectedTrip) return null;
 		// Find first stop that hasn't happened yet
 		const nextStop = selectedTrip.stopTimes.find((st) => {
@@ -39,11 +49,11 @@
 		return map;
 	});
 
-	const stationIcon = L.divIcon({
+	const createStationIcon = (stopId: string) => L.divIcon({
 		className: "station-marker-icon",
-		html: `<div class="station-dot"></div>`,
-		iconSize: [12, 12],
-		iconAnchor: [6, 6],
+		html: `<div class="station-dot" data-stop-id="${stopId}"></div>`,
+		iconSize: [8, 8],
+		iconAnchor: [4, 4],
 	});
 
 	// Memoize icons to prevent prototype loss during Svelte updates
@@ -89,6 +99,68 @@
 		}
 	}
 
+	async function fetchStationDepartures(stopId: string) {
+		isRefreshingDepartures = true;
+		try {
+			const res = await fetch(`/api/stop/${stopId}`);
+			if (res.ok) {
+				const data = await res.json();
+				selectedStopDepartures = data.departures;
+				selectedStopInstances = data.instances;
+				selectedStopRoutes = data.routes;
+			}
+		} catch (err) {
+			console.error("Failed to fetch station departures", err);
+		} finally {
+			isRefreshingDepartures = false;
+		}
+	}
+
+	function startDepartureRefresh(stopId: string) {
+		if (departureRefreshTimer) clearInterval(departureRefreshTimer);
+		fetchStationDepartures(stopId);
+		departureRefreshTimer = setInterval(() => {
+			fetchStationDepartures(stopId);
+		}, 30000);
+	}
+
+	let stationMarkers: L.Marker[] = [];
+
+	// EFFECT: Handle station markers manually
+	$effect(() => {
+		if (mapInstance && stops.length > 0) {
+			// Clear existing markers
+			stationMarkers.forEach((m) => m.remove());
+			stationMarkers = [];
+
+			stops.forEach((stop: AugmentedStop) => {
+				if (stop.stop_lat && stop.stop_lon) {
+					const marker = L.marker([stop.stop_lat, stop.stop_lon], {
+						icon: createStationIcon(stop.stop_id),
+						interactive: true,
+					}).addTo(mapInstance!);
+
+					marker.bindTooltip(stop.stop_name ?? "Unknown", {
+						direction: "top",
+						offset: [0, -5],
+					});
+
+					marker.on("click", (e) => {
+						L.DomEvent.stopPropagation(e);
+						handleStationClick(stop.stop_id);
+					});
+
+					stationMarkers.push(marker);
+				}
+			});
+
+			return () => {
+				stationMarkers.forEach((m) => m.remove());
+				stationMarkers = [];
+			};
+		}
+	});
+
 	// EFFECT: Handle map interaction events
 	$effect(() => {
 		if (mapInstance) {
@@ -111,13 +183,15 @@
 
 			const handleMapClick = (e: L.LeafletMouseEvent) => {
 				const clickedElement = e.originalEvent.target as HTMLElement;
-				const container = clickedElement.closest(".marker-container") as HTMLElement;
+				const markerContainer = clickedElement.closest(".marker-container") as HTMLElement;
 
-				if (container && container.dataset.instanceId) {
-					const id = container.dataset.instanceId;
+				if (markerContainer && markerContainer.dataset.instanceId) {
+					const id = markerContainer.dataset.instanceId;
 					const foundVp = vps.find((v: any) => v.instance_id === id);
 					if (foundVp) {
 						selectedInstanceId = id;
+						selectedStopId = null;
+						if (departureRefreshTimer) clearInterval(departureRefreshTimer);
 						isFollowing = true;
 						isProgrammaticMove = true;
 						mapInstance?.flyTo([foundVp.position.latitude, foundVp.position.longitude], 15);
@@ -126,6 +200,12 @@
 						}, 500);
 						fetchTripDetails(id);
 					}
+				} else {
+					selectedInstanceId = null;
+					selectedTrip = null;
+					selectedStopId = null;
+					if (departureRefreshTimer) clearInterval(departureRefreshTimer);
+					isFollowing = false;
 				}
 			};
 
@@ -143,9 +223,19 @@
 		}
 	});
 
+	function handleStationClick(stopId: string) {
+		console.log("handleStationClick called for", stopId);
+		selectedStopId = stopId;
+		selectedInstanceId = null;
+		selectedTrip = null;
+		isFollowing = false;
+		startDepartureRefresh(stopId);
+	}
+
 	// EFFECT: Invalidate map size when sidebar toggles
 	$effect(() => {
 		void selectedInstanceId;
+		void selectedStopId;
 		if (mapInstance && !isDragging) {
 			setTimeout(() => {
 				mapInstance?.invalidateSize({ animate: true });
@@ -223,47 +313,79 @@
 		return () => {
 			window.removeEventListener("resize", resize);
 			clearInterval(timeInterval);
+			if (departureRefreshTimer) clearInterval(departureRefreshTimer);
 		};
 	});
 </script>
 
 <div id="mapContainer" class:animating={isAnimating}>
-	{#if selectedTrip}
+	{#if selectedTrip || selectedStopId}
 		<div class="sidebar">
 			<div class="sidebar-header">
 				<h3>
-					Trip {selectedTrip.run}
-					{#if selectedTrip.route_id && routes[selectedTrip.route_id]}
-						{@const route = routes[selectedTrip.route_id]}
-						- {route.route_short_name}
+					{#if selectedTrip}
+						Trip {selectedTrip.run}
+						{#if selectedTrip.route_id && routes[selectedTrip.route_id]}
+							{@const route = routes[selectedTrip.route_id]}
+							- {route.route_short_name}
+						{/if}
+						<a
+							href="/TV/trip/gtfs/{selectedTrip.instance_id}"
+							target="_blank"
+							title="View in TripViewer"
+							style="font-size: 0.8rem; margin-left: 0.5rem; text-decoration: none;"
+						>
+							🔗
+						</a>
+					{:else if selectedStopId}
+						{@const station = stationMap[selectedStopId]}
+						Departures: {station?.stop_name ?? "Unknown"}
+						<a
+							href="/DB/gtfs/{selectedStopId}"
+							target="_blank"
+							title="View in DepartureBoard"
+							style="font-size: 0.8rem; margin-left: 0.5rem; text-decoration: none;"
+						>
+							🔗
+						</a>
 					{/if}
-					<a
-						href="/TV/trip/gtfs/{selectedTrip.instance_id}"
-						target="_blank"
-						title="View in TripViewer"
-						style="font-size: 0.8rem; margin-left: 0.5rem; text-decoration: none;"
-					>
-						🔗
-					</a>
 				</h3>
 				<button
 					class="close-btn"
 					onclick={() => {
 						selectedInstanceId = null;
 						selectedTrip = null;
+						selectedStopId = null;
+						if (departureRefreshTimer) clearInterval(departureRefreshTimer);
 						isFollowing = false;
 					}}>&times;</button
 				>
 			</div>
 			<div class="sidebar-content">
-				<StopTimes
-					inst={selectedTrip}
-					{useRealtime}
-					stations={stationMap}
-					route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
-					{extraDetails}
-					{highlightedStopId}
-				/>
+				{#if selectedTrip}
+					<StopTimes
+						inst={selectedTrip}
+						{useRealtime}
+						stations={stationMap}
+						route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
+						{extraDetails}
+						{highlightedStopId}
+					/>
+				{:else if selectedStopId}
+					{#if isRefreshingDepartures && selectedStopDepartures.length === 0}
+						<p>Loading departures...</p>
+					{:else}
+						<div class="scaled-departures">
+							<DepartureBoard
+								departures={selectedStopDepartures}
+								instances={selectedStopInstances}
+								routes={selectedStopRoutes}
+								stop_id={selectedStopId}
+								{extraDetails}
+							/>
+						</div>
+					{/if}
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -271,22 +393,6 @@
 	<div class="map-wrapper">
 		<Map options={{ center: [biggest.stop_lat ?? 0, biggest.stop_lon ?? 0], zoom: 13 }} bind:instance={mapInstance}>
 			<TileLayer url={"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} />
-
-			{#each stops as stop}
-				{#if stop.stop_lat && stop.stop_lon}
-					<Marker
-						latLng={[stop.stop_lat, stop.stop_lon]}
-						options={{
-							icon: stationIcon,
-							interactive: true,
-						}}
-					>
-						<Tooltip options={{ direction: "top", offset: [0, -5] }}>
-							{stop.stop_name}
-						</Tooltip>
-					</Marker>
-				{/if}
-			{/each}
 
 			{#each Object.keys(shapes) as shapeId}
 				{@const shape = shapes[shapeId]}
@@ -386,12 +492,21 @@
 	.sidebar-content {
 		flex: 1;
 		overflow-y: auto;
+		overflow-x: hidden;
 		padding: 1rem;
 	}
 
 	.sidebar-content :global(.tv-stoptimes) {
 		align-items: flex-start;
 		margin: 0;
+	}
+
+	.scaled-departures {
+		transform: scale(0.65);
+		margin-top: -2em;
+		margin-left: -1em;
+		transform-origin: top left;
+		width: 170%; /* Compensate for scale to fill width */
 	}
 
 	.close-btn {
@@ -466,6 +581,8 @@
 		background: transparent;
 		border: none;
 		z-index: 1000;
+		pointer-events: auto !important;
+		cursor: pointer !important;
 	}
 
 	:global(.station-dot) {
@@ -475,5 +592,6 @@
 		border: 2px solid #2c3e50;
 		border-radius: 50%;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+		pointer-events: auto !important;
 	}
 </style>
