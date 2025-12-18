@@ -28,23 +28,36 @@
 			// Initialize zoom level immediately
 			currentZoom = mapInstance.getZoom();
 
+			let hasView = false;
 			if (selectedStopId) {
 				const stop = stops.find((s: any) => s.stop_id === selectedStopId);
 				if (stop && stop.stop_lat && stop.stop_lon) {
 					mapInstance.setView([stop.stop_lat, stop.stop_lon], 15);
 					startDepartureRefresh(selectedStopId);
+					hasView = true;
 				}
-			} else if (selectedInstanceId) {
+			}
+
+			if (selectedInstanceId) {
+				fetchTripDetails(selectedInstanceId);
 				const vp = vps.find((v: any) => v.instance_id === selectedInstanceId);
 				if (vp) {
 					mapInstance.setView([vp.position.latitude, vp.position.longitude], 15);
-					fetchTripDetails(selectedInstanceId);
+					hasView = true;
 				}
-			} else if (bounds) {
+			}
+
+			if (!hasView && bounds) {
 				mapInstance.fitBounds([
 					[bounds.min_lat, bounds.min_lon],
 					[bounds.max_lat, bounds.max_lon],
 				]);
+				hasView = true;
+			}
+
+			if (!hasView) {
+				// Fallback to a default view if nothing else matches
+				mapInstance.setView([stops[0].stop_lat, stops[0].stop_lon], 12);
 			}
 			
 			// Ensure zoom state is captured after setView/fitBounds
@@ -94,6 +107,11 @@
 	let highlightedStopId = $derived.by(() => {
 		if (selectedStopId) return selectedStopId;
 		if (!selectedTrip) return null;
+
+		// Only highlight if there's an active vehicle position
+		const hasVp = vps.some((v: any) => v.instance_id === selectedInstanceId);
+		if (!hasVp) return null;
+
 		// Find first stop that hasn't happened yet
 		const nextStop = selectedTrip.stopTimes.find((st) => {
 			const time = st.actual_arrival_time ?? st.actual_departure_time;
@@ -334,12 +352,11 @@
 			isAnimating = false;
 		}, 1000);
 
-		if (id && currentVps) {
-			const foundVp = currentVps.find((v: any) => v.instance_id === id);
+		if (id) {
+			untrack(() => fetchTripDetails(id));
 
+			const foundVp = currentVps?.find((v: any) => v.instance_id === id);
 			if (foundVp) {
-				untrack(() => fetchTripDetails(id));
-
 				if (isFollowing && mapInstance && !isDragging) {
 					isProgrammaticMove = true;
 					mapInstance.flyTo([foundVp.position.latitude, foundVp.position.longitude], mapInstance.getZoom());
@@ -348,11 +365,7 @@
 					}, 500);
 				}
 			} else {
-				untrack(() => {
-					selectedInstanceId = null;
-					selectedTrip = null;
-					isFollowing = false;
-				});
+				isFollowing = false;
 			}
 		}
 	});
@@ -447,7 +460,7 @@
 						inst={selectedTrip}
 						{useRealtime}
 						stations={stationMap}
-						route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
+						route={(selectedTrip.route_id ? routes[selectedTrip.route_id] : null) ?? {}}
 						{extraDetails}
 						{highlightedStopId}
 						onStopClick={handleStationClick}

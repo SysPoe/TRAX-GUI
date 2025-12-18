@@ -46,8 +46,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	let seen: Map<string, boolean> = new Map();
 	const shapesData = TRAX.getShapes().filter(v => {
-		if(seen.has(v.route_id.slice(0,4))) return false;
-		seen.set(v.route_id.slice(0,4), true);
+		if (seen.has(v.route_id.slice(0, 4))) return false;
+		seen.set(v.route_id.slice(0, 4), true);
 		return true;
 	});
 	const shapes: Record<string, { points: any[]; color: string }> = {};
@@ -64,11 +64,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	let routesMap: { [key: string]: Route } = {};
-	const uniqueRouteIds = [...new Set([...vps.map((v) => v.route_id)])];
-	uniqueRouteIds.forEach((id) => {
-		const r = TRAX.gtfs.getRoute(id);
-		if (r) routesMap[id] = r;
-	});
+	TRAX.getRawRoutes().forEach(v => routesMap[v.route_id] = v);
 
 	let stops = TRAX.getStations();
 	const stopsWithCoords = stops.filter((v) => v.stop_lat != null && v.stop_lon != null);
