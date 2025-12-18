@@ -447,6 +447,7 @@
 		border: none;
 		cursor: pointer !important;
 		pointer-events: auto !important;
+		z-index: 2000 !important;
 	}
 
 	:global(.animating .custom-ipbr-marker) {
@@ -496,6 +497,7 @@
 	:global(.station-marker-icon) {
 		background: transparent;
 		border: none;
+		z-index: 1000;
 	}
 
 	:global(.station-dot) {
