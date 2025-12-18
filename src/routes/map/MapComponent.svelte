@@ -314,7 +314,7 @@
 
 	/* 3. SIDEBAR STYLING */
 	.sidebar {
-		width: fit-content;
+		width: 25rem;
 		height: 100%;
 		background: white;
 		z-index: 1100;
@@ -326,8 +326,26 @@
 		border-right: 1px solid #ddd;
 	}
 
+	@media (max-width: 768px) {
+		#mapContainer {
+			flex-direction: column-reverse;
+		}
+
+		.sidebar {
+			width: 100%;
+			height: 50%;
+			border-right: none;
+			border-top: 1px solid #ddd;
+			box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+		}
+
+		.map-wrapper {
+			flex: 1;
+		}
+	}
+
 	.sidebar-header {
-		padding: 15px;
+		padding: 4px 12px;
 		background: #f8f8f8;
 		border-bottom: 1px solid #ddd;
 		display: flex;
@@ -338,14 +356,14 @@
 	.sidebar-header h3 {
 		margin: 0;
 		font-family: sans-serif;
-		font-size: 1.1rem;
+		font-size: 0.9rem;
+		line-height: 1.2;
 	}
 
 	.sidebar-content {
 		flex: 1;
 		overflow-y: auto;
-		margin-left: auto;
-		margin-right: auto;
+		padding: 1rem;
 	}
 
 	.sidebar-content :global(.tv-stoptimes) {
@@ -356,9 +374,12 @@
 	.close-btn {
 		background: none;
 		border: none;
-		font-size: 24px;
+		font-size: 18px;
 		cursor: pointer;
 		color: #666;
+		padding: 0;
+		display: flex;
+		align-items: center;
 	}
 
 	.close-btn:hover {
