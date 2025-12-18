@@ -86,7 +86,7 @@
 
 	<style>
 		:root {
-			font-size: min(2.4vw, 1em);
+			font-size: min(2.65vw, 1em);
 		}
 	</style>
 

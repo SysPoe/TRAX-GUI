@@ -502,9 +502,9 @@
 	}
 
 	.scaled-departures {
-		transform: scale(0.65);
-		margin-top: -2em;
-		margin-left: -1em;
+		transform: scale(0.7);
+		margin-top: -1.5rem;
+		margin-left: -2rem;
 		transform-origin: top left;
 		width: 170%; /* Compensate for scale to fill width */
 	}
