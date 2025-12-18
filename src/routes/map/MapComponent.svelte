@@ -200,12 +200,6 @@
 						}, 500);
 						fetchTripDetails(id);
 					}
-				} else {
-					selectedInstanceId = null;
-					selectedTrip = null;
-					selectedStopId = null;
-					if (departureRefreshTimer) clearInterval(departureRefreshTimer);
-					isFollowing = false;
 				}
 			};
 
