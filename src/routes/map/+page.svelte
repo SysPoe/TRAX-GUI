@@ -6,7 +6,7 @@
     let { data } = $props();
     let vps = $derived(data.vps);
     let shapes = $derived(data.shapes);
-    let biggest = $derived(data.biggest);
+    let bounds = $derived(data.bounds);
     let stops = $derived(data.stops);
     let routes = $derived(data.routes);
     let extraDetails = $derived(data.extraDetails);
@@ -37,7 +37,7 @@
 </svelte:head>
 
 {#if MapComponent}
-    <MapComponent {vps} {shapes} {biggest} {stops} {routes} {extraDetails} />
+    <MapComponent {vps} {shapes} {bounds} {stops} {routes} {extraDetails} />
 {:else}
     <p>Loading...</p>
 {/if}

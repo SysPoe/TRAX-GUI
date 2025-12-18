@@ -71,17 +71,22 @@ export const load: PageServerLoad = async ({ locals }) => {
 	});
 
 	let stops = TRAX.getStations();
-	let biggest = {
-		stop_lat: -27.4661,
-		stop_lon: 153.0244,
-		stop_id: "CENTRAL",
-		stop_name: "Central Station",
-	};
+	const stopsWithCoords = stops.filter((v) => v.stop_lat != null && v.stop_lon != null);
+	let bounds = null;
+
+	if (stopsWithCoords.length > 0) {
+		bounds = {
+			min_lat: Math.min(...stopsWithCoords.map((v) => v.stop_lat!)),
+			min_lon: Math.min(...stopsWithCoords.map((v) => v.stop_lon!)),
+			max_lat: Math.max(...stopsWithCoords.map((v) => v.stop_lat!)),
+			max_lon: Math.max(...stopsWithCoords.map((v) => v.stop_lon!)),
+		};
+	}
 
 	return {
 		vps,
 		shapes,
-		biggest,
+		bounds,
 		stops,
 		routes: routesMap,
 		extraDetails: locals.session?.data.extraDetails ?? false,

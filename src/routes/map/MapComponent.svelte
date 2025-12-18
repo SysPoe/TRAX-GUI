@@ -8,7 +8,7 @@
 	import StopTimes from "$lib/StopTimes.svelte";
 	import { DepartureBoard, type Departure } from "$lib";
 
-	let { vps, shapes, biggest, stops, routes, extraDetails } = $props();
+	let { vps, shapes, bounds, stops, routes, extraDetails } = $props();
 
 	let mapInstance = $state<L.Map | undefined>(undefined);
 	let selectedInstanceId = $state<string | null>(null);
@@ -29,6 +29,7 @@
 	let departureRefreshTimer: ReturnType<typeof setInterval> | null = null;
 
 	let currentTimeSecs = $state(0);
+	let currentZoom = $state(13);
 
 	let highlightedStopId = $derived.by(() => {
 		if (selectedStopId) return selectedStopId;
@@ -133,6 +134,8 @@
 			stationMarkers.forEach((m) => m.remove());
 			stationMarkers = [];
 
+			if (currentZoom <= 10) return;
+
 			stops.forEach((stop: AugmentedStop) => {
 				if (stop.stop_lat && stop.stop_lon) {
 					const marker = L.marker([stop.stop_lat, stop.stop_lon], {
@@ -179,6 +182,11 @@
 
 			const handleMoveEnd = () => {
 				isDragging = false;
+				currentZoom = mapInstance?.getZoom() ?? 13;
+			};
+
+			const handleMove = () => {
+				currentZoom = mapInstance?.getZoom() ?? 13;
 			};
 
 			const handleMapClick = (e: L.LeafletMouseEvent) => {
@@ -205,12 +213,14 @@
 
 			mapInstance.on("movestart", handleMoveStart);
 			mapInstance.on("moveend", handleMoveEnd);
+			mapInstance.on("move", handleMove);
 			mapInstance.on("dragstart", handleDragStart);
 			mapInstance.on("click", handleMapClick);
 
 			return () => {
 				mapInstance?.off("movestart", handleMoveStart);
 				mapInstance?.off("moveend", handleMoveEnd);
+				mapInstance?.off("move", handleMove);
 				mapInstance?.off("dragstart", handleDragStart);
 				mapInstance?.off("click", handleMapClick);
 			};
@@ -293,6 +303,17 @@
 			container.style.height = `calc(100vh - ${navHeight}px - 2rem)`;
 		}
 	};
+
+	let initialFitDone = false;
+	$effect(() => {
+		if (mapInstance && bounds && !initialFitDone) {
+			mapInstance.fitBounds([
+				[bounds.min_lat, bounds.min_lon],
+				[bounds.max_lat, bounds.max_lon],
+			]);
+			initialFitDone = true;
+		}
+	});
 
 	onMount(() => {
 		const updateTime = () => {
@@ -385,7 +406,7 @@
 	{/if}
 
 	<div class="map-wrapper">
-		<Map options={{ center: [biggest.stop_lat ?? 0, biggest.stop_lon ?? 0], zoom: 13 }} bind:instance={mapInstance}>
+		<Map bind:instance={mapInstance} options={{}}>
 			<TileLayer url={"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} />
 
 			{#each Object.keys(shapes) as shapeId}
@@ -398,18 +419,20 @@
 				{/if}
 			{/each}
 
-			{#each vps as vp}
-				{@const icon = markerIcons[vp.instance_id]}
-				{#if icon}
-					<Marker
-						latLng={[vp.position.latitude, vp.position.longitude]}
-						options={{
-							icon,
-							interactive: true,
-						}}
-					/>
-				{/if}
-			{/each}
+			{#if currentZoom >= 11}
+				{#each vps as vp}
+					{@const icon = markerIcons[vp.instance_id]}
+					{#if icon}
+						<Marker
+							latLng={[vp.position.latitude, vp.position.longitude]}
+							options={{
+								icon,
+								interactive: true,
+							}}
+						/>
+					{/if}
+				{/each}
+			{/if}
 		</Map>
 	</div>
 </div>
