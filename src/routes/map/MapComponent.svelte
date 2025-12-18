@@ -17,6 +17,18 @@
 	let isAnimating = $state(false);
 	let animationTimer: ReturnType<typeof setTimeout> | null = null;
 
+	let currentTimeSecs = $state(0);
+
+	let highlightedStopId = $derived.by(() => {
+		if (!selectedTrip) return null;
+		// Find first stop that hasn't happened yet
+		const nextStop = selectedTrip.stopTimes.find((st) => {
+			const time = st.actual_arrival_time ?? st.actual_departure_time;
+			return time !== null && time > currentTimeSecs;
+		});
+		return nextStop ? (nextStop.scheduled_parent_station_id ?? nextStop.scheduled_stop_id) : null;
+	});
+
 	let shapeCache = $state<Record<string, { points: any[]; color: string }>>({});
 	let fetchController: AbortController | null = null;
 
@@ -210,9 +222,19 @@
 	};
 
 	onMount(() => {
+		const updateTime = () => {
+			const now = new Date(Date.now() + 10 * 3600 * 1000);
+			currentTimeSecs = now.getUTCHours() * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();
+		};
+		updateTime();
+		const timeInterval = setInterval(updateTime, 10000);
+
 		resize();
 		window.addEventListener("resize", resize);
-		return () => window.removeEventListener("resize", resize);
+		return () => {
+			window.removeEventListener("resize", resize);
+			clearInterval(timeInterval);
+		};
 	});
 </script>
 
@@ -251,6 +273,7 @@
 					stations={stationMap}
 					route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
 					{extraDetails}
+					{highlightedStopId}
 				/>
 			</div>
 		</div>

@@ -52,6 +52,12 @@ a.tv-stop-time.canceled:hover {
 	background-color: #c48989;
 }
 
+.tv-stop-time.highlighted {
+	background-color: #fffde7;
+	border: 2px solid #fdd835;
+	box-shadow: 0 0 8px rgba(253, 216, 53, 0.4);
+}
+
 a.tv-stop-time.canceled:hover {
 	background-color: #c48989;
 	box-shadow: 0 0 1rem #8c4141;

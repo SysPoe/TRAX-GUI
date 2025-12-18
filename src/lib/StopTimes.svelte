@@ -13,16 +13,30 @@
 		stations,
 		route,
 		extraDetails,
+		highlightedStopId = null,
 	}: {
 		inst: AugmentedTripInstance;
 		useRealtime: boolean;
 		stations: Record<string, AugmentedStop>;
 		route: { route_color?: string | null };
 		extraDetails: boolean;
+		highlightedStopId?: string | null;
 	} = $props();
+
+	let containerElement = $state<HTMLElement | null>(null);
+
+	$effect(() => {
+		if (highlightedStopId && containerElement) {
+			// Find the element with the data-stop-id
+			const element = containerElement.querySelector(`[data-stop-id="${highlightedStopId}"]`);
+			if (element) {
+				element.scrollIntoView({ behavior: "smooth", block: "center" });
+			}
+		}
+	});
 </script>
 
-<div class="tv-stoptimes">
+<div class="tv-stoptimes" bind:this={containerElement}>
 	{#each inst.stopTimes as st}
 		{@const stopId = st.scheduled_parent_station_id ?? st.scheduled_stop_id ?? ""}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -35,6 +49,8 @@
 			st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
 				? 'canceled'
 				: ''}"
+			class:highlighted={stopId === highlightedStopId}
+			data-stop-id={stopId}
 			href={`/DB/gtfs/${stopId}`}
 			onclick={(ev) => {
 				if (ev.shiftKey || ev.ctrlKey || ev.metaKey || ev.type === "auxclick") {
