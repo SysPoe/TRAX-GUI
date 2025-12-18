@@ -12,9 +12,11 @@
 	let mapInstance = $state<L.Map | undefined>(undefined);
 	let selectedInstanceId = $state<string | null>(null);
 	let selectedTrip = $state<AugmentedTripInstance | null>(null);
+	let useRealtime = $state(true);
 	let isFollowing = $state(false);
 	let isProgrammaticMove = false;
 	let isAnimating = $state(false);
+	let isDragging = false;
 	let animationTimer: ReturnType<typeof setTimeout> | null = null;
 
 	let currentTimeSecs = $state(0);
@@ -38,6 +40,32 @@
 		return map;
 	});
 
+	// Memoize icons to prevent prototype loss during Svelte updates
+	let markerIcons = $derived.by(() => {
+		const icons: Record<string, L.DivIcon> = {};
+		vps.forEach((vp: any) => {
+			const route = vp.route_id
+				? routes[vp.route_id]
+				: ({ route_short_name: "?", route_color: "000000" } as Route);
+			const label = vp.run ?? "???";
+			const instanceId = vp.instance_id;
+
+			icons[vp.instance_id] = L.divIcon({
+				className: "custom-ipbr-marker",
+				html: `
+				<div class="marker-container" data-instance-id="${instanceId}">
+					<div class="logo-circle" style="background-color: ${route.route_color ? `#${route.route_color}` : "#000"};">
+						<span class="logo-text" style="color: ${getContrastYIQ(route.route_color ? `#${route.route_color}` : "#000")}">${route.route_short_name}</span>
+					</div>
+					${extraDetails ? `<span class="run-label">${label}</span>` : ""}
+				</div>`,
+				iconSize: [40, 40],
+				iconAnchor: [20, 20],
+			});
+		});
+		return icons;
+	});
+
 	async function fetchTripDetails(instanceId: string) {
 		if (fetchController) fetchController.abort();
 		fetchController = new AbortController();
@@ -55,41 +83,75 @@
 		}
 	}
 
-	// EFFECT: Handle following state on user move
+	// EFFECT: Handle map interaction events
 	$effect(() => {
 		if (mapInstance) {
 			const handleMoveStart = () => {
-				// Disable animation immediately when map starts moving (user or programmatic)
 				isAnimating = false;
 				if (animationTimer) clearTimeout(animationTimer);
-
 				if (!isProgrammaticMove) {
 					isFollowing = false;
 				}
 			};
+
+			const handleDragStart = () => {
+				isDragging = true;
+				isFollowing = false;
+			};
+
+			const handleMoveEnd = () => {
+				isDragging = false;
+			};
+
+			const handleMapClick = (e: L.LeafletMouseEvent) => {
+				const clickedElement = e.originalEvent.target as HTMLElement;
+				const container = clickedElement.closest(".marker-container") as HTMLElement;
+
+				if (container && container.dataset.instanceId) {
+					const id = container.dataset.instanceId;
+					const foundVp = vps.find((v: any) => v.instance_id === id);
+					if (foundVp) {
+						selectedInstanceId = id;
+						isFollowing = true;
+						isProgrammaticMove = true;
+						mapInstance?.flyTo([foundVp.position.latitude, foundVp.position.longitude], 15);
+						setTimeout(() => {
+							isProgrammaticMove = false;
+						}, 500);
+						fetchTripDetails(id);
+					}
+				}
+			};
+
 			mapInstance.on("movestart", handleMoveStart);
-			return () => mapInstance?.off("movestart", handleMoveStart);
+			mapInstance.on("moveend", handleMoveEnd);
+			mapInstance.on("dragstart", handleDragStart);
+			mapInstance.on("click", handleMapClick);
+
+			return () => {
+				mapInstance?.off("movestart", handleMoveStart);
+				mapInstance?.off("moveend", handleMoveEnd);
+				mapInstance?.off("dragstart", handleDragStart);
+				mapInstance?.off("click", handleMapClick);
+			};
 		}
 	});
 
 	// EFFECT: Invalidate map size when sidebar toggles
 	$effect(() => {
-		// Run this when selectedInstanceId changes
 		void selectedInstanceId;
-		if (mapInstance) {
+		if (mapInstance && !isDragging) {
 			setTimeout(() => {
 				mapInstance?.invalidateSize({ animate: true });
 			}, 100);
 		}
 	});
 
-	// EFFECT: Update selected trip and follow if enabled when vps changes (30s poll)
+	// EFFECT: Update selected trip and follow if enabled
 	$effect(() => {
-		// Dependency on vps and selectedInstanceId
 		const currentVps = vps;
 		const id = selectedInstanceId;
 
-		// Trigger animation flag for markers
 		isAnimating = true;
 		if (animationTimer) clearTimeout(animationTimer);
 		animationTimer = setTimeout(() => {
@@ -100,10 +162,9 @@
 			const foundVp = currentVps.find((v: any) => v.instance_id === id);
 
 			if (foundVp) {
-				// Refresh details if they are out of sync or just triggered by vps update
 				untrack(() => fetchTripDetails(id));
 
-				if (isFollowing && mapInstance) {
+				if (isFollowing && mapInstance && !isDragging) {
 					isProgrammaticMove = true;
 					mapInstance.flyTo([foundVp.position.latitude, foundVp.position.longitude], mapInstance.getZoom());
 					setTimeout(() => {
@@ -111,7 +172,6 @@
 					}, 500);
 				}
 			} else {
-				// Vehicle disappeared
 				untrack(() => {
 					selectedInstanceId = null;
 					selectedTrip = null;
@@ -121,14 +181,13 @@
 		}
 	});
 
-	// EFFECT: Fetch shapes for new vehicles
+	// EFFECT: Fetch shapes
 	$effect(() => {
 		if (vps) {
 			vps.forEach((vp: any) => {
 				if (vp.shape_id && !shapeCache[vp.shape_id]) {
 					const route = routes[vp.route_id];
 					const color = route?.route_color ? `#${route.route_color}` : "#0000FF";
-					// Initialize cache to prevent double-fetch
 					shapeCache[vp.shape_id] = { points: [], color };
 
 					fetch(`/api/shape/${vp.shape_id}`)
@@ -146,72 +205,19 @@
 	});
 
 	function getContrastYIQ(hexcolor: string) {
-		// Remove leading #
 		hexcolor = hexcolor.replace("#", "");
-
-		// Convert 3-digit hex to 6-digit
 		if (hexcolor.length === 3) {
 			hexcolor = hexcolor
 				.split("")
 				.map((c: string) => c + c)
 				.join("");
 		}
-
-		// Convert to RGB
 		const r = parseInt(hexcolor.substring(0, 2), 16);
 		const g = parseInt(hexcolor.substring(2, 4), 16);
 		const b = parseInt(hexcolor.substring(4, 6), 16);
-
-		// Calculate YIQ ratio
 		const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-
-		// Return black for light backgrounds, white for dark backgrounds
 		return yiq >= 128 ? "#000000" : "#FFFFFF";
 	}
-
-	// Custom Icon Generator matches your IPBR logo design
-	const ipbrIcon = (label: string, route: Route, instanceId: string) =>
-		L.divIcon({
-			className: "custom-ipbr-marker",
-			html: `
-            <div class="marker-container" data-instance-id="${instanceId}">
-                <div class="logo-circle" style="background-color: ${route.route_color ? `#${route.route_color}` : "#000"};">
-                    <span class="logo-text" style="color: ${getContrastYIQ(route.route_color ? `#${route.route_color}` : "#000")}">${route.route_short_name}</span>
-                </div>
-				${extraDetails ? `<span class="run-label">${label}</span>` : ""}
-            </div>`,
-			iconSize: [40, 40],
-			iconAnchor: [20, 20],
-		});
-
-	// EFFECT: Map-wide click listener
-	$effect(() => {
-		if (mapInstance) {
-			const handleMapClick = (e: L.LeafletMouseEvent) => {
-				const clickedElement = e.originalEvent.target as HTMLElement;
-				const container = clickedElement.closest(".marker-container") as HTMLElement;
-
-				if (container && container.dataset.instanceId) {
-					const id = container.dataset.instanceId;
-					const foundVp = vps.find((v: any) => v.instance_id === id);
-					if (foundVp) {
-						selectedInstanceId = id;
-						isFollowing = true;
-						isProgrammaticMove = true;
-						// Fly to the actual vehicle position
-						mapInstance?.flyTo([foundVp.position.latitude, foundVp.position.longitude], 15);
-						setTimeout(() => {
-							isProgrammaticMove = false;
-						}, 500);
-						fetchTripDetails(id);
-					}
-				}
-			};
-
-			mapInstance.on("click", handleMapClick);
-			return () => mapInstance?.off("click", handleMapClick);
-		}
-	});
 
 	let resize = () => {
 		const navHeight = document.querySelector("nav")?.getBoundingClientRect()?.height ?? 0;
@@ -267,9 +273,17 @@
 				>
 			</div>
 			<div class="sidebar-content">
+				{#if extraDetails}
+					<div class="sidebar-controls">
+						<label>
+							<input type="checkbox" bind:checked={useRealtime} />
+							Show Realtime Data
+						</label>
+					</div>
+				{/if}
 				<StopTimes
 					inst={selectedTrip}
-					useRealtime={true}
+					{useRealtime}
 					stations={stationMap}
 					route={selectedTrip.route_id ? routes[selectedTrip.route_id] : {}}
 					{extraDetails}
@@ -294,20 +308,16 @@
 			{/each}
 
 			{#each vps as vp}
-				{@const runLabel = vp.run ?? "???"}
-				<Marker
-					latLng={[vp.position.latitude, vp.position.longitude]}
-					options={{
-						icon: ipbrIcon(
-							runLabel,
-							vp.route_id
-								? routes[vp.route_id]
-								: ({ route_short_name: "?", route_color: "000000" } as Route),
-							vp.instance_id,
-						),
-						interactive: true,
-					}}
-				/>
+				{@const icon = markerIcons[vp.instance_id]}
+				{#if icon}
+					<Marker
+						latLng={[vp.position.latitude, vp.position.longitude]}
+						options={{
+							icon,
+							interactive: true,
+						}}
+					/>
+				{/if}
 			{/each}
 		</Map>
 	</div>
@@ -315,7 +325,6 @@
 
 <style>
 	/* 1. RELOCATE MAP CONTROLS */
-	/* Moves the + and - buttons to the right so the sidebar doesn't block them */
 	:global(.leaflet-left) {
 		left: auto !important;
 		right: 10px !important;
@@ -417,13 +426,9 @@
 		pointer-events: auto !important;
 	}
 
-	/* Smooth movement animation ONLY during refresh */
 	:global(.animating .custom-ipbr-marker) {
 		transition: transform 1s linear;
 	}
-
-	/* Disable transition during map panning/zooming to prevent lag */
-
 
 	:global(.marker-container) {
 		display: flex;
@@ -432,7 +437,7 @@
 		justify-content: center;
 		pointer-events: auto; /* Enable clicks */
 		width: 40px;
-		height: fit-content;
+		height: fit-content; /* Height is dynamic so there is no weird squishing if there are runs shown */
 	}
 
 	:global(.logo-circle) {
