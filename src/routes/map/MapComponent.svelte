@@ -22,6 +22,9 @@
 	let selectedStopRoutes = $state<Record<string, any>>({});
 	let isRefreshingDepartures = $state(false);
 
+	const STATION_ZOOM = 8;
+	const VEHICLE_ZOOM = $derived(vps.length > 100 ? 12 : vps.length > 50 ? 11 : vps.length > 20 ? 10 : 9);
+
 	let initialViewDone = $state(false);
 	$effect(() => {
 		if (mapInstance && !initialViewDone) {
@@ -59,7 +62,7 @@
 				// Fallback to a default view if nothing else matches
 				mapInstance.setView([stops[0].stop_lat, stops[0].stop_lon], 12);
 			}
-			
+
 			// Ensure zoom state is captured after setView/fitBounds
 			currentZoom = mapInstance.getZoom();
 			initialViewDone = true;
@@ -94,7 +97,7 @@
 	});
 
 	let useRealtime = $state(true);
-	let isFollowing = $state(!!(params?.get("trip")));
+	let isFollowing = $state(!!params?.get("trip"));
 	let isProgrammaticMove = false;
 	let isAnimating = $state(false);
 	let isDragging = false;
@@ -128,12 +131,13 @@
 		return map;
 	});
 
-	const createStationIcon = (stopId: string) => L.divIcon({
-		className: "station-marker-icon",
-		html: `<div class="station-dot" data-stop-id="${stopId}"></div>`,
-		iconSize: [8, 8],
-		iconAnchor: [4, 4],
-	});
+	const createStationIcon = (stopId: string) =>
+		L.divIcon({
+			className: "station-marker-icon",
+			html: `<div class="station-dot" data-stop-id="${stopId}"></div>`,
+			iconSize: [8, 8],
+			iconAnchor: [4, 4],
+		});
 
 	// Memoize icons to prevent prototype loss during Svelte updates
 	let markerIcons = $derived.by(() => {
@@ -212,7 +216,7 @@
 			stationMarkers.forEach((m) => m.remove());
 			stationMarkers = [];
 
-			if (currentZoom <= 10) return;
+			if (currentZoom <= STATION_ZOOM) return;
 
 			stops.forEach((stop: AugmentedStop) => {
 				if (stop.stop_lat && stop.stop_lon) {
@@ -307,7 +311,7 @@
 		selectedInstanceId = instanceId;
 		selectedStopId = null;
 		if (departureRefreshTimer) clearInterval(departureRefreshTimer);
-		
+
 		if (foundVp) {
 			isFollowing = true;
 			isProgrammaticMove = true;
@@ -499,7 +503,7 @@
 				{/if}
 			{/each}
 
-			{#if currentZoom >= 11}
+			{#if currentZoom >= VEHICLE_ZOOM}
 				{#each vps as vp}
 					{@const icon = markerIcons[vp.instance_id]}
 					{#if icon}
