@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Map, TileLayer, Marker, Polyline } from "sveaflet";
+	import { Map, TileLayer, Marker, Polyline, Tooltip } from "sveaflet";
 	import L from "leaflet";
 	import "leaflet/dist/leaflet.css";
 	import type { AugmentedStop, AugmentedTripInstance } from "translink-rail-api";
@@ -38,6 +38,13 @@
 		const map: Record<string, AugmentedStop> = {};
 		stops.forEach((s: AugmentedStop) => (map[s.stop_id] = s));
 		return map;
+	});
+
+	const stationIcon = L.divIcon({
+		className: "station-marker-icon",
+		html: `<div class="station-dot"></div>`,
+		iconSize: [12, 12],
+		iconAnchor: [6, 6],
 	});
 
 	// Memoize icons to prevent prototype loss during Svelte updates
@@ -297,6 +304,22 @@
 		<Map options={{ center: [biggest.stop_lat ?? 0, biggest.stop_lon ?? 0], zoom: 13 }} bind:instance={mapInstance}>
 			<TileLayer url={"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} />
 
+			{#each stops as stop}
+				{#if stop.stop_lat && stop.stop_lon}
+					<Marker
+						latLng={[stop.stop_lat, stop.stop_lon]}
+						options={{
+							icon: stationIcon,
+							interactive: true,
+						}}
+					>
+						<Tooltip options={{ direction: "top", offset: [0, -5] }}>
+							{stop.stop_name}
+						</Tooltip>
+					</Marker>
+				{/if}
+			{/each}
+
 			{#each Object.keys(shapeCache) as shapeId}
 				{@const shape = shapeCache[shapeId]}
 				{#if shape.points.length > 0}
@@ -468,5 +491,19 @@
 		border: 1px solid #ccc;
 		margin-top: 2px;
 		font-family: sans-serif;
+	}
+
+	:global(.station-marker-icon) {
+		background: transparent;
+		border: none;
+	}
+
+	:global(.station-dot) {
+		width: 8px;
+		height: 8px;
+		background: white;
+		border: 2px solid #2c3e50;
+		border-radius: 50%;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 	}
 </style>
