@@ -44,23 +44,54 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return diff >= -300;
 	});
 
-	let seen: Map<string, boolean> = new Map();
-	const shapesData = TRAX.getShapes().filter(v => {
-		if (seen.has(v.route_id.slice(0, 4))) return false;
-		seen.set(v.route_id.slice(0, 4), true);
-		return true;
-	});
-	const shapes: Record<string, { points: any[]; color: string }> = {};
+	const shapes: { points: any[]; color: string }[] = [];
 
-	for (const s of shapesData) {
-		const points = TRAX.gtfs.getShape(s.shape_id);
-		if (points && points.length > 0) {
-			const route = TRAX.gtfs.getRoute(s.route_id);
-			shapes[s.shape_id] = {
-				points,
-				color: route?.route_color ? `#${route.route_color}` : "#f202ffff",
-			};
-		}
+	// Select one train going from each of:
+	let selection = [
+		{ from: "place_rossta", to: "place_namsta" },
+		{ from: "place_romsta", to: "place_gymsta" },
+		{ from: "place_varsta", to: "place_domsta" },
+		{ from: "place_clesta", to: "place_shnsta" },
+		{ from: "place_clesta", to: "place_sgtsta" },
+		{ from: "place_spcsta", to: "place_kprsta" },
+		{ from: "place_fersta", to: "place_beesta" },
+	]
+
+	for (const trip of TRAX.getAugmentedTrips().filter(trip => trip.instances.some(i =>
+		selection.some(v =>
+			(v.from === i.stopTimes.at(0)?.scheduled_parent_station_id
+				|| v.from === i.stopTimes.at(0)?.scheduled_stop_id) &&
+			(v.to === i.stopTimes.at(-1)?.scheduled_parent_station_id
+				|| v.to === i.stopTimes.at(-1)?.scheduled_stop_id)
+		)
+	))) {
+		let chosI = trip.instances.find(i =>
+			selection.some(v =>
+				(v.from === i.stopTimes.at(0)?.scheduled_parent_station_id
+					|| v.from === i.stopTimes.at(0)?.scheduled_stop_id) &&
+				(v.to === i.stopTimes.at(-1)?.scheduled_parent_station_id
+					|| v.to === i.stopTimes.at(-1)?.scheduled_stop_id)
+			)
+		);
+		if (!chosI) continue;
+		if (!chosI?.shape_id) continue;
+		const { shape_id, route_id } = chosI;
+		let sel = selection.findIndex(v =>
+			(v.from === chosI?.stopTimes.at(0)?.scheduled_parent_station_id
+				|| v.from === chosI?.stopTimes.at(0)?.scheduled_stop_id) &&
+			(v.to === chosI?.stopTimes.at(-1)?.scheduled_parent_station_id
+				|| v.to === chosI?.stopTimes.at(-1)?.scheduled_stop_id)
+		);
+		let shape = TRAX.gtfs.getShape(shape_id);
+		let route = TRAX.gtfs.getRoute(route_id);
+		if (!shape || !route) continue;
+		shapes.push({
+			points: shape,
+			color: route.route_color ?? "000000"
+		});
+		selection[sel] = undefined as any;
+		selection = selection.filter(v => v);
+		if (selection.length == 0) break;
 	}
 
 	let routesMap: { [key: string]: Route } = {};

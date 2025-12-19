@@ -25,6 +25,8 @@
 	const STATION_ZOOM = 8;
 	const VEHICLE_ZOOM = $derived(vps.length > 100 ? 12 : vps.length > 50 ? 11 : vps.length > 20 ? 10 : 9);
 
+	console.log(shapes);
+
 	let initialViewDone = $state(false);
 	let userLocationZoomDone = $state(false);
 
@@ -555,17 +557,16 @@
 		<Map bind:instance={mapInstance} options={{}}>
 			<TileLayer url={"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} />
 
-			{#each Object.keys(shapes) as shapeId}
-				{@const shape = shapes[shapeId]}
+			{#each shapes as shape}
 				{#if shape.points.length > 0}
 					<Polyline
 						latLngs={shape.points.map((p: any) => [p.shape_pt_lat, p.shape_pt_lon])}
-						options={{ color: shape.color, weight: 3, opacity: 0.7 }}
+						options={{ color: `#${shape.color}`, weight: 3, opacity: 0.7 }}
 					/>
 				{/if}
 			{/each}
 
-			{#if currentZoom >= 11}
+			{#if currentZoom >= VEHICLE_ZOOM}
 				{#each vps as vp}
 					{@const icon = markerIcons[vp.instance_id]}
 					{#if icon}
