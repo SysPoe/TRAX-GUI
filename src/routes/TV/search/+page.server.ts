@@ -65,6 +65,9 @@ export const load: PageServerLoad = async ({ url }) => {
 		trainNumberRegex = new RegExp(`^${trainNumber}$`);
 	}
 
+	let car3 = ["j", "u", "x"];
+	let car6 = ["1", "d", "t", "x"];
+
 	let trips = TRAX.getAugmentedTrips().flatMap((v) => v.instances).filter((inst) => {
 		// Station filtering
 		if (
@@ -114,7 +117,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			}
 		}
 
-		if (trainNumberType.trim() !== "" && inst.run[0].toLowerCase() !== trainNumberType.toLowerCase()) return false;
+		if (trainNumberType.trim() !== "" && inst.run[0].toLowerCase() !== trainNumberType.toLowerCase() && !(trainNumberType === "3car" && car3.includes(inst.run[0].toLowerCase())) && !(trainNumberType === "6car" && car6.includes(inst.run[0].toLowerCase()))) return false;
 		if (trainNumberDestination.trim() !== "" && inst.run[1].toLowerCase() !== trainNumberDestination.toLowerCase())
 			return false;
 		if (trainNumberRegex && !trainNumberRegex.test(inst.run.trim().toUpperCase())) return false;

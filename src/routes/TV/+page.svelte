@@ -230,8 +230,10 @@
 						<label for="train-number-type">Train Type</label>
 						<select name="train-number-type" id="train-number-type">
 							<option value="">Any Type</option>
+							<option value="3car">Any 3 car</option>
+							<option value="6car">Any 6 car</option>
 							<option value="1">1 - 6 car SMU</option>
-							<option value="D">D - NGR</option>
+							<option value="D">D - 6 car NGR</option>
 							<option value="J">J - 3 car SMU</option>
 							<option value="T">T - 6 car IMU</option>
 							<option value="U">U - 3 car IMU</option>
