@@ -2,7 +2,7 @@
 	import type { PageProps } from "./$types";
 	import type { AugmentedStop } from "translink-rail-api";
 	import "$lib/styles/common.css";
-	
+
 	// Import the NEW generic component
 	import Autocomplete from "$lib/Autocomplete.svelte";
 
@@ -13,17 +13,45 @@
 	// --- 1. PREPARE DATA FOR AUTOCOMPLETE ---
 
 	// Convert Stations to Autocomplete Format
-	let stationOptions = $derived(stations.map((s) => ({
-		label: s.stop_name ?? "Unknown Station",
-		value: s.stop_id ?? "",
-		original: s 
-	})));
+	let stationOptions = $derived(
+		stations.map((s) => ({
+			label: s.stop_name
+				? `${s.stop_name} ${s.platform_code ? "" : "(all platforms)"}`
+				: "Unknown Station",
+			value: s.stop_id ?? "",
+			original: s,
+		})),
+	);
+
+	const formatDate = (d: string) => {
+		const date = new Date(
+			Date.UTC(
+				Number.parseInt(d.slice(0, 4)),
+				Number.parseInt(d.slice(4, 6)) - 1,
+				Number.parseInt(d.slice(6, 8)),
+			),
+		);
+		const p = Object.fromEntries(
+			new Intl.DateTimeFormat("en-AU", {
+				day: "numeric",
+				month: "short",
+				year: "2-digit",
+				weekday: "short",
+				timeZone: "UTC",
+			})
+				.formatToParts(date)
+				.map((i) => [i.type, i.value]),
+		);
+		return `${p.day} ${p.month} ${p.year} (${p.weekday})`;
+	};
 
 	// Convert Dates to Autocomplete Format
-	let dateOptions = $derived(data.dates.map((d) => ({
-		label: d, // Date string (e.g., "20251201")
-		value: d  
-	})));
+	let dateOptions = $derived(
+		data.dates.map((d) => ({
+			label: formatDate(d),
+			value: d,
+		})),
+	);
 
 	// Convert Destinations to Autocomplete Format
 	// (Hardcoding your previous list here for cleaner mapping)
@@ -55,22 +83,21 @@
 		{ v: "Y", l: "Virginia - Kippa-Ring" },
 		{ v: "Z", l: "Exhibition" },
 	];
-	const destOptions = destRaw.map(d => ({
+	const destOptions = destRaw.map((d) => ({
 		label: `${d.v} - ${d.l}`, // Combine so user can search by code OR name
-		value: d.v
+		value: d.v,
 	}));
-
 
 	// --- 2. STATE VARIABLES ---
 	// We only need simple variables or arrays now, the component handles the hidden inputs
 
-	// Station State (We use the 'original' property to get the augmented stop back if needed, 
-    // but standard form submit only needs the ID which the component handles via 'name')
+	// Station State (We use the 'original' property to get the augmented stop back if needed,
+	// but standard form submit only needs the ID which the component handles via 'name')
 	let startStationItem = $state(null);
 	let endStationItem = $state(null);
-	
+
 	// Intermediate Stations: Array of objects { item: Item | null }
-	let intermediateItems = $state<{ item: any }[]>([]); 
+	let intermediateItems = $state<{ item: any }[]>([]);
 
 	// Date State
 	let dateFilters = $state<{ id: number; item: any }[]>([]);
@@ -78,7 +105,6 @@
 
 	// Destination State
 	let destItem = $state(null);
-
 
 	// --- 3. HELPER FUNCTIONS ---
 
@@ -124,25 +150,24 @@
 
 	{#if !loading}
 		<form action="/TV/search" method="get" class="search-card">
-			
 			<fieldset>
 				<legend>Station Filter</legend>
 				<div class="grid-2">
 					<div class="input-group">
 						<label for="start-station-input">Starts at:</label>
-						<Autocomplete 
-							items={stationOptions} 
+						<Autocomplete
+							items={stationOptions}
 							bind:selectedItem={startStationItem}
-							name="start-station" 
+							name="start-station"
 							placeholder="Search start station..."
 						/>
 					</div>
 					<div class="input-group">
 						<label for="end-station-input">Ends at:</label>
-						<Autocomplete 
-							items={stationOptions} 
+						<Autocomplete
+							items={stationOptions}
 							bind:selectedItem={endStationItem}
-							name="end-station" 
+							name="end-station"
 							placeholder="Search destination..."
 						/>
 					</div>
@@ -154,10 +179,10 @@
 						{#each intermediateItems as row, index}
 							<div class="row-control">
 								<div class="flex-grow">
-									<Autocomplete 
-										items={stationOptions} 
+									<Autocomplete
+										items={stationOptions}
 										bind:selectedItem={row.item}
-										name="intermediate-station-{index}" 
+										name="intermediate-station-{index}"
 										placeholder="Search via station..."
 									/>
 								</div>
@@ -173,9 +198,7 @@
 						{/each}
 					</div>
 				{/if}
-				<button type="button" class="btn-secondary small" onclick={addIntermediate}>
-					+ Add Via Station
-				</button>
+				<button type="button" class="btn-secondary small" onclick={addIntermediate}> + Add Via Station </button>
 			</fieldset>
 
 			<fieldset>
@@ -185,26 +208,19 @@
 				{#each dateFilters as row, index}
 					<div class="row-control">
 						<div class="flex-grow">
-							<Autocomplete 
+							<Autocomplete
 								items={dateOptions}
 								bind:selectedItem={row.item}
 								name="service-date-{index}"
 								placeholder="Select or type date (YYYYMMDD)..."
 							/>
 						</div>
-						<button
-							type="button"
-							class="btn-icon"
-							onclick={() => removeDate(index)}
-							title="Remove Date"
-						>
+						<button type="button" class="btn-icon" onclick={() => removeDate(index)} title="Remove Date">
 							&minus;
 						</button>
 					</div>
 				{/each}
-				<button type="button" class="btn-secondary small" onclick={addDate}>
-					+ Add Date Constraint
-				</button>
+				<button type="button" class="btn-secondary small" onclick={addDate}> + Add Date Constraint </button>
 			</fieldset>
 
 			<fieldset>
@@ -229,7 +245,7 @@
 							type="text"
 							name="train-number"
 							id="train-number"
-							placeholder="e.g. 1124"
+							placeholder="e.g. 1124 or use '.' for wildcard (.K12)"
 						/>
 					</div>
 				</div>
@@ -288,11 +304,7 @@
 							{/each}
 						</select>
 						<label class="checkbox-label">
-							<input
-								type="checkbox"
-								name="route-pair-reversible"
-								id="route-pair-reversible"
-							/>
+							<input type="checkbox" name="route-pair-reversible" id="route-pair-reversible" />
 							Reversible
 						</label>
 					</div>
@@ -324,11 +336,7 @@
 			</details>
 
 			<div class="form-actions">
-				<input
-					type="submit"
-					value="Search Trips"
-					class="btn-primary"
-				/>
+				<input type="submit" value="Search Trips" class="btn-primary" />
 			</div>
 		</form>
 	{/if}

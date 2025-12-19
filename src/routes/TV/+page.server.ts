@@ -1,6 +1,7 @@
 import { TRAX, isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { TraxLogger } from "translink-rail-api";
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!isTRAXLoaded) {
@@ -12,6 +13,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	let stations = TRAX.getStations()
 		.slice()
+		.flatMap(v => [v, ...(v.child_stop_ids.flatMap(s => TRAX.getAugmentedStops(s)))])
+		.filter(v => TRAX.utils.isConsideredStop(v))
 		.sort((a, b) => (a.stop_name ?? "").localeCompare(b.stop_name ?? ""));
 	let today = Number.parseInt(new Date(Date.now() + 10 * 3_600_000).toISOString().split("T")[0].replaceAll("-", ""));
 	let dates = [
