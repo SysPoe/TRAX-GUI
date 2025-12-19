@@ -50,6 +50,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	let selection = [
 		{ from: "place_rossta", to: "place_namsta" },
 		{ from: "place_romsta", to: "place_gymsta" },
+		{ from: "place_romsta", to: "place_exhsta" },
+		{ from: "place_romsta", to: "place_dbnsta" },
 		{ from: "place_varsta", to: "place_domsta" },
 		{ from: "place_clesta", to: "place_shnsta" },
 		{ from: "place_clesta", to: "place_sgtsta" },

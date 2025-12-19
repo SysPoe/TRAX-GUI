@@ -561,7 +561,7 @@
 				{#if shape.points.length > 0}
 					<Polyline
 						latLngs={shape.points.map((p: any) => [p.shape_pt_lat, p.shape_pt_lon])}
-						options={{ color: `#${shape.color}`, weight: 3, opacity: 0.7 }}
+						options={{ color: `#${shape.color}`, weight: 3, opacity: 1 }}
 					/>
 				{/if}
 			{/each}
