@@ -22,7 +22,8 @@
 		placeholder = "Type to search...",
 		value = $bindable(""),
 		selectedItem = $bindable(null),
-		name = ""
+		name = "",
+		extraDetails = false
 	}: Props = $props();
 
 	let inputElement: HTMLInputElement;
@@ -148,7 +149,7 @@
 					onmouseenter={() => highlightedIndex = index}
 				>
 					<span class="item-label">{item.label}</span>
-					{#if item.value !== item.label}
+					{#if item.value !== item.label && extraDetails}
 						<span class="item-value-pill">{item.value}</span>
 					{/if}
 				</button>

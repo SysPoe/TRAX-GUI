@@ -8,6 +8,7 @@
 
 	let loading = $state(false);
 	let { data }: PageProps = $props();
+	let extraDetails: boolean = $derived(data.extraDetails)
 	let stations: AugmentedStop[] = $derived(data.stations);
 
 	// --- 1. PREPARE DATA FOR AUTOCOMPLETE ---
@@ -15,9 +16,7 @@
 	// Convert Stations to Autocomplete Format
 	let stationOptions = $derived(
 		stations.map((s) => ({
-			label: s.stop_name
-				? `${s.stop_name} ${s.platform_code ? "" : "(all platforms)"}`
-				: "Unknown Station",
+			label: s.stop_name ? `${s.stop_name} ${s.platform_code ? "" : "(all platforms)"}` : "Unknown Station",
 			value: s.stop_id ?? "",
 			original: s,
 		})),
@@ -158,6 +157,7 @@
 						<Autocomplete
 							items={stationOptions}
 							bind:selectedItem={startStationItem}
+							{extraDetails}
 							name="start-station"
 							placeholder="Search start station..."
 						/>
@@ -167,6 +167,7 @@
 						<Autocomplete
 							items={stationOptions}
 							bind:selectedItem={endStationItem}
+							{extraDetails}
 							name="end-station"
 							placeholder="Search destination..."
 						/>
@@ -182,6 +183,7 @@
 									<Autocomplete
 										items={stationOptions}
 										bind:selectedItem={row.item}
+										{extraDetails}
 										name="intermediate-station-{index}"
 										placeholder="Search via station..."
 									/>
@@ -211,6 +213,7 @@
 							<Autocomplete
 								items={dateOptions}
 								bind:selectedItem={row.item}
+								{extraDetails}
 								name="service-date-{index}"
 								placeholder="Select or type date (YYYYMMDD)..."
 							/>
@@ -257,6 +260,7 @@
 					<Autocomplete
 						items={destOptions}
 						bind:selectedItem={destItem}
+						{extraDetails}
 						name="train-number-destination"
 						placeholder="Search destination code or name..."
 					/>
@@ -313,7 +317,7 @@
 				</div>
 			</fieldset>
 
-			<details class="advanced-details" open={data.extraDetails}>
+			<details class="advanced-details" open={extraDetails}>
 				<summary>Advanced Settings</summary>
 				<div class="details-content">
 					<div class="grid-2">
@@ -329,7 +333,7 @@
 								type="checkbox"
 								name="extra-details"
 								id="extra-details"
-								checked={data.extraDetails}
+								checked={extraDetails}
 							/>
 							<label for="extra-details">Show Extra Details</label>
 						</div>
