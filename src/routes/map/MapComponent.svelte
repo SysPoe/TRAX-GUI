@@ -3,12 +3,50 @@
 	import L from "leaflet";
 	import "leaflet/dist/leaflet.css";
 	import type { AugmentedStop, AugmentedTripInstance } from "translink-rail-api";
-	import type { Route } from "qdf-gtfs/types";
+	import type { RealtimeUpdateTripInfo, Route, Shape } from "qdf-gtfs/types";
 	import { onMount, untrack } from "svelte";
 	import StopTimes from "$lib/StopTimes.svelte";
 	import { DepartureBoard, type Departure } from "$lib";
+	import { replaceState } from "$app/navigation";
 
-	let { vps, shapes, bounds, stops, routes, extraDetails } = $props();
+	let {
+		vps,
+		shapes,
+		bounds,
+		stops,
+		routes,
+		extraDetails,
+	}: {
+		vps: {
+			trip: RealtimeUpdateTripInfo;
+			position: {
+				latitude: number;
+				longitude: number;
+				bearing: number | null;
+				odometer: number | null;
+				speed: number | null;
+			};
+			vehicle: {
+				id: string;
+				label: string;
+				license_plate: string;
+			};
+			instance_id: string;
+			run: string;
+			route_id: string;
+			shape_id: string | null;
+		}[];
+		shapes: { points: Shape[]; color: string }[];
+		bounds: {
+			min_lat: number;
+			min_lon: number;
+			max_lat: number;
+			max_lon: number;
+		} | null;
+		stops: AugmentedStop[];
+		routes: Record<string, Route>;
+		extraDetails: boolean;
+	} = $props();
 
 	const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
 
@@ -92,7 +130,10 @@
 
 			if (!hasView) {
 				// Fallback to a default view if nothing else matches
-				mapInstance.setView([stops[0].stop_lat, stops[0].stop_lon], 12);
+				let stopsWithCoords = stops.filter((v) => v.stop_lat !== null && v.stop_lon !== null);
+				if (stopsWithCoords.length > 0) {
+					mapInstance.setView([stopsWithCoords[0].stop_lat!, stopsWithCoords[0].stop_lon!], 12);
+				}
 			}
 
 			// Ensure zoom state is captured after setView/fitBounds
@@ -477,7 +518,7 @@
 	});
 </script>
 
-<div id="mapContainer" class:animating={isAnimating} class:extraDetails={extraDetails}>
+<div id="mapContainer" class:animating={isAnimating} class:extraDetails>
 	{#if selectedTrip || selectedStopId}
 		<div class="sidebar">
 			<div class="sidebar-header">

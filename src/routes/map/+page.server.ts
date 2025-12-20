@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return diff >= -300;
 	});
 
-	const shapes: { points: any[]; color: string }[] = [];
+	const shapes: { points: Shape[]; color: string }[] = [];
 
 	// Select one train going from each of:
 	let selection = [
@@ -101,7 +101,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	let stops = TRAX.getStations();
 	const stopsWithCoords = stops.filter((v) => v.stop_lat != null && v.stop_lon != null);
-	let bounds = null;
+	let bounds: {
+		min_lat: number;
+		min_lon: number;
+		max_lat: number;
+		max_lon: number;
+	} | null = null;
 
 	if (stopsWithCoords.length > 0) {
 		bounds = {

@@ -35,10 +35,3 @@
 {:else}
     <p>Loading...</p>
 {/if}
-
-
-<style>
-    :global(body) {
-        margin: 0;
-    }
-</style>
