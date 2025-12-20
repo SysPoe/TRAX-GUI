@@ -94,7 +94,12 @@
 </svelte:head>
 
 <div class="header">
-	<h1>TRAX <i>DepartureBoard</i></h1>
+	<div class="header-main">
+		<h1>TRAX <i>DepartureBoard</i></h1>
+		<a href="/map?stop={data.stop_id}" class="btn-map" title="View on map">
+			🗺️
+		</a>
+	</div>
 	<h2>
 		Departures from {station?.stop_name ?? "Unknown Station"} in the next 4 hours
 	</h2>

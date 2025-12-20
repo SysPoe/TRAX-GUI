@@ -35,7 +35,12 @@
 </svelte:head>
 
 <div class="header">
-	<h1>TRAX <i>TripViewer</i></h1>
+	<div class="header-main">
+		<h1>TRAX <i>TripViewer</i></h1>
+		<a href="/map?trip={inst.instance_id}" class="btn-map" title="View on map">
+			🗺️
+		</a>
+	</div>
 	{#if data.extraDetails}
 		<h2>
 			{inst.run} - {inst.trip_headsign?.replace("station", "").trim() ?? "Unknown"} Service

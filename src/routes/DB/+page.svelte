@@ -65,7 +65,7 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === "Enter" && filteredStations.length === 1) {
+		if (event.key === "Enter" && filteredStations.length > 0) {
 			loading = true;
 			if (event.shiftKey || event.ctrlKey || event.metaKey) {
 				window.open(`/DB/gtfs/${filteredStations[0].stop_id}`, "_blank");
