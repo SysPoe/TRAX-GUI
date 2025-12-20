@@ -470,7 +470,7 @@
 	.btn-primary {
 		width: 100%;
 		padding: 0.8rem;
-		background-color: #007bff;
+		background-color: #2980b9;
 		color: white;
 		border: none;
 		border-radius: 6px;
@@ -481,7 +481,7 @@
 	}
 
 	.btn-primary:hover {
-		background-color: #0056b3;
+		background-color: #1f6391;
 	}
 
 	.btn-secondary {
@@ -495,8 +495,8 @@
 	}
 
 	.btn-secondary:hover {
-		border-color: #007bff;
-		color: #007bff;
+		border-color: #2980b9;
+		color: #2980b9;
 		background: #f0f7ff;
 	}
 

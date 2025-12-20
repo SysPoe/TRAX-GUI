@@ -15,6 +15,7 @@
 		value?: string; // The text in the input box
 		selectedItem?: Item | null; // The actual selected object
 		name?: string; // For the hidden input field form submission
+		extraDetails?: boolean;
 	}
 
 	let {
@@ -204,6 +205,7 @@
 		padding: 0.5rem 0.8rem;
 		border: none;
 		background: none;
+		color: #2c3e50;
 		text-align: left;
 		cursor: pointer;
 		border-bottom: 1px solid #f0f0f0;

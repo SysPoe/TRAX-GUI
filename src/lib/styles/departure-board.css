@@ -219,17 +219,19 @@
 	border: 1px solid #ccc;
 	border-radius: 6px;
 	background: #fff;
+	color: #333;
 	cursor: pointer;
 	transition: all 0.15s;
 }
 
 .filters button.active {
-	background: #007bff;
+	background: #2980b9;
 	color: #fff;
-	border-color: #0056b3;
+	border-color: #1f6391;
 	font-weight: 700;
 }
 
 .filters button:hover:not(.active) {
-	background: #f0f0f0;
+	background: #f0f7ff;
+	border-color: #2980b9;
 }

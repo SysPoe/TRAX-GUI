@@ -156,9 +156,11 @@
 		font-family: "Arial";
 		font-size: 1rem;
 		font-weight: 600;
-		padding: 0.35rem 1.2rem;
-		border: 0.15rem solid #000;
-		background-color: #fff;
+		padding: 0.4rem 1.2rem;
+		border: none;
+		background-color: #2980b9;
+		color: #fff;
+		border-radius: 4px;
 		cursor: pointer;
 		transition:
 			background-color 150ms ease,
@@ -167,12 +169,12 @@
 
 	.refresh-button:disabled {
 		cursor: not-allowed;
-		background-color: #eee;
+		background-color: #a5c7dd;
 		transform: none;
 	}
 
 	.refresh-button:not(:disabled):hover {
-		background-color: #eef;
+		background-color: #1f6391;
 		transform: translateY(-1px);
 	}
 
