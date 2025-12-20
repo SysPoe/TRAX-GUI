@@ -6,7 +6,7 @@
 		label: string;
 		value: string;
 		// Allow passing through original objects if needed (like the station object)
-		original?: any; 
+		original?: any;
 	}
 
 	interface Props {
@@ -24,7 +24,7 @@
 		value = $bindable(""),
 		selectedItem = $bindable(null),
 		name = "",
-		extraDetails = false
+		extraDetails = false,
 	}: Props = $props();
 
 	let inputElement: HTMLInputElement;
@@ -32,16 +32,37 @@
 	let isOpen = $state(false);
 	let highlightedIndex = $state(-1);
 
+	// Sync value when selectedItem changes from outside
+	$effect(() => {
+		if (selectedItem) {
+			value = selectedItem.label;
+		} else if (value === "") {
+			// No action needed
+		} else {
+			// If selectedItem is cleared but value isn't empty,
+			// it means user is typing or it was cleared programmatically.
+			// If it was cleared programmatically, we might want to clear value too.
+			// But if user is typing, handleInput already handles it.
+		}
+	});
+
+	// To handle the reset case specifically:
+	$effect(() => {
+		if (selectedItem === null && value !== "" && !isOpen) {
+			// This likely means a programmatic reset happened
+			value = "";
+		}
+	});
+
 	// Filter items based on input
 	let filteredItems = $derived.by(() => {
 		// If input is empty, show all (or limit to top 20 for performance)
 		// If you prefer to show NOTHING until typing, uncomment the next line:
-		// if (!value.trim()) return []; 
-		
+		// if (!value.trim()) return [];
+
 		const query = value.toLowerCase();
-		return items.filter(item => {
-			return item.label.toLowerCase().includes(query) || 
-				   item.value.toLowerCase().includes(query);
+		return items.filter((item) => {
+			return item.label.toLowerCase().includes(query) || item.value.toLowerCase().includes(query);
 		});
 	});
 
@@ -70,15 +91,15 @@
 		isOpen = false;
 		highlightedIndex = -1;
 		// blur to close keyboard on mobile, or keep focus? Usually keeping focus is better but closed dropdown.
-		// inputElement?.blur(); 
+		// inputElement?.blur();
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (!isOpen && event.key !== "ArrowDown") return;
-        if (!isOpen && event.key === "ArrowDown") {
-             isOpen = true;
-             return;
-        }
+		if (!isOpen && event.key === "ArrowDown") {
+			isOpen = true;
+			return;
+		}
 
 		switch (event.key) {
 			case "ArrowDown":
@@ -108,8 +129,12 @@
 	// Close dropdown when clicking outside
 	onMount(() => {
 		function handleClickOutside(event: MouseEvent) {
-			if (inputElement && !inputElement.contains(event.target as Node) &&
-				dropdownElement && !dropdownElement.contains(event.target as Node)) {
+			if (
+				inputElement &&
+				!inputElement.contains(event.target as Node) &&
+				dropdownElement &&
+				!dropdownElement.contains(event.target as Node)
+			) {
 				isOpen = false;
 				highlightedIndex = -1;
 			}
@@ -133,7 +158,7 @@
 		autocomplete="off"
 		class="autocomplete-input"
 	/>
-	
+
 	{#if name}
 		<input type="hidden" {name} value={selectedItem?.value ?? ""} />
 	{/if}
@@ -142,18 +167,18 @@
 		<ul bind:this={dropdownElement} class="dropdown-list">
 			{#each filteredItems as item, index}
 				<li class="dropdown-item-wrapper">
-				<button
-					type="button"
-					class="dropdown-item"
-					class:highlighted={index === highlightedIndex}
-					onclick={() => selectItem(item)}
-					onmouseenter={() => highlightedIndex = index}
-				>
-					<span class="item-label">{item.label}</span>
-					{#if item.value !== item.label && extraDetails}
-						<span class="item-value-pill">{item.value}</span>
-					{/if}
-				</button>
+					<button
+						type="button"
+						class="dropdown-item"
+						class:highlighted={index === highlightedIndex}
+						onclick={() => selectItem(item)}
+						onmouseenter={() => (highlightedIndex = index)}
+					>
+						<span class="item-label">{item.label}</span>
+						{#if item.value !== item.label && extraDetails}
+							<span class="item-value-pill">{item.value}</span>
+						{/if}
+					</button>
 				</li>
 			{/each}
 		</ul>
@@ -168,14 +193,14 @@
 
 	.autocomplete-input {
 		width: 100%;
-		padding: 0.6rem;
+		padding: 0.45rem 0.6rem;
 		border: 1px solid #ccc;
 		border-radius: 6px;
 		font-size: 1rem;
 		box-sizing: border-box;
 		background-color: #fff;
 	}
-	
+
 	.autocomplete-input:focus {
 		outline: none;
 		border-color: #007bff;
@@ -214,7 +239,7 @@
 		align-items: center;
 		font-size: 0.95rem;
 	}
-	
+
 	.dropdown-item-wrapper:last-child .dropdown-item {
 		border-bottom: none;
 	}

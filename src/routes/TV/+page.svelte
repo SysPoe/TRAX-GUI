@@ -5,11 +5,15 @@
 
 	// Import the NEW generic component
 	import Autocomplete from "$lib/Autocomplete.svelte";
+	import { replaceState } from "$app/navigation";
+	import { page } from "$app/state";
+	import { onMount } from "svelte";
 
 	let loading = $state(false);
 	let { data }: PageProps = $props();
-	let extraDetails: boolean = $derived(data.extraDetails)
+	let extraDetails: boolean = $derived(data.extraDetails);
 	let stations: AugmentedStop[] = $derived(data.stations);
+	let isLoaded = $state(false);
 
 	// --- 1. PREPARE DATA FOR AUTOCOMPLETE ---
 
@@ -87,6 +91,44 @@
 		value: d.v,
 	}));
 
+	// Train Type Options
+	const trainTypeOptions = [
+		{ value: "3car", label: "Any 3 car" },
+		{ value: "6car", label: "Any 6 car" },
+		{ value: "1", label: "1 - 6 car SMU" },
+		{ value: "D", label: "D - 6 car NGR" },
+		{ value: "J", label: "J - 3 car SMU" },
+		{ value: "T", label: "T - 6 car IMU" },
+		{ value: "U", label: "U - 3 car IMU" },
+		{ value: "X", label: "X - L2 ETCS" },
+	];
+
+	// Route Options
+	let routeOptions = $derived(
+		Object.keys(data.routes)
+			.sort()
+			.map((r) => ({
+				label: data.routes[r],
+				value: r,
+			})),
+	);
+
+	// Route Pair Options
+	let routePairOptions = $derived(
+		Object.keys(data.routePairs)
+			.sort()
+			.map((p) => ({
+				label: data.routePairs[p],
+				value: p,
+			})),
+	);
+
+	// Date Mode Options
+	const dateModeOptions = [
+		{ value: "actual_sch", label: "Actual SCH (default)" },
+		{ value: "actual_rt", label: "Actual RT" },
+	];
+
 	// --- 2. STATE VARIABLES ---
 	// We only need simple variables or arrays now, the component handles the hidden inputs
 
@@ -105,7 +147,128 @@
 	// Destination State
 	let destItem = $state(null);
 
-	// --- 3. HELPER FUNCTIONS ---
+	// Additional Filter State
+	let trainTypeItem = $state(null);
+	let trainNumber = $state("");
+	let routeItem = $state(null);
+	let routeStartItem = $state(null);
+	let routeEndItem = $state(null);
+	let routePairItem = $state(null);
+	let routePairReversible = $state(false);
+	let dateModeItem = $state(dateModeOptions[0]);
+
+	// --- 3. INITIAL LOAD FROM URL ---
+	onMount(() => {
+		const params = page.url.searchParams;
+		const findItem = (options: any[], val: string | null) => (val ? options.find((o) => o.value === val) ?? null : null);
+
+		startStationItem = findItem(stationOptions, params.get("start-station"));
+		endStationItem = findItem(stationOptions, params.get("end-station"));
+		destItem = findItem(destOptions, params.get("train-number-destination"));
+		trainTypeItem = findItem(trainTypeOptions, params.get("train-number-type"));
+		trainNumber = params.get("train-number") ?? "";
+		routeItem = findItem(routeOptions, params.get("route"));
+		routeStartItem = findItem(routeOptions, params.get("route-start"));
+		routeEndItem = findItem(routeOptions, params.get("route-end"));
+		routePairItem = findItem(routePairOptions, params.get("route-pair"));
+		routePairReversible = params.get("route-pair-reversible") === "on";
+		dateModeItem = findItem(dateModeOptions, params.get("date-mode")) ?? dateModeOptions[0];
+
+		// Intermediates
+		const interKeys = Array.from(params.keys())
+			.filter((k) => k.startsWith("intermediate-station-"))
+			.sort((a, b) => {
+				const na = parseInt(a.split("-").pop() || "0");
+				const nb = parseInt(b.split("-").pop() || "0");
+				return na - nb;
+			});
+
+		if (interKeys.length > 0) {
+			intermediateItems = interKeys
+				.map((k) => ({
+					item: findItem(stationOptions, params.get(k)),
+				}))
+				.filter((r) => r.item !== null);
+		}
+
+		// Dates
+		const dateKeys = Array.from(params.keys())
+			.filter((k) => k.startsWith("service-date-"))
+			.sort((a, b) => {
+				const na = parseInt(a.split("-").pop() || "0");
+				const nb = parseInt(b.split("-").pop() || "0");
+				return na - nb;
+			});
+
+		if (dateKeys.length > 0) {
+			dateFilters = dateKeys
+				.map((k) => ({
+					id: dateCounter++,
+					item: findItem(dateOptions, params.get(k)),
+				}))
+				.filter((r) => r.item !== null);
+		}
+
+		// Mark as loaded so effect can start syncing
+		isLoaded = true;
+	});
+
+	// --- 4. SYNC STATE TO URL ---
+	$effect(() => {
+		if (!isLoaded) return;
+
+		const params = new URLSearchParams();
+		const addParam = (key: string, item: any) => {
+			if (item?.value) params.set(key, item.value);
+		};
+
+		addParam("start-station", startStationItem);
+		addParam("end-station", endStationItem);
+		addParam("train-number-destination", destItem);
+		addParam("train-number-type", trainTypeItem);
+		if (trainNumber) params.set("train-number", trainNumber);
+		addParam("route", routeItem);
+		addParam("route-start", routeStartItem);
+		addParam("route-end", routeEndItem);
+		addParam("route-pair", routePairItem);
+		if (routePairReversible) params.set("route-pair-reversible", "on");
+		addParam("date-mode", dateModeItem);
+
+		intermediateItems.forEach((row, i) => {
+			if (row.item?.value) params.set(`intermediate-station-${i}`, row.item.value);
+		});
+
+		dateFilters.forEach((row, i) => {
+			if (row.item?.value) params.set(`service-date-${i}`, row.item.value);
+		});
+
+		if (extraDetails) params.set("extra-details", "on");
+
+		const newUrl = new URL(page.url);
+		newUrl.search = params.toString();
+
+		if (newUrl.toString() !== page.url.toString()) {
+			replaceState(newUrl, page.state);
+		}
+	});
+
+	// --- 5. HELPER FUNCTIONS ---
+
+	function resetFilters() {
+		startStationItem = null;
+		endStationItem = null;
+		intermediateItems = [];
+		dateFilters = [];
+		destItem = null;
+		trainTypeItem = null;
+		trainNumber = "";
+		routeItem = null;
+		routeStartItem = null;
+		routeEndItem = null;
+		routePairItem = null;
+		routePairReversible = false;
+		dateModeItem = dateModeOptions[0];
+	}
 
 	function addIntermediate() {
 		intermediateItems.push({ item: null });
@@ -149,6 +312,11 @@
 
 	{#if !loading}
 		<form action="/TV/search" method="get" class="search-card">
+			<div class="form-actions top">
+				<input type="submit" value="Search Trips" class="btn-primary" />
+				<button type="button" class="btn-secondary" onclick={resetFilters}> Reset Filters </button>
+			</div>
+
 			<fieldset>
 				<legend>Station Filter</legend>
 				<div class="grid-2">
@@ -231,17 +399,13 @@
 				<div class="grid-2">
 					<div class="input-group">
 						<label for="train-number-type">Train Type</label>
-						<select name="train-number-type" id="train-number-type">
-							<option value="">Any Type</option>
-							<option value="3car">Any 3 car</option>
-							<option value="6car">Any 6 car</option>
-							<option value="1">1 - 6 car SMU</option>
-							<option value="D">D - 6 car NGR</option>
-							<option value="J">J - 3 car SMU</option>
-							<option value="T">T - 6 car IMU</option>
-							<option value="U">U - 3 car IMU</option>
-							<option value="X">X - L2 ETCS</option>
-						</select>
+						<Autocomplete
+							items={trainTypeOptions}
+							bind:selectedItem={trainTypeItem}
+							{extraDetails}
+							name="train-number-type"
+							placeholder="Any Type"
+						/>
 					</div>
 
 					<div class="input-group">
@@ -250,6 +414,7 @@
 							type="text"
 							name="train-number"
 							id="train-number"
+							bind:value={trainNumber}
 							placeholder="e.g. 1124 or use '.' for wildcard (.K12)"
 						/>
 					</div>
@@ -271,46 +436,55 @@
 				<legend>Route Filters</legend>
 				<div class="input-group">
 					<label for="route">Any Included Line</label>
-					<select name="route" id="route">
-						<option value="">Any Included Line</option>
-						{#each Object.keys(data.routes).sort() as route}
-							<option value={route}>{data.routes[route]}</option>
-						{/each}
-					</select>
+					<Autocomplete
+						items={routeOptions}
+						bind:selectedItem={routeItem}
+						{extraDetails}
+						name="route"
+						placeholder="Any Included Line"
+					/>
 				</div>
 
 				<div class="grid-2">
 					<div class="input-group">
 						<label for="route-start">Starting Line</label>
-						<select name="route-start" id="route-start">
-							<option value="">Any</option>
-							{#each Object.keys(data.routes).sort() as route}
-								<option value={route}>{data.routes[route]}</option>
-							{/each}
-						</select>
+						<Autocomplete
+							items={routeOptions}
+							bind:selectedItem={routeStartItem}
+							{extraDetails}
+							name="route-start"
+							placeholder="Any"
+						/>
 					</div>
 					<div class="input-group">
 						<label for="route-end">Ending Line</label>
-						<select name="route-end" id="route-end">
-							<option value="">Any</option>
-							{#each Object.keys(data.routes).sort() as route}
-								<option value={route}>{data.routes[route]}</option>
-							{/each}
-						</select>
+						<Autocomplete
+							items={routeOptions}
+							bind:selectedItem={routeEndItem}
+							{extraDetails}
+							name="route-end"
+							placeholder="Any"
+						/>
 					</div>
 				</div>
 
 				<div class="input-group">
 					<label for="route-pair">Line Pair</label>
 					<div class="row-control">
-						<select name="route-pair" id="route-pair" class="flex-grow">
-							<option value="">Any Line Pair</option>
-							{#each Object.keys(data.routePairs).sort() as pair}
-								<option value={pair}>{data.routePairs[pair]}</option>
-							{/each}
-						</select>
+						<Autocomplete
+							items={routePairOptions}
+							bind:selectedItem={routePairItem}
+							{extraDetails}
+							name="route-pair"
+							placeholder="Any Line Pair"
+						/>
 						<label class="checkbox-label">
-							<input type="checkbox" name="route-pair-reversible" id="route-pair-reversible" />
+							<input
+								type="checkbox"
+								name="route-pair-reversible"
+								id="route-pair-reversible"
+								bind:checked={routePairReversible}
+							/>
 							Reversible
 						</label>
 					</div>
@@ -323,10 +497,13 @@
 					<div class="grid-2">
 						<div class="input-group">
 							<label for="date-mod">Date Selection</label>
-							<select name="date-mode" id="date-mod">
-								<option value="actual_sch">Actual SCH (default)</option>
-								<option value="actual_rt">Actual RT</option>
-							</select>
+							<Autocomplete
+								items={dateModeOptions}
+								bind:selectedItem={dateModeItem}
+								{extraDetails}
+								name="date-mode"
+								placeholder="Select date mode..."
+							/>
 						</div>
 						<div class="input-group checkbox-group">
 							<input
@@ -341,8 +518,9 @@
 				</div>
 			</details>
 
-			<div class="form-actions">
+			<div class="form-actions bottom">
 				<input type="submit" value="Search Trips" class="btn-primary" />
+				<button type="button" class="btn-secondary" onclick={resetFilters}> Reset Filters </button>
 			</div>
 		</form>
 	{/if}
@@ -352,12 +530,12 @@
 	.page-container {
 		max-width: 800px;
 		margin: 0 auto;
-		padding: 2rem 1rem;
+		padding: 1rem;
 	}
 
 	.title {
 		text-align: center;
-		margin-bottom: 2rem;
+		margin-bottom: 1rem;
 	}
 
 	.title h1 {
@@ -373,7 +551,7 @@
 	/* Card Style */
 	.search-card {
 		background: white;
-		padding: 2rem;
+		padding: 1.25rem;
 		border-radius: 12px;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 		border: 1px solid #e1e4e8;
@@ -383,9 +561,9 @@
 	fieldset {
 		border: none;
 		padding: 0;
-		margin: 0 0 2rem 0;
+		margin: 0 0 1rem 0;
 		border-bottom: 1px solid #eee;
-		padding-bottom: 2rem;
+		padding-bottom: 1rem;
 	}
 
 	fieldset:last-of-type {
@@ -398,7 +576,7 @@
 		font-weight: 600;
 		font-size: 1.1rem;
 		color: #2c3e50;
-		margin-bottom: 1rem;
+		margin-bottom: 0.5rem;
 		display: block;
 		width: 100%;
 	}
@@ -415,7 +593,7 @@
 	.grid-2 {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
+		gap: 0.75rem;
 	}
 
 	@media (max-width: 600px) {
@@ -425,7 +603,7 @@
 	}
 
 	.input-group {
-		margin-bottom: 1rem;
+		margin-bottom: 0.75rem;
 	}
 
 	label {
@@ -436,8 +614,7 @@
 		color: #444;
 	}
 
-	input[type="text"],
-	select {
+	input[type="text"] {
 		width: 100%;
 		padding: 0.6rem;
 		border: 1px solid #ccc;
@@ -447,8 +624,7 @@
 		background-color: #fff;
 	}
 
-	input[type="text"]:focus,
-	select:focus {
+	input[type="text"]:focus {
 		outline: none;
 		border-color: #007bff;
 		box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
@@ -550,7 +726,7 @@
 		background: #f8f9fa;
 		border-radius: 8px;
 		padding: 0.5rem;
-		margin-bottom: 2rem;
+		margin-bottom: 1rem;
 	}
 
 	summary {
@@ -566,6 +742,17 @@
 	}
 
 	.form-actions {
-		margin-top: 2rem;
+		display: flex;
+		gap: 1rem;
+	}
+
+	.form-actions.top {
+		margin-bottom: 1rem;
+		border-bottom: 1px solid #eee;
+		padding-bottom: 1rem;
+	}
+
+	.form-actions.bottom {
+		margin-top: 1rem;
 	}
 </style>
