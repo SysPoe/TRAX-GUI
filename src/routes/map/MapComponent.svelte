@@ -5,7 +5,6 @@
 	import type { AugmentedStop, AugmentedTripInstance } from "translink-rail-api";
 	import type { Route } from "qdf-gtfs/types";
 	import { onMount, untrack } from "svelte";
-	import { replaceState } from "$app/navigation";
 	import StopTimes from "$lib/StopTimes.svelte";
 	import { DepartureBoard, type Departure } from "$lib";
 
@@ -478,7 +477,7 @@
 	});
 </script>
 
-<div id="mapContainer" class:animating={isAnimating}>
+<div id="mapContainer" class:animating={isAnimating} class:extraDetails={extraDetails}>
 	{#if selectedTrip || selectedStopId}
 		<div class="sidebar">
 			<div class="sidebar-header">
@@ -667,10 +666,14 @@
 	@media (min-width: 769px) {
 		.scaled-departures {
 			transform: scale(0.7);
-			margin-top: -1.5rem;
 			margin-left: -2rem;
+			margin-top: -0.6rem;
 			transform-origin: top left;
 			width: 170%;
+		}
+
+		.extraDetails .scaled-departures {
+			margin-top: -1.5rem;
 		}
 	}
 

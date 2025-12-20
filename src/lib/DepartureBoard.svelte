@@ -72,6 +72,7 @@
 	}
 
 	function readSelectedTypesFromStorage() {
+		if (!extraDetails) return ["scheduled"];
 		if (typeof window === "undefined") return null as string[] | null;
 		const raw = localStorage.getItem(storageKey());
 		if (!raw) return null;
@@ -130,10 +131,10 @@
 	let filteredDepartures = $derived(departures.filter((d) => selectedDepTypes.has(getDepType(d))));
 </script>
 
-{#if depTypes.length > 0}
+{#if depTypes.length > 0 && extraDetails}
 	<div class="filters">
 		<span class="filter-label">Type:</span>
-		{#each depTypes.filter((t) => t !== "passing" || extraDetails) as t}
+		{#each depTypes as t}
 			<button class:active={selectedDepTypes.has(t)} onclick={() => toggleDepType(t)}>
 				{t === "scheduled"
 					? "Scheduled"
@@ -305,9 +306,12 @@
 							.trim() ?? "Unknown"}
 					</span>
 				</span>
-				<span class="service-type {dep.passing ? 'passing' : 'qr-travel'}" title={
-					dep.passing ? "Service passes, and does not stop here" : "This is a Queensland Rail Travel service"
-				}>
+				<span
+					class="service-type {dep.passing ? 'passing' : 'qr-travel'}"
+					title={dep.passing
+						? "Service passes, and does not stop here"
+						: "This is a Queensland Rail Travel service"}
+				>
 					{dep.passing ? "P" : "Q"}
 				</span>
 				<span class="time-container">
