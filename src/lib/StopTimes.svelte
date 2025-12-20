@@ -72,7 +72,17 @@
 				}
 			}}
 		>
-			<span class="tv-platform" style="background-color: #{route.route_color ?? '000000'}">
+			<span
+				class="tv-platform"
+				style="background-color: #{route.route_color ?? '000000'}"
+				title={useRealtime
+					? st.actual_platform_code
+						? `Service departs platform ${st.actual_platform_code}`
+						: "Service departs unknown platform"
+					: st.scheduled_platform_code
+						? `Service departs platform ${st.scheduled_platform_code}`
+						: "Service departs unknown platform"}
+			>
 				{(useRealtime ? st.actual_platform_code : st.scheduled_platform_code) ?? "?"}
 			</span>
 			<span class="tv-smalltext">
@@ -175,11 +185,13 @@
 				</span>
 			</span>
 			{#if st.passing}
-				<span class="tv-service-type passing">P</span>
+				<span class="tv-service-type passing" title="Service passes this station and does not stop">P</span>
 			{:else if useRealtime && inst.schedule_relationship === qdf.TripScheduleRelationship.CANCELED}
-				<span class="tv-service-type canceled">C</span>
+				<span class="tv-service-type canceled" title="Service is canceled">C</span>
 			{:else if useRealtime && st.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED}
-				<span class="tv-service-type canceled">S</span>
+				<span class="tv-service-type canceled" title="Service skips this stop">S</span>
+			{:else}
+				<span class="tv-service-type-empty"></span>
 			{/if}
 		</a>
 		<hr />
