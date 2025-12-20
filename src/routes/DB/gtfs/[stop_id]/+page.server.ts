@@ -119,5 +119,5 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		);
 	}
 
-	return { stations, stop_id, departures: mixed, instances, routes, extraDetails };
+	return { stations, stop_id, stop, departures: mixed, instances, routes, extraDetails };
 };
