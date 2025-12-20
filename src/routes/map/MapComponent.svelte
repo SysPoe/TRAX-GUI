@@ -5,6 +5,7 @@
 	import type { AugmentedStop, AugmentedTripInstance } from "translink-rail-api";
 	import type { Route } from "qdf-gtfs/types";
 	import { onMount, untrack } from "svelte";
+	import { replaceState } from "$app/navigation";
 	import StopTimes from "$lib/StopTimes.svelte";
 	import { DepartureBoard, type Departure } from "$lib";
 
@@ -24,8 +25,6 @@
 
 	const STATION_ZOOM = 8;
 	const VEHICLE_ZOOM = $derived(vps.length > 100 ? 12 : vps.length > 50 ? 11 : vps.length > 20 ? 10 : 9);
-
-	console.log(shapes);
 
 	let initialViewDone = $state(false);
 	let userLocationZoomDone = $state(false);
@@ -125,7 +124,7 @@
 			}
 
 			if (url.search !== window.location.search) {
-				window.history.replaceState({}, "", url);
+				replaceState(url, {});
 			}
 		});
 	});
