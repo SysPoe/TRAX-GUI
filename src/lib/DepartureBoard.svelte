@@ -177,7 +177,13 @@
 					}
 				}}
 			>
-				<span class="platform" style="background-color: #{route.route_color}">
+				<span
+					class="platform"
+					style="background-color: #{route.route_color}"
+					title={dep.actual_platform_code
+						? `Service departs platform ${dep.actual_platform_code}`
+						: "Service departs unknown platform"}
+				>
 					{dep.actual_platform_code ?? "?"}
 				</span>
 				<span class="smalltext">
@@ -201,6 +207,17 @@
 								: express
 									? 'express'
 									: 'all-stops'}"
+					title={instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
+						? "Service is canceled"
+						: dep.realtime_info?.schedule_relationship === qdf.StopTimeScheduleRelationship.SKIPPED
+							? "Service skipped this stop"
+							: dep.last_stop_id == stop_id
+								? "Service terminates at this stop"
+								: dep.passing
+									? "Service passes, and does not stop here"
+									: express
+										? dep.express_string
+										: "Service runs all stops"}
 				>
 					{instance.schedule_relationship === qdf.TripScheduleRelationship.CANCELED
 						? "C"
@@ -270,7 +287,7 @@
 					}
 				}}
 			>
-				<span class="platform qr-travel"> ? </span>
+				<span class="platform qr-travel" title="Service departs unknown platform"> ? </span>
 				<span class="smalltext">
 					<span class="time"
 						>Sch. {(
@@ -288,7 +305,9 @@
 							.trim() ?? "Unknown"}
 					</span>
 				</span>
-				<span class="service-type {dep.passing ? 'passing' : 'qr-travel'}">
+				<span class="service-type {dep.passing ? 'passing' : 'qr-travel'}" title={
+					dep.passing ? "Service passes, and does not stop here" : "This is a Queensland Rail Travel service"
+				}>
 					{dep.passing ? "P" : "Q"}
 				</span>
 				<span class="time-container">
