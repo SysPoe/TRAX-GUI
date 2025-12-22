@@ -116,9 +116,7 @@
 <div class="header">
 	<div class="header-main">
 		<h1>TRAX <i>DepartureBoard</i></h1>
-		<a href="/map?stop={data.stop_id}" class="btn-map" title="View on map">
-			🗺️
-		</a>
+		<a href="/map?stop={data.stop_id}" class="btn-map" title="View on map"> 🗺️ </a>
 	</div>
 	<h2>
 		Departures from {station?.stop_name ?? "Unknown Station"} in the next 4 hours
@@ -139,11 +137,31 @@
 							<div class="ohours-section">
 								<h4>{section.title}</h4>
 								<ul>
-									{#each section.times as time}
+									{#each section.times.filter((t, i, arr) => {
+										if (t.days?.toLowerCase().includes("holiday")) {
+											return arr.findIndex((x) => x.days
+														?.toLowerCase()
+														.includes("holiday")) === i;
+										}
+										return true;
+									}) as time}
 										<li>
-											<strong>{time.days}:</strong> {time.open} - {time.close}
-											{#if time.status} <span class="status-tag">{time.status}</span>{/if}
-											{#if time.note} <br /><small class="note-text">{time.note}</small>{/if}
+											{#if time.days?.toLowerCase().includes("holiday")}
+												<strong>Public holiday hours may vary.</strong>
+											{:else}
+												<strong>{time.days?.replace(/[:-\s]+$/, "")}:</strong>
+												{#if time.open && time.open !== "-"}
+													{time.open} - {time.close}
+												{:else}
+													{time.status || "Closed"}
+												{/if}
+												{#if time.status && time.open && time.open !== "-"}
+													<span class="status-tag">{time.status}</span>
+												{/if}
+												{#if time.note}
+													<br /><small class="note-text">{time.note}</small>
+												{/if}
+											{/if}
 										</li>
 									{/each}
 								</ul>
@@ -172,7 +190,7 @@
 
 				{#if facilities.sginfor}
 					<div class="info-section">
-						<h3>Platform & Sign Info</h3>
+						<h3>Accessibility Info</h3>
 						<div class="sg-list">
 							{#each Object.entries(facilities.sginfor) as [key, value]}
 								{#if key !== "_notes" && value !== undefined}
@@ -181,7 +199,8 @@
 										{#if typeof value === "object" && value !== null && "level" in value}
 											{@const levelVal = value as any}
 											<span class="level-tag level-{levelVal.level}">{levelVal.level}</span>
-											{#if levelVal.note}<br /><small class="level-note">{levelVal.note}</small>{/if}
+											{#if levelVal.note}<br /><small class="level-note">{levelVal.note.replace(/^Platforms? \d((, \d)+ and \d)? (is|are) /, "").trim()}</small
+												>{/if}
 										{:else if Array.isArray(value)}
 											{value.join(", ")}
 										{:else}
@@ -210,25 +229,44 @@
 
 <hr />
 
-<div class="refresh-bar" aria-live="polite">
-	<button class="refresh-button" onclick={refreshDepartures} disabled={isRefreshing}>
-		{isRefreshing ? "Updating…" : "Refresh"}
-	</button>
-	<span class="refresh-status">
-		{#if lastUpdated}
-			Last updated at
-			{lastUpdated.toLocaleTimeString([], {
-				hour: "2-digit",
-				minute: "2-digit",
-				second: "2-digit",
-			})}
-		{:else}
-			Waiting for first update…
-		{/if}
-		{#if refreshError}
-			<span class="refresh-error"> • {refreshError}</span>
-		{/if}
-	</span>
+<div class="board-header-container">
+	<div class="refresh-bar" aria-live="polite">
+		<button class="refresh-btn-simple" onclick={refreshDepartures} disabled={isRefreshing}>
+			{isRefreshing ? "Updating…" : "Refresh"}
+		</button>
+		<span class="refresh-status">
+			{#if lastUpdated}
+				Last updated at
+				{lastUpdated.toLocaleTimeString([], {
+					hour: "2-digit",
+					minute: "2-digit",
+					second: "2-digit",
+				})}
+			{:else}
+				Waiting for first update…
+			{/if}
+			{#if refreshError}
+				<span class="refresh-error"> • {refreshError}</span>
+			{/if}
+		</span>
+	</div>
+
+	<div class="column-labels-row">
+		<div class="column-labels">
+			<div class="hdr-grp-left">
+				<div class="hdr-col hdr-platform">Platform</div>
+				<div class="hdr-sep">|</div>
+				<div class="hdr-col hdr-destination">Destination</div>
+			</div>
+			<div class="hdr-grp-right">
+				<div class="hdr-col hdr-express">Express</div>
+				<div class="hdr-col hdr-departs">
+					<span class="hdr-sep-right">|</span>
+					Departs in
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <DepartureBoard
@@ -244,48 +282,124 @@
 		font-family: "Arial";
 	}
 
+	.board-header-container {
+		width: 100%;
+		margin: 1.5rem auto 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
 	.refresh-bar {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
 		justify-content: center;
-		margin: 1rem auto;
-		width: fit-content;
-		padding: 0.5rem 0.75rem;
-		background-color: rgba(0, 0, 0, 0.04);
-		border-radius: 0.5rem;
+		margin-bottom: 0.75rem;
+		padding: 0.5rem;
 	}
 
-	.refresh-button {
-		font-family: "Arial";
-		font-size: 1rem;
+	.refresh-btn-simple {
+		font-family: inherit;
+		font-size: 0.9rem;
 		font-weight: 600;
-		padding: 0.4rem 1.2rem;
+		padding: 0.4rem 1rem;
 		border: none;
 		background-color: #2980b9;
 		color: #fff;
 		border-radius: 4px;
 		cursor: pointer;
-		transition:
-			background-color 150ms ease,
-			transform 150ms ease;
 	}
 
-	.refresh-button:disabled {
-		cursor: not-allowed;
+	.refresh-btn-simple:disabled {
 		background-color: #a5c7dd;
-		transform: none;
-	}
-
-	.refresh-button:not(:disabled):hover {
-		background-color: #1f6391;
-		transform: translateY(-1px);
+		cursor: not-allowed;
 	}
 
 	.refresh-status {
-		font-family: "Arial";
 		font-size: 0.9rem;
 		color: #333;
+	}
+
+	.column-labels-row {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		border-bottom: 2px solid #333;
+		padding-bottom: 2px;
+	}
+
+	.column-labels {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		/* Matches total width of board rows */
+		width: 31.7rem;
+		padding: 0 0.2rem;
+	}
+
+	.hdr-grp-left {
+		display: flex;
+		align-items: center;
+		width: 21.2rem; /* 5.2 + 16 */
+	}
+
+	.hdr-grp-right {
+		display: flex;
+		align-items: center;
+		width: 10.5rem; /* 1.5 + 9 */
+		position: relative;
+	}
+
+	.hdr-col {
+		font-weight: 400;
+		color: #333;
+		font-size: 1.1rem;
+		font-family: Arial, sans-serif;
+	}
+
+	.hdr-platform {
+		width: 5.2rem;
+		text-align: center;
+	}
+
+	.hdr-destination {
+		flex: 1;
+		text-align: left;
+		padding-left: 0.5rem;
+	}
+
+	.hdr-express {
+		width: 1.5rem;
+		display: flex;
+		justify-content: center;
+		overflow: visible;
+		white-space: nowrap;
+		/* High z-index to ensure text is visible if it crosses lines, though we fix layout to allow space */
+		z-index: 1; 
+	}
+
+	.hdr-departs {
+		width: 9rem;
+		text-align: right;
+		position: relative;
+		/* Ensure the separator inside this container is positioned correctly */
+	}
+
+	.hdr-sep {
+		color: #999;
+		margin: 0 0.1rem;
+		font-style: normal;
+	}
+
+	/* Separator specifically for the right group, positioned to clear "Express" text */
+	.hdr-sep-right {
+		position: absolute;
+		left: 2.6rem; /* Push separator into the column to clear "Express" but keep it closer */
+		top: 50%;
+		transform: translateY(-50%);
+		color: #999;
+		font-style: normal;
 	}
 
 	.refresh-error {
