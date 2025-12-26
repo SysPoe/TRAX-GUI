@@ -8,3 +8,4 @@ gtfs-last-loaded.txt
 .idea
 TRAX.log
 .TRAXCACHE
+.env

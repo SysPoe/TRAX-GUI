@@ -87,6 +87,8 @@
 			</a>
 		</div>
 		<hr />
+	{:else}
+		No QRT Services found. Try reloading in a few seconds...
 	{/each}
 </div>
 

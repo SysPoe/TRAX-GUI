@@ -3,10 +3,13 @@
 	import "$lib/styles/common.css";
 	import * as qdf from "qdf-gtfs/types";
 	import { onMount } from "svelte";
-	import { formatTimestamp, type Departure, DepartureBoard } from "$lib";
+	import { type Departure, DepartureBoard } from "$lib";
 	import type { PageProps } from "./$types";
+	import DepartureBoardGrouped from "$lib/DepartureBoardGrouped.svelte";
 
 	const REFRESH_INTERVAL_MS = 30_000;
+
+	let newLayout = $state(false);
 
 	let { data, params }: PageProps = $props();
 
@@ -104,11 +107,13 @@
 		TRAX Departure Board - {station?.stop_name ?? "Unknown Station"}
 	</title>
 
-	<style>
-		:root {
-			font-size: min(2.65vw, 1em);
-		}
-	</style>
+	{#if !newLayout}
+		<style>
+			:root {
+				font-size: min(2.65vw, 1em);
+			}
+		</style>
+	{/if}
 
 	<link rel="icon" type="image/svg+xml" href="/favicon-DB.svg" />
 </svelte:head>
@@ -119,11 +124,23 @@
 		<a href="/map?stop={data.stop_id}" class="btn-map" title="View on map"> 🗺️ </a>
 	</div>
 	<h2>
-		Departures from {station?.stop_name ?? "Unknown Station"} in the next 4 hours
+		Departures from {station?.stop_name ?? "Unknown Station"} in the next 8 hours
 	</h2>
 
 	{#if data.admin && data.extraDetails}
 		<button onclick={() => console.log(data)}>LogRaw</button>
+		
+		<button
+			onclick={() => {
+				newLayout = !newLayout;
+			}}
+		>
+			{#if newLayout}
+				Switch to old layout
+			{:else}
+				Switch to experimental layout
+			{/if}
+		</button>
 	{/if}
 
 	{#if facilities}
@@ -137,9 +154,9 @@
 							<div class="ohours-section">
 								<h4>{section.title}</h4>
 								<ul>
-									{#each section.times.filter((t, i, arr) => {
+									{#each section.times.filter((t: { days: string }, i: any, arr: any[]) => {
 										if (t.days?.toLowerCase().includes("holiday")) {
-											return arr.findIndex((x) => x.days
+											return arr.findIndex((x: { days: string }) => x.days
 														?.toLowerCase()
 														.includes("holiday")) === i;
 										}
@@ -199,7 +216,10 @@
 										{#if typeof value === "object" && value !== null && "level" in value}
 											{@const levelVal = value as any}
 											<span class="level-tag level-{levelVal.level}">{levelVal.level}</span>
-											{#if levelVal.note}<br /><small class="level-note">{levelVal.note.replace(/^Platforms? \d((, \d)+ and \d)? (is|are) /, "").trim()}</small
+											{#if levelVal.note}<br /><small class="level-note"
+													>{levelVal.note
+														.replace(/^Platforms? \d((, \d)+ and \d)? (is|are) /, "")
+														.trim()}</small
 												>{/if}
 										{:else if Array.isArray(value)}
 											{value.join(", ")}
@@ -251,31 +271,44 @@
 		</span>
 	</div>
 
-	<div class="column-labels-row">
-		<div class="column-labels">
-			<div class="hdr-grp-left">
-				<div class="hdr-col hdr-platform">Platform</div>
-				<div class="hdr-sep">|</div>
-				<div class="hdr-col hdr-destination">Destination</div>
-			</div>
-			<div class="hdr-grp-right">
-				<div class="hdr-col hdr-express">Express</div>
-				<div class="hdr-col hdr-departs">
-					<span class="hdr-sep-right">|</span>
-					Departs in
+	{#if !newLayout}
+		<div class="column-labels-row">
+			<div class="column-labels">
+				<div class="hdr-grp-left">
+					<div class="hdr-col hdr-platform">Platform</div>
+					<div class="hdr-sep">|</div>
+					<div class="hdr-col hdr-destination">Destination</div>
+				</div>
+				<div class="hdr-grp-right">
+					<div class="hdr-col hdr-express">Express</div>
+					<div class="hdr-col hdr-departs">
+						<span class="hdr-sep-right">|</span>
+						Departs in
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
 </div>
 
-<DepartureBoard
-	{departures}
-	instances={data.instances}
-	{routes}
-	stop_id={params.stop_id}
-	extraDetails={data.extraDetails}
-/>
+{#if newLayout}
+	<DepartureBoardGrouped
+		{departures}
+		instances={data.instances}
+		{routes}
+		stop_id={params.stop_id}
+		extraDetails={data.extraDetails}
+		stations={data.stations}
+	/>
+{:else}
+	<DepartureBoard
+		{departures}
+		instances={data.instances}
+		{routes}
+		stop_id={params.stop_id}
+		extraDetails={data.extraDetails}
+	/>
+{/if}
 
 <style>
 	* {
@@ -376,7 +409,7 @@
 		overflow: visible;
 		white-space: nowrap;
 		/* High z-index to ensure text is visible if it crosses lines, though we fix layout to allow space */
-		z-index: 1; 
+		z-index: 1;
 	}
 
 	.hdr-departs {

@@ -73,6 +73,7 @@
 
 <svelte:head>
 	<title>
+		{formatTime(service.departureDate).split(" ")[0]}
 		{service.run}
 		{destination} service - TRAX TripViewer
 	</title>
@@ -85,21 +86,31 @@
 </svelte:head>
 
 <div class="header">
-	<h1>TRAX <i>TripViewer</i></h1>
-	<h2>
-		{service.run} - {destination} Service
-	</h2>
-	<p>
-		Departing: {formatTime(service.departureDate)} | Service ID: {service.serviceId}
-	</p>
+	<div class="header-main">
+		<h1>TRAX <i>TripViewer</i></h1>
+	</div>
+	{#if data.extraDetails}
+		<h2>
+			{service.run} - {destination} Service
+		</h2>
+		<p>
+			Departing: {formatTime(service.departureDate)} | Service ID: {service.serviceId}
+		</p>
+	{:else}
+		<h2>
+			{service.departureDate.slice(0, 10)}
+			{formatTime(service.departureDate).split(" ")[0]}
+			{destination} Service
+		</h2>
+	{/if}
 </div>
 
 <hr />
 
 <div class="container">
 	<div class="content">
-		<div class="info-section">
-			<h3>Trip Information</h3>
+		<details class="info-section">
+			<summary>Trip Information</summary>
 			{#if data.extraDetails}
 				<div class="info-item">
 					<span class="info-label">TRN:</span>
@@ -148,11 +159,11 @@
 					</span>
 				</div>
 			{/if}
-		</div>
+		</details>
 
 		{#if service.disruption}
-			<div class="info-section">
-				<h3>Service Disruption</h3>
+			<details class="info-section">
+				<summary>Service Disruption</summary>
 				<div class="info-item">
 					<span class="info-label">Title:</span>
 					<span class="info-value">{service.disruption.Title}</span>
@@ -173,21 +184,21 @@
 						>
 					</div>
 				{/if}
-			</div>
+			</details>
 		{/if}
 
-		<div class="info-section">
-			<h3>Stoptimes</h3>
+		<details class="info-section" open>
+			<summary>Stoptimes</summary>
 			<div class="tv-stoptimes">
 				{#if data.extraDetails}
-					<div class="controls">
+					<div class="stoptimes-controls">
 						<label>
 							<input type="checkbox" bind:checked={showPassing} />
 							Show Passing Stops*
 						</label>
 						<label>
 							<input type="checkbox" bind:checked={useRealtime} />
-							Use Realtime Data
+							Show Realtime Data
 						</label><br />
 						(*Passing stops use realtime data)
 					</div>
@@ -248,12 +259,10 @@
 							</span>
 							{#if passing}
 								<span class="tv-service-type passing">P</span>
-							{/if}
-							{#if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)}
-								{@const ost = service.stops.find((v) => v.placeName === st.placeName)}
-								{#if ost?.kStation}
-									<span class="tv-service-type">K</span>
-								{/if}
+							{:else if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)?.kStation}
+								<span class="tv-service-type">K</span>
+							{:else}
+								<span class="tv-service-type-empty"></span>
 							{/if}
 						</a>
 						<hr />
@@ -305,19 +314,17 @@
 							</span>
 							{#if passing}
 								<span class="tv-service-type passing">P</span>
-							{/if}
-							{#if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)}
-								{@const ost = service.stops.find((v) => v.placeName === st.placeName)}
-								{#if ost?.kStation}
-									<span class="tv-service-type">K</span>
-								{/if}
+							{:else if data.extraDetails && service.stops.find((v) => v.placeName === st.placeName)?.kStation}
+								<span class="tv-service-type">K</span>
+							{:else}
+								<span class="tv-service-type-empty"></span>
 							{/if}
 						</div>
 						<hr />
 					{/if}
 				{/each}
 			</div>
-		</div>
+		</details>
 	</div>
 </div>
 
@@ -347,24 +354,26 @@
 	}
 
 	.info-section {
-		margin-bottom: 1.5rem;
-		padding: 1.2rem;
+		/* margin-bottom: 1rem; */
+		padding: 0.5rem;
 		border-radius: 6px;
 		background-color: #ffffff;
-		box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+		/* box-shadow: 0 0rem 0.4rem rgba(0, 0, 0, 0.5); */
 	}
 
-	.info-section h3 {
+	.info-section summary {
 		margin-top: 0;
 		color: #2c3e50;
 		font-size: 1.3rem;
 		font-weight: 600;
+		cursor: pointer;
 	}
 
 	.info-item {
 		display: flex;
-		margin-bottom: 0.6rem;
-		padding: 0.4rem 0;
+		padding: 0.1rem 0.5rem;
+		margin-left: 1rem;
+		border-left: solid black 0.1rem;
 	}
 
 	.info-label {
@@ -398,20 +407,6 @@
 		transform: scale(1.2);
 	}
 
-	.run-series-item {
-		display: flex;
-		margin: 0.2rem 0;
-	}
-
-	.route-link {
-		color: #2980b9;
-		text-decoration: none;
-	}
-
-	.route-link:hover {
-		text-decoration: underline;
-	}
-
 	.color-square {
 		width: 1rem;
 		height: 1rem;
@@ -419,6 +414,15 @@
 		display: inline-block;
 		margin-left: 0.5rem;
 		vertical-align: middle;
+	}
+
+	.stoptimes-controls {
+		margin-bottom: 1rem;
+		text-align: center;
+	}
+	.stoptimes-controls label {
+		font-size: 1rem;
+		cursor: pointer;
 	}
 
 	footer {

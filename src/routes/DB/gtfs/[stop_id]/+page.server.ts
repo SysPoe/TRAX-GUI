@@ -6,7 +6,6 @@ import {
 	loadTRAX,
 } from "$lib/server/trax";
 import { formatTimestamp, type Departure, type UpcomingGTFSDeparture, type UpcomingQRTravelDeparture } from "$lib";
-import type { AugmentedStopTime } from "translink-rail-api";
 import * as qdf from "qdf-gtfs";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
@@ -30,7 +29,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let today = now.toISOString().split("T")[0].replaceAll("-", "");
 	let tomorrow = tomDate.toISOString().split("T")[0].replaceAll("-", "");
 	let startTime = (now.getUTCHours()).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
-	let endTime = (now.getUTCHours() + 4).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
+	let endTime = (now.getUTCHours() + 8).toString().padStart(2, "0") + ":" + now.getUTCMinutes().toString().padStart(2, "0") + ":00";
 
 	// startTime = "00:00:00";
 	// endTime = "96:00:00";

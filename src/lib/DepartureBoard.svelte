@@ -327,6 +327,6 @@
 			<hr />
 		{/if}
 	{:else}
-		<p>No departures found in the next 4 hours.</p>
+		<p>No departures found in the next 8 hours.</p>
 	{/each}
 </div>

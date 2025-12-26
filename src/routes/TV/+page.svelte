@@ -7,11 +7,11 @@
 	import Autocomplete from "$lib/Autocomplete.svelte";
 	import { replaceState } from "$app/navigation";
 	import { page } from "$app/state";
-	import { onMount } from "svelte";
+	import { onMount, tick } from "svelte";
 
 	let loading = $state(false);
 	let { data }: PageProps = $props();
-	let extraDetails: boolean = $derived(data.extraDetails);
+	let extraDetails = $state(data.extraDetails);
 	let stations: AugmentedStop[] = $derived(data.stations);
 	let isLoaded = $state(false);
 
@@ -209,8 +209,13 @@
 				.filter((r) => r.item !== null);
 		}
 
-		// Mark as loaded so effect can start syncing
-		isLoaded = true;
+		if (params.get("extra-details") === "on") extraDetails = true;
+		else if (params.has("extra-details")) extraDetails = false;
+
+		// Wait for a tick to ensure router is ready before we start syncing to URL
+		tick().then(() => {
+			isLoaded = true;
+		});
 	});
 
 	// --- 4. SYNC STATE TO URL ---
@@ -510,7 +515,7 @@
 								type="checkbox"
 								name="extra-details"
 								id="extra-details"
-								checked={extraDetails}
+								bind:checked={extraDetails}
 							/>
 							<label for="extra-details">Show Extra Details</label>
 						</div>

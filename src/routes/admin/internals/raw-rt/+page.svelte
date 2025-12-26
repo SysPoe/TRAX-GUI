@@ -372,6 +372,7 @@
 		border: 1px solid #ccc;
 		border-radius: 4px;
 		background: #fff;
+		color: #333;
 		cursor: pointer;
 		transition: all 0.2s;
 	}

@@ -1,7 +1,7 @@
 import { TRAX, isTRAXLoaded, isTRAXLoading, loadTRAX } from "$lib/server/trax";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { formatTimestamp, type RealtimeVehiclePosition, type Route, type Shape } from "qdf-gtfs";
+import { type Route, type Shape } from "qdf-gtfs";
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!isTRAXLoaded) {
@@ -84,9 +84,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 			(v.to === chosI?.stopTimes.at(-1)?.scheduled_parent_station_id
 				|| v.to === chosI?.stopTimes.at(-1)?.scheduled_stop_id)
 		);
-		let shape = TRAX.gtfs.getShape(shape_id);
-		let route = TRAX.gtfs.getRoute(route_id);
-		if (!shape || !route) continue;
+		let shape = TRAX.gtfs.getShapes({ shape_id });
+		let route = TRAX.gtfs.getRoutes({ route_id })[0];
+		if (!shape || shape.length == 0 || !route) continue;
 		shapes.push({
 			points: shape,
 			color: route.route_color ?? "000000"
